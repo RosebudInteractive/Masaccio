@@ -73,10 +73,8 @@ var UccelloServ = require('../'+uccelloDir+'/uccelloServ');
 var uccelloServ = new UccelloServ({port:8081, authenticate:fakeAuthenticate});
 
 // код для Engine
-var MemDBController = require('../'+uccelloDir+'/memDB/memDBController');
 var ControlMgr = require('../'+uccelloDir+'/controls/controlMgr');
 var UObject = require('../'+uccelloDir+'/system/uobject');
-var MemDataBase = require('../'+uccelloDir+'/memDB/memDataBase');
 var Engine = require('./wfe/engine');
 
 // objects

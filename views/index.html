@@ -30,10 +30,11 @@
     <div id="container"></div>
 </div>
 
-<div id="loginForm" style="display: none;">
+<div id="loginForm" style="position: absolute; left:0px;top:50px;">
     <div id="loginError"></div>
-    Имя:<input type="text" value="u1" id="loginName"><br>
-    Пароль:<input type="password" value="p1" id="loginPass"><br>
+    Имя: <input type="text" value="u1" id="loginName"><br>
+   <input type="hidden" value="p1" id="loginPass">
+   <!-- Пароль:<input type="password" value="p1" id="loginPass"><br>-->
     <input type="button" value="Войти" onclick="login($('#loginName').val(), $('#loginPass').val())">
 </div>
 

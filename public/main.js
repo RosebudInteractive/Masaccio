@@ -228,7 +228,7 @@ $(document).ready( function() {
                     var user = uccelloClt.getUser();
                     if (user) {
                         that.getContexts();
-                        $('#login').hide(); $('#logout').show();
+                        $('#login').hide(); $('#logout').show();$('#loginForm').hide();
                         $('#userInfo').html('User: '+user.name()+' <br>Session:'+uccelloClt.getSessionGuid()/*+' <br>DeviceName:'+uccelloClt.getSession().deviceName*/);
 
                         var vc = url('#context');
@@ -341,7 +341,7 @@ $(document).ready( function() {
             window.logout = function(){
                 uccelloClt.deauthenticate(function(result){
                     $('#login').show(); $('#logout').hide();
-                    $('#userInfo').html('');
+                    $('#userInfo').html('');$('#loginForm').show();
                 });
             }
 
