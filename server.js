@@ -80,7 +80,7 @@ var MemDataBase = require('../'+uccelloDir+'/memDB/memDataBase');
 var Engine = require('./wfe/engine');
 
 // objects
-var dbc = new MemDBController(uccelloServ.getRouter(), {rpc:uccelloServ.pvt.rpc, proxyServer: uccelloServ.pvt.proxyServer});
+var dbc = new MemDBController(uccelloServ.getRouter());
 var db = dbc.newDataBase({name: "Engine", kind: "master", guid:'fb9653ea-4fc3-aee0-7a31-172a91aa196b'});
 var cm = new ControlMgr(db);
 
@@ -90,6 +90,7 @@ new Engine(cm);
 
 // создаем объект
 var engine = new Engine(cm, { ini: { fields: { Name: 'Engine', State: 'Ok' } } });
+
 
 // запускаем http сервер
 http.createServer(app).listen(1328);
