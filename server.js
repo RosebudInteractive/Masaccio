@@ -72,6 +72,25 @@ UCCELLO_CONFIG = new UccelloConfig(config);
 var UccelloServ = require('../'+uccelloDir+'/uccelloServ');
 var uccelloServ = new UccelloServ({port:8081, authenticate:fakeAuthenticate});
 
+// код для Engine
+var MemDBController = require('../'+uccelloDir+'/memDB/memDBController');
+var ControlMgr = require('../'+uccelloDir+'/controls/controlMgr');
+var UObject = require('../'+uccelloDir+'/system/uobject');
+var MemDataBase = require('../'+uccelloDir+'/memDB/memDataBase');
+var Engine = require('./wfe/engine');
+
+// objects
+var dbc = new MemDBController(uccelloServ.getRouter(), {rpc:uccelloServ.pvt.rpc, proxyServer: uccelloServ.pvt.proxyServer});
+var db = dbc.newDataBase({name: "Engine", kind: "master", guid:'fb9653ea-4fc3-aee0-7a31-172a91aa196b'});
+var cm = new ControlMgr(db);
+
+// meta
+new UObject(cm);
+new Engine(cm);
+
+// создаем объект
+var engine = new Engine(cm, { ini: { fields: { Name: 'Engine', State: 'Ok' } } });
+
 // запускаем http сервер
 http.createServer(app).listen(1328);
 console.log('Сервер запущен на http://127.0.0.1:1328/masaccio');
