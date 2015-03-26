@@ -34,7 +34,8 @@ $(document).ready( function() {
             ],
             controlsPath: 'controls/',
             uccelloPath: 'uccello/',
-            viewSet: {name: 'simpleview', path:'ProtoControls/simpleview/'}
+            viewSet: {name: 'simpleview', path:'ProtoControls/simpleview/'},
+            webSocketServer: {port:8082}
         };
         UCCELLO_CONFIG = new Config(config);
 
@@ -223,7 +224,6 @@ $(document).ready( function() {
 
 
             uccelloClt = new UccelloClt({
-                host:"ws://"+url('hostname')+":8081",
                 callback: function(){
                     var user = uccelloClt.getUser();
                     if (user) {

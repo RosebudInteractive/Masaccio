@@ -61,7 +61,8 @@ var config = {
     ],
     controlsPath: __dirname+'/../Masaccio/public/controls/',
     dataPath: __dirname+'/../Masaccio/data/',
-    uccelloPath: __dirname+'/../'+uccelloDir+'/'
+    uccelloPath: __dirname+'/../'+uccelloDir+'/',
+    webSocketServer: {port:8082}
 };
 
 // модуль настроек
@@ -70,7 +71,7 @@ UCCELLO_CONFIG = new UccelloConfig(config);
 
 // модуль сервера
 var UccelloServ = require('../'+uccelloDir+'/uccelloServ');
-var uccelloServ = new UccelloServ({port:8081, authenticate:fakeAuthenticate});
+var uccelloServ = new UccelloServ({authenticate:fakeAuthenticate});
 
 // код для Engine
 var ControlMgr = require('../'+uccelloDir+'/controls/controlMgr');
