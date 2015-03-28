@@ -1,3 +1,6 @@
+/**
+ * Created by staloverov on 11.03.2015.
+ */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
     var Class = require('class.extend');
@@ -5,19 +8,16 @@ if (typeof define !== 'function') {
 
 define(
     [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
-    function(UObject) {
-        var Engine = UObject.extend({
+    function(UObject){
+        var ProcessDefinition = UObject.extend({
 
-            className: "Engine",
+            className: "ProcessDefinition",
             classGuid: UCCELLO_CONFIG.classGuids.AComponent,
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-            /**
-             * @constructs
-             * @param cm {ControlMgr} - менеджер контролов, к которому привязан данный контрол
-             * @param params
-             */
+
+
             init: function(cm, params){
                 this._super(cm,params);
             },
@@ -30,10 +30,16 @@ define(
                 return this._genericSetter("State",value);
             },
 
-            addProcessDefinition : function() {},
-            getProcessInstance : function() {},
-            startProcessInstance : function() {}
+            addActivity : function(){},
+
+            addParameter : function(parameter) {},
+
+            addGateway : function() {},
+
+            addRequest : function() {}
+
         });
-        return Engine;
+
+        return ProcessDefinition;
     }
-);
+)
