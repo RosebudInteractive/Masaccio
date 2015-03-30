@@ -7,16 +7,20 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
-    function(UObject){
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject', 'Utils'],
+    function(UObject, Utils){
         var ProcessDefinition = UObject.extend({
 
             className: "ProcessDefinition",
-            classGuid: UCCELLO_CONFIG.classGuids.AComponent,
+            classGuid: UCCELLO_CONFIG.classGuids.ProcessDefinition,
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
+
             definitionID : "",
+            connectors : [],
+            nodes : [],
+
 
             init: function(cm, params){
                 this._super(cm,params);
@@ -30,13 +34,23 @@ define(
                 return this._genericSetter("State",value);
             },
 
-            addActivity : function(){},
+            addActivity : function(activity){
+            //    TODO Пока входящим параметром будет проинициализированный Узел
+                this.nodes.push(activity)
+            },
 
             addParameter : function(parameter) {},
 
             addGateway : function() {},
 
-            addRequest : function() {}
+            addRequest : function() {},
+
+            clone : function()
+            {
+                var _newDefinition = Utils.deepCopy(this);
+
+                return _newDefinition;
+            }
 
         });
 

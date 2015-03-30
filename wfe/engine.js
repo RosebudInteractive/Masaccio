@@ -9,7 +9,7 @@ define(
         var Engine = UObject.extend({
 
             className: "Engine",
-            classGuid: UCCELLO_CONFIG.classGuids.AComponent,
+            classGuid: UCCELLO_CONFIG.classGuids.Engine,
             metaFields: [{fname: "Name", ftype: "string"}, {fname: "State", ftype: "string"}],
             metaCols: [],
 
@@ -53,7 +53,7 @@ define(
                 var _def = this.findDefinition(definiton.definitionID)
                 if ((_def !== null) && (_def !== undefined))
                 {
-                    this.definitions.add(definiton);
+                    this.definitions.push(definiton);
                 }
             },
 
@@ -70,7 +70,7 @@ define(
             {
                 /*TODO : Запустить процесс, пока не знаю что здесь делать*/
 
-                this.processes.add(processInstance);
+                this.processes.push(processInstance);
             },
 
             getProcessInstance : function(processID)

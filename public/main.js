@@ -32,6 +32,15 @@ $(document).ready( function() {
                 {className:'Edit', viewset:true},
                 {className:'Label', viewset:true}*/
             ],
+
+            classGuids : {
+                'Engine' : "387E8D92-E2CA-4A94-9732-B4A479FF8BB8",
+                'ProcessDefinition' : "ACD97FFF-93F9-47ED-84BB-E24FFDF28FC5",
+                'Process' : "74441683-A11F-4B59-9E04-0AEFCC5BC18A",
+                'FlowNode' : "199A78B0-B555-4F97-9D8F-41234AE7F06F",
+                'SequinceFlow' : "C7A6CD70-653F-4E12-B6DC-8A6085B7FC7F"
+            },
+
             controlsPath: 'controls/',
             uccelloPath: 'uccello/',
             viewSet: {name: 'simpleview', path:'ProtoControls/simpleview/'},

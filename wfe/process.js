@@ -7,19 +7,23 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
-    function(UObject){
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject', 'processDefinition', UCCELLO_CONFIG.uccelloPath + 'system/Utils'],
+    function(UObject, Definition, UUtils){
         var Process = UObject.extend({
 
             className: "Process",
-            classGuid: UCCELLO_CONFIG.classGuids.AComponent,
+            classGuid: UCCELLO_CONFIG.classGuids.Process,
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
             processID : "",
+            definition : null,
 
-            init: function(cm, params){
+            init: function(cm, params, definition){
                 this._super(cm,params);
+
+                this.processID = UUtils.guid;
+                this.definition = definition.clone();
             },
 
             name: function(value) {
@@ -30,9 +34,7 @@ define(
                 return this._genericSetter("State",value);
             },
 
-            addActivity : function(){}
-
-
+            getNode : function() {}
 
         });
 
