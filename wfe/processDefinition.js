@@ -7,7 +7,7 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', 'Utils'],
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject', '../public/utils'],
     function(UObject, Utils){
         var ProcessDefinition = UObject.extend({
 
