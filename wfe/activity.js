@@ -1,5 +1,5 @@
 /**
- * Created by staloverov on 30.03.2015.
+ * Created by staloverov on 31.03.2015.
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
@@ -7,17 +7,17 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', 'flowNode'],
-    function(UObject, FlowNode){
-        var SequenceFlow = UObject.extend({
+    ['flowNode'],
+    function(FlowNode){
+        var Activity = FlowNode.extend({
 
-            className: "SequinceFlow",
-            classGuid: UCCELLO_CONFIG.classGuids.SequinceFlow,
+            className: "Activity",
+            classGuid: UCCELLO_CONFIG.classGuids.Activity,
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-            source : null,
-            target : null,
+            incoming : [],
+            outgoing : [],
 
 
             init: function(cm, params){
@@ -32,15 +32,16 @@ define(
                 return this._genericSetter("State",value);
             },
 
-            connect : function(from, to) {
-                this.source = from;
-                this.target = to;
+            execute : function() {
 
-                this.source.outgoing.push(this);
-                this.target.incoming.push(this);
+            },
+
+            cancel : function() {
+
             }
         });
 
-        return SequenceFlow;
+        return Activity;
     }
 )
+
