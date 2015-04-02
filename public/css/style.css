@@ -82,5 +82,6 @@ p {padding:0;margin: 4px 0;}
 .grid .header.w60{width: 60px;}
 
 #loginForm { padding:5px; position: absolute; width: 200px; height: auto; left: 100px; top: 50px; z-index: 2; background-color: #ffffff; border: 1px solid #bababa; }
+#testingForm { padding:5px; position: absolute; width: 200px; height: auto; left: 100px; top: 50px; z-index: 2; background-color: #aaaaaa; border: 1px solid #bababa; }
 #header {position:absolute;}
 #loginError {color: #ff0000;}
