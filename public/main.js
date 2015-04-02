@@ -7,13 +7,13 @@ requirejs.config({
     }
 });
 
-var uccelloClt = null;
+var uccelloClt = null, DEBUG = true;
 
 // когда документ загружен
 $(document).ready( function() {
     require(['./uccello/config/config'], function(Config){
 
-        var myConfig = {
+        var config = {
             controls: [
                 /*{className:'DataContact', component:'../DataControls/dataContact', guid:'73596fd8-6901-2f90-12d7-d1ba12bae8f4'},
                 {className:'DataContract', component:'../DataControls/dataContract', guid:'08a0fad1-d788-3604-9a16-3544a6f97721'},
@@ -33,22 +33,12 @@ $(document).ready( function() {
                 {className:'Label', viewset:true}*/
             ],
 
-            classGuids : {
-                'Engine' : "387E8D92-E2CA-4A94-9732-B4A479FF8BB8",
-                'ProcessDefinition' : "ACD97FFF-93F9-47ED-84BB-E24FFDF28FC5",
-                'Process' : "74441683-A11F-4B59-9E04-0AEFCC5BC18A",
-                'FlowNode' : "199A78B0-B555-4F97-9D8F-41234AE7F06F",
-                'SequenceFlow' : "C7A6CD70-653F-4E12-B6DC-8A6085B7FC7F",
-                'Activity' : "173a2e1f-909d-432d-9255-895f35335f65",
-                'Gateway' : "05e31d1c-7b7e-4fb8-b23d-063fee27b9f6"
-            },
-
             controlsPath: 'controls/',
             uccelloPath: 'uccello/',
             viewSet: {name: 'simpleview', path:'ProtoControls/simpleview/'},
             webSocketServer: {port:8082}
         };
-        UCCELLO_CONFIG = new Config(myConfig);
+        UCCELLO_CONFIG = new Config(config);
 
     require(
         ['./uccello/uccelloClt'],
@@ -336,6 +326,7 @@ $(document).ready( function() {
                                 $('#loginForm').hide();
                                 $('#loginError').hide();
                                 $('#userInfo').html('User: '+result.user.user+' <br>Session:'+uccelloClt.getSessionGuid()/*+' <br>DeviceName:'+uccelloClt.getSession().deviceName*/);
+                                $('#testingForm').show();
                             }
                         });
                     } else {
@@ -391,6 +382,8 @@ $(document).ready( function() {
                     that.getContexts();
                 });
             }
+
+            window.createEngine = function(){}
 
 
 

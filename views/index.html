@@ -22,7 +22,7 @@
 
 
 <div id="interface">
-    <a href="#" id="login" style="display: none;">Войти</a>
+    <!--<a href="#" id="login" style="display: none;">Войти</a>-->
     <a href="#" id="logout" style="display: none;" onclick="return logout();">Выйти</a>
     <br><br>
 
@@ -36,6 +36,11 @@
    <input type="hidden" value="p1" id="loginPass">
    <!-- Пароль:<input type="password" value="p1" id="loginPass"><br>-->
     <input type="button" value="Войти" onclick="login($('#loginName').val(), $('#loginPass').val())">
+</div>
+
+
+<div id = "testingForm" style="display: none">
+    <input type="button" value="Запустить процесс" onclick="newTab()">
 </div>
 
 </body>
