@@ -7,7 +7,7 @@ if (typeof define !== 'function') {
 }
 
 define(
-    ['flowNode'],
+    ['./flowNode'],
     function(FlowNode){
         var Activity = FlowNode.extend({
 

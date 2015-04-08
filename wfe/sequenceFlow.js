@@ -7,7 +7,7 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', 'flowNode'],
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './flowNode'],
     function(UObject, FlowNode){
         var SequenceFlow = UObject.extend({
 

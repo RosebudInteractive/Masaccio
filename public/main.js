@@ -383,7 +383,9 @@ $(document).ready( function() {
                 });
             }
 
-            window.createEngine = function(){}
+            window.createEngine = function(){
+                uccelloClt.pvt.clientConnection.socket.send({action : "createProcess", type:'method'}, function(result){that.selectContext(result)})
+            }
 
 
 

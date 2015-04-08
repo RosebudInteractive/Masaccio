@@ -4,8 +4,8 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './process'],
-    function(UObject, Process) {
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './process', './processDefinition', './activity', './flowNode'],
+    function(UObject, Process, Definition, Activity, FlowNode) {
         var Engine = UObject.extend({
 
             className: "Engine",
@@ -18,6 +18,7 @@ define(
             requests: [],
 
 
+
             /**
              * @constructs
              * @param cm {ControlMgr} - менеджер контролов, к которому привязан данный контрол
@@ -25,6 +26,8 @@ define(
              */
             init: function (cm, params) {
                 this._super(cm, params);
+
+                this.testAddProcess();
             },
 
             name: function (value) {
@@ -90,6 +93,12 @@ define(
                 var _process = this.createNewProcess(definitionID);
                 this.runProcess(_process);
                 return _process.ProcessID;
+            },
+
+            testAddProcess : function() {
+                var _definition = new Definition(this.pvt.controlMgr, {definitionID : "60CAC005-4DBB-4A22-BEB1-1AFAE6604791"})
+                _definition.addActivity(new FlowNode(this.pvt.controlMgr, {}));
+                _definition.addActivity(new Activity(this.pvt.controlMgr, {name : "testActivity2"}));
             }
 
         });

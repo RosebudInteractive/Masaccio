@@ -72,6 +72,14 @@ DEBUG = true;
 // модуль сервера
 var UccelloServ = require('../'+uccelloDir+'/uccelloServ');
 var uccelloServ = new UccelloServ({authenticate:fakeAuthenticate});
+var that = this;
+uccelloServ.getRouter().add('createProcess', function() {return that.createProcess.apply(that, arguments)});
+
+function createProcess(data, done) {
+    var that = this;
+    var engine = this.engine;
+    engine.addProcessDefinition('definition');
+};
 
 // код для Engine
 var ControlMgr = require('../'+uccelloDir+'/controls/controlMgr');
