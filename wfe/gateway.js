@@ -7,7 +7,7 @@ if (typeof define !== 'function') {
 }
 
 define(
-    ['flowNode'],
+    ['./flowNode'],
     function(FlowNode){
         var Gateway = FlowNode.extend({
 

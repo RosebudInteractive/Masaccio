@@ -45,6 +45,11 @@ define(
 
             addRequest : function() {},
 
+            addConnector : function(connector) {
+                this.connectors.push(connector)
+            },
+
+
             clone : function()
             {
                 var _newDefinition = Utils.deepCopy(this);

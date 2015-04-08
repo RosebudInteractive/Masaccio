@@ -7,7 +7,7 @@ if (typeof define !== 'function') {
 }
 
 define(
-    ['flowNode'],
+    ['./flowNode'],
     function(FlowNode){
         var Activity = FlowNode.extend({
 
@@ -21,7 +21,7 @@ define(
 
 
             init: function(cm, params){
-                this._super(cm,params);
+                this._super(cm);
             },
 
             name: function(value) {
