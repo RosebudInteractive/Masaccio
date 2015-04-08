@@ -21,7 +21,7 @@ define(
 
 
             init: function(cm, params){
-                this._super(cm,params);
+                this._super(cm);
             },
 
             name: function(value) {
