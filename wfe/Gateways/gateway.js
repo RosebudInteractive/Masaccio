@@ -7,11 +7,11 @@ if (typeof define !== 'function') {
 }
 
 define(
-    ['./flowNode'],
+    ['./../flowNode'],
     function(FlowNode){
-        var Activity = FlowNode.extend({
+        var Gateway = FlowNode.extend({
 
-            className: "Activity",
+            className: "Gateway",
             classGuid: UCCELLO_CONFIG.classGuids.Activity,
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
@@ -19,9 +19,11 @@ define(
             incoming : [],
             outgoing : [],
 
+            direction : {Unspecified : 0, Converging : 1, Diverging : 2, Mixed : 3},
+
 
             init: function(cm, params){
-                this._super(cm);
+                this._super(cm,params);
             },
 
             name: function(value) {
@@ -33,7 +35,7 @@ define(
             },
 
             execute : function() {
-
+                console.log('execute node [%s]', this.name);
             },
 
             cancel : function() {
@@ -41,7 +43,6 @@ define(
             }
         });
 
-        return Activity;
+        return Gateway;
     }
 )
-

@@ -1,7 +1,6 @@
 /**
  * Created by staloverov on 30.03.2015.
  */
-
 var Utils = {};
 
 Utils.copyObject = function(obj)
@@ -33,15 +32,18 @@ Utils.deepCopy = function (obj) {
     var cons = obj.constructor;
     if (cons === RegExp)
         return obj;
+
     var copy = cons();
     for (var key in obj) {
         if (typeof obj[key] === "object") {
-            copy[key] = exports.deepCopy(obj[key]);
+            copy[key] = Utils.deepCopy(obj[key]);
         } else {
-            copy[key] = obj[key];
+            if ((obj[key] !== undefined) && ((typeof obj[key] !== "function"))) {
+                copy[key] = obj[key]
+            };
         }
     }
     return copy;
 };
 
-if (module) { module.exports = Utils; }
+if (module) { module.exports = Utils}
