@@ -46,16 +46,16 @@ function fakeAuthenticate(user, pass, done) {
     done(err, row);
 }
 
-
 var config = {
     controls:[
-        {className:'Engine', component:'./wfe/engine', guid:'387E8D92-E2CA-4A94-9732-B4A479FF8BB8'},
-        {className:'ProcessDefinition', component:'./wfe/processDefinition', guid:'ACD97FFF-93F9-47ED-84BB-E24FFDF28FC5'},
-        {className:'Process', component:'./wfe/process', guid:'74441683-A11F-4B59-9E04-0AEFCC5BC18A'},
-        {className:'FlowNode', component:'./wfe/flowNode', guid:'199A78B0-B555-4F97-9D8F-41234AE7F06F'},
-        {className:'SequenceFlow', component:'./wfe/sequenceFlow', guid:'C7A6CD70-653F-4E12-B6DC-8A6085B7FC7F'},
-        {className:'Activity', component:'./wfe/activity', guid:'173a2e1f-909d-432d-9255-895f35335f65'},
-        {className:'Gateway', component:'./wfe/Gateway', guid:'05e31d1c-7b7e-4fb8-b23d-063fee27b9f6'}
+        {className:'Engine', component:'./wfe/engine', guid:'387e8d92-e2ca-4a94-9732-b4a479ff8bb8'},
+        {className:'ProcessDefinition', component:'./wfe/processDefinition', guid:'acd97fff-93f9-47ed-84bb-e24ffdf28fc5'},
+        {className:'Process', component:'./wfe/process', guid:'74441683-a11f-4b59-9e04-0aefcc5bc18a'},
+        {className:'FlowNode', component:'./wfe/flowNode', guid:'199a78b0-b555-4f97-9d8f-41234ae7f06f'},
+        {className:'SequenceFlow', component:'./wfe/sequenceFlow', guid:'c7a6cd70-653f-4e12-b6dc-8a6085b7fc7f'},
+        {className:'Activity', component:'/wfe/Activities/activity', guid:'173a2e1f-909d-432d-9255-895f35335f65'},
+        {className:'Gateway', component:'./wfe/Gateways/Gateway', guid:'05e31d1c-7b7e-4fb8-b23d-063fee27b9f6'},
+        {className:'Token', component:'./wfe/token', guid:'d09117fc-b298-42f6-84fc-c8807e83ca12'}
     ],
 
     controlsPath: __dirname+'/../Masaccio/public/controls/',
@@ -93,7 +93,7 @@ var cm = new ControlMgr(db);
 
 // meta
 new UObject(cm);
-new Engine(cm);
+//new Engine(cm);
 
 // создаем объект
 var engine = new Engine(cm, { ini: { fields: { Name: 'Engine', State: 'Ok' } } });

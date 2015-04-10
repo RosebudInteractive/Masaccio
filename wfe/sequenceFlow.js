@@ -36,8 +36,8 @@ define(
                 this.source = from;
                 this.target = to;
 
-                this.source.outgoing.push(this);
-                this.target.incoming.push(this);
+                this.source.addOutgoing(this);
+                this.target.addIncoming(this);
             }
         });
 

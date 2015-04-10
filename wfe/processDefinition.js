@@ -46,13 +46,19 @@ define(
             addRequest : function() {},
 
             addConnector : function(connector) {
-                this.connectors.push(connector)
+                this.connectors.push(connector);
             },
 
 
             clone : function()
             {
-                var _newDefinition = Utils.deepCopy(this);
+                var _newDefinition = new ProcessDefinition(this.pvt.controlMgr, {});
+
+                _newDefinition.definitionID = this.definitionID;
+                _newDefinition.name = this.name;
+                _newDefinition.state = this.state;
+                _newDefinition.nodes = Utils.copyArray(this.nodes);
+                _newDefinition.connectors = Utils.copyArray(this.connectors)
 
                 return _newDefinition;
             }

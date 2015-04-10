@@ -7,23 +7,20 @@ if (typeof define !== 'function') {
 }
 
 define(
-    ['./flowNode'],
+    ['./../flowNode'],
     function(FlowNode){
-        var Gateway = FlowNode.extend({
+        var Activity = FlowNode.extend({
 
-            className: "Gateway",
+            className: "Activity",
             classGuid: UCCELLO_CONFIG.classGuids.Activity,
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-            incoming : [],
-            outgoing : [],
-
-            direction : {Unspecified : 0, Converging : 1, Diverging : 2, Mixed : 3},
-
-
             init: function(cm, params){
-                this._super(cm,params);
+                this._super(cm);
+
+                this.incoming = [];
+                this.outgoing = [];
             },
 
             name: function(value) {
@@ -35,14 +32,25 @@ define(
             },
 
             execute : function() {
-
+                /*Todo : исправить на Enum*/
+                this.state = 5;
+                console.log("Выполняется узел %s [%s]", this.name, typeof(this))
             },
 
             cancel : function() {
 
+            },
+
+            addOutgoing : function(sequence) {
+                this.outgoing.push(sequence);
+            },
+
+            addIncoming : function(sequence) {
+                this.incoming.push(sequence);
             }
         });
 
-        return Gateway;
+        return Activity;
     }
 )
+

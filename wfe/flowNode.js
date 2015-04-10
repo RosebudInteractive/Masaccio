@@ -19,6 +19,9 @@ define(
             incoming : [],
             outgoing : [],
 
+            states : {Passive : 0, Initialized : 1, Executing : 2, WaitingRequest : 3,
+                WaitingTokens : 4, ExecutionComplete : 5, Closed : 6},
+
 
             init: function(cm, params){
                 this._super(cm,params);
@@ -32,9 +35,9 @@ define(
                 return this._genericSetter("State",value);
             },
 
-            execute : function() {
-
-            },
+            //execute : function() {
+            //
+            //},
 
             cancel : function() {
 
