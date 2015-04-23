@@ -126,10 +126,10 @@ define(
                 }
             },
 
-            addRequest : function (request) {
-                /* В калипсо была доп проверка на существование реквеста в хранилище */
-                this.requests.push(request)
-            },
+            //addRequest : function (request) {
+            //    /* В калипсо была доп проверка на существование реквеста в хранилище */
+            //    this.requests.push(request)
+            //},
 
             deactivateProcess: function (processInstance) {
                 console.log('Процесс [%s] деактивирован', processInstance.processID)
@@ -175,6 +175,7 @@ define(
                     var _receivingNode = _token.currentNode;
                     /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
                     _receivingNode.execute();
+                    this.requestStorage.getCallback(response.ID);
                 }
             },
 

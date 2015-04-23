@@ -114,7 +114,7 @@ define(
                     var _request = nodeProps.requests[i]
                     _request.state = Request.state.Exposed;
 
-                    EngineSingleton.getInstance().addRequest(_request);
+                    EngineSingleton.getInstance().requestStorage.addRequest(_request, this._callback());
                     EngineSingleton.getInstance().notifier.notify({
                         processID : this.processInstance.processID,
                         tokenID : this.tokenID,
@@ -123,6 +123,10 @@ define(
                         nodeName : this.currentNode.name
                     })
                 }
+            },
+
+            _callback : function(){
+                this.execute()
             },
 
             getNextNode : function() {
