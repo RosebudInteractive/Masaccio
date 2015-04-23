@@ -167,7 +167,7 @@ define(
             submitResponse : function(response) {
                 var _processID = response.processID;
                 /* Todo : сделать RequestStorage */
-                if (this.isRequestExists()) {
+                if (this.requestStorage.isRequestExists(response.ID)) {
                     var _process = this.activateProcess(_processID);
                     var _token = _process.getToken(response.tokenID);
                     _token.addResponse(response);
@@ -175,21 +175,22 @@ define(
                     var _receivingNode = _token.currentNode;
                     /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
                     _receivingNode.execute();
-                    this.requestStorage.getCallback(response.ID);
+                    var _callback = this.requestStorage.getCallback(response.ID);
+                    _callback(_token);
                 }
             },
 
-            isRequestExists : function(requestID) {
-                return (this.getRequest(requestID) !== null);
-            },
+            //isRequestExists : function(requestID) {
+            //    return (this.getRequest(requestID) !== null);
+            //},
 
-            getRequest : function(requestID){
-                for (var i = 0; i < this.requests.length; i++) {
-                    if (this.requests[i].ID = requestID) {return this.requests[i]}
-                };
-
-                return null;
-            },
+            //getRequest : function(requestID){
+            //    for (var i = 0; i < this.requests.length; i++) {
+            //        if (this.requests[i].ID = requestID) {return this.requests[i]}
+            //    };
+            //
+            //    return null;
+            //},
 
 
             testAddProcessDefinition : function() {
@@ -205,6 +206,7 @@ define(
                 var _userTask =  new UserTask(this.pvt.controlMgr);
                 _userTask.name = 'UserTask1';
                 var _request = _userTask.addRequest('Реквест1');
+                /* Todo : необходимо добавить в параметры узла*/
                 _request.addParameter('param1');
 
                 var _activity2 = new Activity(this.pvt.controlMgr);

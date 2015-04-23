@@ -35,6 +35,7 @@ define(
 
             notify : function (eventParams) {
                 this.observers.forEach(function(item, i, arr) {
+                    /* Todo возможно тоже callback нужен*/
                     item.handleNewRequest(eventParams);
                 })
             }

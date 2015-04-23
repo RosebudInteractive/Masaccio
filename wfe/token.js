@@ -114,7 +114,11 @@ define(
                     var _request = nodeProps.requests[i]
                     _request.state = Request.state.Exposed;
 
-                    EngineSingleton.getInstance().requestStorage.addRequest(_request, this._callback());
+                    EngineSingleton.getInstance().requestStorage.addRequest(_request, function(token){
+                        console.log('Вызов callback-а');
+                        console.log('token [%s]', token.tokenID);
+                        token.execute();
+                    });
                     EngineSingleton.getInstance().notifier.notify({
                         processID : this.processInstance.processID,
                         tokenID : this.tokenID,
@@ -141,15 +145,27 @@ define(
             },
 
             getPropertiesOfNode : function (nodeName) {
-                for (var i in this.nodesProps) {
-                    if (!this.nodesProps.hasOwnProperty(i)) continue;
-
-                    if (this.nodesProps[i].name == nodeName) {return this.nodesProps[i]}
+                for (var i = 0; i < this.nodesProps.length; i++) {
+                    var _nodeProps = this.nodesProps[i];
+                    if (_nodeProps.name == nodeName) {
+                        return _nodeProps
+                    }
                 }
+
+                return null;
+
+                //for (var i in this.nodesProps) {
+                //    if (!this.nodesProps.hasOwnProperty(i)) continue;
+                //
+                //    if (this.nodesProps[i].name === nodeName) {return this.nodesProps[i]}
+                //}
             },
 
             addResponse : function (response){
-                throw 'No implemantetion'
+                var _nodeProps = this.getPropertiesOfNode(this.currentNode.name);
+                _nodeProps.responses.push(response);
+                _nodeProps.addParameter(response.parameters[0]);
+
             },
 
             doOnInitialized : function() {

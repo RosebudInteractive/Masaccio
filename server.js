@@ -104,9 +104,9 @@ EngineSingleton.setInstance(engine);
 var testClient = new TestClient(engine);
 engine.notifier.registerObserver(testClient);
 
-var _id = EngineSingleton.getInstance().testAddProcessDefinition();
-EngineSingleton.getInstance().startProcessInstance(_id);
-
 // запускаем http сервер
 http.createServer(app).listen(1328);
 console.log('Сервер запущен на http://127.0.0.1:1328/masaccio');
+
+var _id = EngineSingleton.getInstance().testAddProcessDefinition();
+EngineSingleton.getInstance().startProcessInstance(_id);

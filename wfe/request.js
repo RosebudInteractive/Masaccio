@@ -61,6 +61,8 @@ define(
                 var _newRequest = new Request(this.pvt.controlMgr);
 
                 _newRequest.name = this.name;
+                _newRequest.processID = this.processID;
+                _newRequest.tokenID = this.tokenID;
                 _newRequest.parameters = Utils.copyArray(this.parameters);
 
                 return _newRequest;

@@ -21,7 +21,7 @@ define(
                 var _process = this.engine.getProcessInstance(eventParams.processID);
                 if (_process === null) { throw 'Process ID [%s] do not exists', eventParams.processID };
 
-                var _request = this.engine.getRequest(eventParams.requestID);
+                var _request = this.engine.requestStorage.getRequest(eventParams.requestID);
                 if (_request === null) { throw 'Token ID [%s] do not exists', eventParams.requestID };
 
                 var _response = _request.clone();

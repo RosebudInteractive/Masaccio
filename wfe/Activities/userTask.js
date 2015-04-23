@@ -49,6 +49,8 @@ define(
                 }
                 else if (this.state == FlowNode.state.WaitingRequest) {
                     if (this.processInstance.currentToken.getPropertiesOfNode(this.name).isAllResponseReceived()) {
+                        var _param = this.processInstance.currentToken.getPropertiesOfNode(this.name).parameters[0];
+                        console.log('[%s] : %s', _param.name, _param.value)
                         this.state = FlowNode.state.ExecutionComplete
                     }
                     else { this.state = FlowNode.state.WaitingRequest }
