@@ -6,8 +6,10 @@ if (typeof define !== 'function') {
     var Class = require('class.extend');
 }
 
+var processStates = {Initialized : 0, Running : 1, Finished : 2, Aborted : 3, Waiting : 4, None : 5};
+
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './processDefinition', UCCELLO_CONFIG.uccelloPath + 'system/utils', ],
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './processDefinition', UCCELLO_CONFIG.uccelloPath + 'system/utils'],
     function(UObject, Definition, UUtils){
         var Process = UObject.extend({
 
@@ -16,18 +18,18 @@ define(
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-            //processID : "",
             definition : null,
             tokens : [],
 
-            currentTokenID : 0,
-            states : {Initialized : 0, Running : 1, Finished : 2, Aborted : 3, Waiting : 4, None : 5},
+            sequenceValue : 0,
+            currentToken : null,
 
             init: function(cm, params, definition){
                 this._super(cm,params);
 
                 this.processID = UUtils.guid();
                 this.definition = definition.clone();
+                this.tokenQueue = [];
             },
 
             name: function(value) {
@@ -47,7 +49,7 @@ define(
                 }
             },
 
-            isTokenInGueue : function(token) {
+            isTokenInQueue : function(token) {
                 for (var i in this.tokens) {
                     if (!this.tokens.hasOwnProperty(i)) continue;
 
@@ -57,19 +59,34 @@ define(
                 return false;
             },
 
+            getToken : function(tokenID) {
+                for (var i =0; i < this.tokens.length; i++) {
+                    if (this.tokens[i].tokenID == tokenID) {return this.tokens[i]}
+                };
+
+                return null;
+            },
+
             enqueueToken : function(token) {
 
-                if (!this.isTokenInGueue(token)){
-                    token.tokenID = ++this.currentTokenID;
+                if (!this.isTokenInQueue(token)){
+                    token.tokenID = ++this.sequenceValue;
                     this.tokens.push(token);
                 }
+
+                this.tokenQueue.push(token);
             },
 
             dequeueToken : function() {
-                return this.tokens.splice(0, 1)[0];
+                if (this.tokenQueue.length != 0) {
+                    return this.tokenQueue.splice(0, 1)[0];
+                }
+                else {return null};
             }
         });
 
         return Process;
     }
 )
+
+module.exports.state = processStates;

@@ -53,9 +53,14 @@ var config = {
         {className:'Process', component:'./wfe/process', guid:'74441683-a11f-4b59-9e04-0aefcc5bc18a'},
         {className:'FlowNode', component:'./wfe/flowNode', guid:'199a78b0-b555-4f97-9d8f-41234ae7f06f'},
         {className:'SequenceFlow', component:'./wfe/sequenceFlow', guid:'c7a6cd70-653f-4e12-b6dc-8a6085b7fc7f'},
+        {className:'TokenProperties', component:'./wfe/tokenProperties', guid:'867a7d2e-8868-48f7-8086-3d2817aec604'},
+        /*Activities*/
         {className:'Activity', component:'/wfe/Activities/activity', guid:'173a2e1f-909d-432d-9255-895f35335f65'},
+        {className:'UserTask', component:'wfe/Activities/userTask', guid:'e9af2d49-ef3c-4b9a-b693-36a9f7a5cd4a'},
+        /*Gateways*/
         {className:'Gateway', component:'./wfe/Gateways/Gateway', guid:'05e31d1c-7b7e-4fb8-b23d-063fee27b9f6'},
-        {className:'Token', component:'./wfe/token', guid:'d09117fc-b298-42f6-84fc-c8807e83ca12'}
+        {className:'Token', component:'./wfe/token', guid:'d09117fc-b298-42f6-84fc-c8807e83ca12'},
+        {className:'Request', component:'./wfe/request', guid:'783cc459-0b03-4cbd-9960-6401a031537c'}
     ],
 
     controlsPath: __dirname+'/../Masaccio/public/controls/',
@@ -75,16 +80,12 @@ var uccelloServ = new UccelloServ({authenticate:fakeAuthenticate});
 var that = this;
 uccelloServ.getRouter().add('createProcess', function() {return that.createProcess.apply(that, arguments)});
 
-function createProcess(data, done) {
-    var that = this;
-    var engine = this.engine;
-    engine.addProcessDefinition('definition');
-};
-
 // код для Engine
 var ControlMgr = require('../'+uccelloDir+'/controls/controlMgr');
 var UObject = require('../'+uccelloDir+'/system/uobject');
 var Engine = require('./wfe/engine');
+var EngineSingleton = require('./wfe/engineSingleton');
+var TestClient = require('./test/testClient');
 
 // objects
 var dbc = uccelloServ.getUserMgr().getController();
@@ -96,8 +97,15 @@ new UObject(cm);
 //new Engine(cm);
 
 // создаем объект
-var engine = new Engine(cm, { ini: { fields: { Name: 'Engine', State: 'Ok' } } });
 
+var engine = new Engine(cm, { ini: { fields: { Name: 'Engine', State: 'Ok' } } });
+EngineSingleton.setInstance(engine);
+
+var testClient = new TestClient(engine);
+engine.notifier.registerObserver(testClient);
+
+var _id = EngineSingleton.getInstance().testAddProcessDefinition();
+EngineSingleton.getInstance().startProcessInstance(_id);
 
 // запускаем http сервер
 http.createServer(app).listen(1328);

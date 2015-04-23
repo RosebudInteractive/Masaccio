@@ -6,6 +6,17 @@ if (typeof define !== 'function') {
     var Class = require('class.extend');
 }
 
+/* Todo : сделано по аналогии с Calypso при рефакторинге подумать */
+var ActivityState = {Passive : 0,
+    Initializing : 1,
+    ProcessingChildSteps : 2,
+    ExposingRequests : 3,
+    Waiting : 4,
+    Executing : 5,
+    Transfering : 6,
+    Closed : 7,
+    Abort : 8}
+
 define(
     ['./../flowNode'],
     function(FlowNode){
@@ -32,8 +43,7 @@ define(
             },
 
             execute : function() {
-                /*Todo : исправить на Enum*/
-                this.state = 5;
+                this.state = FlowNode.state.ExecutionComplete;
                 console.log("Выполняется узел %s [%s]", this.name, typeof(this))
             },
 
@@ -54,3 +64,4 @@ define(
     }
 )
 
+module.exports.state = ActivityState;

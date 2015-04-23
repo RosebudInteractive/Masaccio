@@ -16,8 +16,8 @@ define(
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-            incoming : [],
-            outgoing : [],
+            //incoming : [],
+            //outgoing : [],
 
             direction : {Unspecified : 0, Converging : 1, Diverging : 2, Mixed : 3},
 

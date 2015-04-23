@@ -6,6 +6,11 @@ if (typeof define !== 'function') {
     var Class = require('class.extend');
 }
 
+var flowNodeState = {
+        Passive : 0, Initialized : 1, Executing : 2, WaitingRequest : 3,
+        WaitingTokens : 4, ExecutionComplete : 5, Closed : 6
+    };
+
 define(
     [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
     function(UObject){
@@ -16,15 +21,13 @@ define(
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-            incoming : [],
-            outgoing : [],
-
-            states : {Passive : 0, Initialized : 1, Executing : 2, WaitingRequest : 3,
-                WaitingTokens : 4, ExecutionComplete : 5, Closed : 6},
-
+            //incoming : [],
+            //outgoing : [],
 
             init: function(cm, params){
                 this._super(cm,params);
+                this.parameters = [];
+                this.processInstance = null;
             },
 
             name: function(value) {
@@ -35,10 +38,6 @@ define(
                 return this._genericSetter("State",value);
             },
 
-            //execute : function() {
-            //
-            //},
-
             cancel : function() {
 
             }
@@ -47,3 +46,5 @@ define(
         return FlowNode;
     }
 )
+
+module.exports.state = flowNodeState;

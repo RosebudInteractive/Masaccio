@@ -3,15 +3,12 @@ if (typeof define !== 'function') {
     var Class = require('class.extend');
 }
 
-var tokenState = {alive: 0, dead: 1};
-var flowNodeState = {Passive : 0, Initialized : 1, Executing : 2, WaitingRequest : 3,
-    WaitingTokens : 4, ExecutionComplete : 5, Closed : 6};
-var processStates = {Initialized : 0, Running : 1, Finished : 2, Aborted : 3, Waiting : 4, None : 5};
+var engineInstance;
 
 define(
     [UCCELLO_CONFIG.uccelloPath+'system/uobject', './process', './processDefinition', './Activities/activity',
-        './flowNode', './sequenceFlow', './Token'],
-    function(UObject, Process, Definition, Activity, FlowNode, SequenceFlow, Token) {
+        './flowNode', './sequenceFlow', './Token', './notify', './Activities/userTask', './requestStorage'],
+    function(UObject, Process, Definition, Activity, FlowNode, SequenceFlow, Token, Notify, UserTask, RequestStorage) {
         var Engine = UObject.extend({
 
             className: "Engine",
@@ -21,9 +18,7 @@ define(
 
             definitions: [],
             processes: [],
-            requests: [],
-
-
+            //requests: [],
 
             /**
              * @constructs
@@ -33,8 +28,11 @@ define(
             init: function (cm, params) {
                 this._super(cm, params);
 
-                var _id = this.testAddProcessDefinition();
-                this.startProcessInstance(_id);
+                this.notifier = new Notify(cm)
+                this.activeProcesses = [];
+                this.requestStorage = new RequestStorage(cm);
+                //var _id = this.testAddProcessDefinition();
+                //this.startProcessInstance(_id);
             },
 
             name: function (value) {
@@ -69,25 +67,19 @@ define(
 
             },
 
-            createNewProcess: function (definitionID)
-            {
-                console.log('Создание инстанса процесса %s', definitionID);
-                var _def = this.findDefinition(definitionID);
-                if ((_def !== null) && (_def !== undefined))
-                {
-                    return new Process(this.pvt.controlMgr, {name : 'Тестовый просесс'}, _def)
-                }
-            },
-
             runProcess : function(processInstance, callback)
             {
                 this.processes.push(processInstance);
 
                 this.defineTokens(processInstance);
 
+                this.activeProcesses.push(processInstance);
+
+                //this.activeProcesses.forEach()
+
                 var _startToken = processInstance.dequeueToken();
-                _startToken.currentNode.state = flowNodeState.Initialized;
-                var result = this.executeToken(_startToken);
+                _startToken.currentNode.state = FlowNode.state.Initialized;
+                var result = _startToken.execute();
 
                 callback(result);
             },
@@ -95,55 +87,8 @@ define(
             defineTokens: function (processInstance) {
                 var _token = new Token(this.pvt.controlMgr, {}, processInstance);
                 _token.currentNode = processInstance.getStartNode();
-                _token.state = tokenState.alive;
+                _token.state = Token.tokenState.alive;
                 processInstance.enqueueToken(_token);
-            },
-
-
-
-            executeToken : function(token) {
-                var _processInstance = token.processInstance;
-                _processInstance.state = processStates.Running;
-
-                switch (token.currentNode.state){
-                    case flowNodeState.Initialized : {
-                        /*Todo : добавить работу с параметрами*/
-                        token.currentNode.state = flowNodeState.Executing;
-                        return this.executeToken(token);
-                        //break;
-                    };
-                    case (flowNodeState.Executing) : {
-                        this.executeNode(token);
-                        return this.executeToken(token);
-                        //break;
-                    };
-                    case (flowNodeState.WaitingRequest) : {};
-                    case (flowNodeState.ExecutionComplete) : {
-                        var _nextNode = this.getNexTokenNode(token);
-                        if (_nextNode !== undefined) {
-                            token.currentNode = _nextNode;
-                            token.currentNode.state = flowNodeState.Initialized;
-                        }
-                        else {
-                            token.currentNode.state = flowNodeState.Closed;
-                        };
-
-                        return this.executeToken(token);
-                        //break;
-                    };
-                    case (flowNodeState.Closed) : { return "Token " + token.tokenID + " выполнен"; };
-                    default : { return "Неизвестный статус узла" };
-                }
-
-
-            },
-
-            getNexTokenNode: function (token) {
-                return (token.currentNode.outgoing[0] !== undefined) ? token.currentNode.outgoing[0].target : undefined;
-            },
-
-            executeNode: function (token) {
-                return token.currentNode.execute()
             },
 
             getProcessInstance : function(processID)
@@ -156,6 +101,7 @@ define(
                     if (_process.processID == processID) { return _process; }
                 }
 
+                return null;
             },
 
             startProcessInstance : function(definitionID)
@@ -170,22 +116,111 @@ define(
                 return _process.ProcessID;
             },
 
+            createNewProcess: function (definitionID)
+            {
+                console.log('Создание инстанса процесса %s', definitionID);
+                var _def = this.findDefinition(definitionID);
+                if ((_def !== null) && (_def !== undefined))
+                {
+                    return new Process(this.pvt.controlMgr, {}, _def)
+                }
+            },
+
+            addRequest : function (request) {
+                /* В калипсо была доп проверка на существование реквеста в хранилище */
+                this.requests.push(request)
+            },
+
+            deactivateProcess: function (processInstance) {
+                console.log('Процесс [%s] деактивирован', processInstance.processID)
+            },
+
+            findProcess: function (processID) {
+                for (i = 0; i < this.processes.length; i++) {
+                    if (this.processes[i].processID == processID) {return this.processes[i]}
+                };
+
+                return null;
+            },
+
+            activateProcess : function(processID) {
+                var _process = this.findProcess(processID);
+                if (_process !== null) {
+                    console.log('Процесс [%s] активирован', _process.processID)
+                    return _process;
+                }
+                else {
+                    throw 'Неизвестный ID процесса'
+                }
+            },
+
+            continueProcess : function (token) {
+                var _newToken = token.processInstance.dequeueToken();
+                if (_newToken !== null && _newToken.tokenID != token.tokenID){
+                    _newToken.execute();
+                }
+                else {
+                    this.deactivateProcess(token.processInstance);
+                }
+            },
+
+            submitResponse : function(response) {
+                var _processID = response.processID;
+                /* Todo : сделать RequestStorage */
+                if (this.isRequestExists()) {
+                    var _process = this.activateProcess(_processID);
+                    var _token = _process.getToken(response.tokenID);
+                    _token.addResponse(response);
+
+                    var _receivingNode = _token.currentNode;
+                    /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
+                    _receivingNode.execute();
+                }
+            },
+
+            isRequestExists : function(requestID) {
+                return (this.getRequest(requestID) !== null);
+            },
+
+            getRequest : function(requestID){
+                for (var i = 0; i < this.requests.length; i++) {
+                    if (this.requests[i].ID = requestID) {return this.requests[i]}
+                };
+
+                return null;
+            },
+
+
             testAddProcessDefinition : function() {
                 var _definition = new Definition(this.pvt.controlMgr, {});
-                _definition.definitionID = "60CAC005-4DBB-4A22-BEB1-1AFAE6604791";
+                _definition.definitionID = "60cac005-4dbb-4a22-beb1-1afae6604791";
                 _definition.name = 'Определение тестового процесса';
 
                 new FlowNode(this.pvt.controlMgr, {});
+
                 var _activity1 = new Activity(this.pvt.controlMgr);
                 _activity1.name = "testActivity1";
+
+                var _userTask =  new UserTask(this.pvt.controlMgr);
+                _userTask.name = 'UserTask1';
+                var _request = _userTask.addRequest('Реквест1');
+                _request.addParameter('param1');
+
                 var _activity2 = new Activity(this.pvt.controlMgr);
                 _activity2.name = "testActivity2";
 
                 _definition.addActivity(_activity1);
+                _definition.addActivity(_userTask);
                 _definition.addActivity(_activity2);
-                var _sq = new SequenceFlow(this.pvt.controlMgr);
-                _sq.connect(_activity1, _activity2);
-                _definition.addConnector(_sq);
+
+                var _sq1 = new SequenceFlow(this.pvt.controlMgr);
+                _sq1.connect(_activity1, _userTask);
+                _definition.addConnector(_sq1);
+
+                var _sq2 = new SequenceFlow(this.pvt.controlMgr);
+                _sq2.connect(_userTask, _activity2);
+                _definition.addConnector(_sq2);
+
                 this.addProcessDefinition(_definition);
 
                 return _definition.definitionID;
