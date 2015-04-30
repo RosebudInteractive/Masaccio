@@ -36,7 +36,20 @@ define(
 
             cancel : function() {
 
+            },
+
+            getOutgoingNodes : function() {
+                if (this.getDirection() == Gateway.direction.Converging) {
+                    return [this.outgoing[0].target]
+                };
+
+                for (var i  = 0; i < this.outgoing.length; i++) {
+                    var _sequence = this.outgoing[i];
+
+                };
+
             }
+
         });
 
         return ExlusiveGateway;

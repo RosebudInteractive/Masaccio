@@ -85,7 +85,9 @@ var ControlMgr = require('../'+uccelloDir+'/controls/controlMgr');
 var UObject = require('../'+uccelloDir+'/system/uobject');
 var Engine = require('./wfe/engine');
 var EngineSingleton = require('./wfe/engineSingleton');
+
 var TestClient = require('./test/testClient');
+var TestDefinitions = require('./test/definitions')
 
 // objects
 var dbc = uccelloServ.getUserMgr().getController();
@@ -94,7 +96,6 @@ var cm = new ControlMgr(db);
 
 // meta
 new UObject(cm);
-//new Engine(cm);
 
 // создаем объект
 
@@ -102,11 +103,12 @@ var engine = new Engine(cm, { ini: { fields: { Name: 'Engine', State: 'Ok' } } }
 EngineSingleton.setInstance(engine);
 
 var testClient = new TestClient(engine);
-engine.notifier.registerObserver(testClient);
+engine.notifier.registerObserver(testClient, testClient.handleNewRequest);
 
 // запускаем http сервер
 http.createServer(app).listen(1328);
 console.log('Сервер запущен на http://127.0.0.1:1328/masaccio');
 
-var _id = EngineSingleton.getInstance().testAddProcessDefinition();
-EngineSingleton.getInstance().startProcessInstance(_id);
+var _def = TestDefinitions.simpleTestDefinition(cm);
+EngineSingleton.getInstance().addProcessDefinition(_def);
+EngineSingleton.getInstance().startProcessInstance(_def.definitionID);

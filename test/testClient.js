@@ -8,8 +8,8 @@ if (typeof define !== 'function') {
 
 define(
     //[UCCELLO_CONFIG.uccelloPath+'system/uobject'],
-    ['./../wfe/request'],
-    function(Request){
+    ['./../wfe/request', './../wfe/engineSingleton'],
+    function(Request, EngineSingleton){
         var TestClient = Class.extend({
 
 
@@ -18,18 +18,22 @@ define(
             },
 
             handleNewRequest : function (eventParams) {
-                var _process = this.engine.getProcessInstance(eventParams.processID);
+                var _process = EngineSingleton.getInstance().getProcessInstance(eventParams.processID);
                 if (_process === null) { throw 'Process ID [%s] do not exists', eventParams.processID };
 
-                var _request = this.engine.requestStorage.getRequest(eventParams.requestID);
+                var _request = EngineSingleton.getInstance().requestStorage.getRequest(eventParams.requestID);
                 if (_request === null) { throw 'Token ID [%s] do not exists', eventParams.requestID };
 
                 var _response = _request.clone();
                 _response.ID = _request.ID;
 
                 _response.parameters[0].value = 'YAHOO!';
+                console.log('Готовим респонс')
+                //process.nextTick(function(){
+                //    console.log('Готовим респонс')
+                //});
 
-                this.engine.submitResponse(_response);
+                EngineSingleton.getInstance().submitResponse(_response);
             }
         });
 

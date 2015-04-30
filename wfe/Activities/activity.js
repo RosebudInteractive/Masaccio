@@ -30,8 +30,8 @@ define(
             init: function(cm, params){
                 this._super(cm);
 
-                this.incoming = [];
-                this.outgoing = [];
+                //this.incoming = [];
+                //this.outgoing = [];
             },
 
             name: function(value) {

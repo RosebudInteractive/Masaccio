@@ -7,8 +7,8 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './flowNode'],
-    function(UObject, FlowNode){
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './flowNode', 'util'],
+    function(UObject, FlowNode, util){
         var SequenceFlow = UObject.extend({
 
             className: "SequinceFlow",
@@ -32,12 +32,19 @@ define(
                 return this._genericSetter("State",value);
             },
 
-            connect : function(from, to) {
+            connect : function(from, to, expession) {
                 this.source = from;
                 this.target = to;
 
+                this.name = util.format('%s->%s', from.name, to.name);
                 this.source.addOutgoing(this);
                 this.target.addIncoming(this);
+
+                this.expression = expession;
+            },
+
+            hasCondition : function() {
+                return this.expression !== undefined || this.expression !== null;
             }
         });
 

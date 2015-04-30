@@ -6,6 +6,13 @@ if (typeof define !== 'function') {
     var Class = require('class.extend');
 }
 
+var gatewayDirection = {
+        Unspecified : 'Unspecified',
+        Converging : 'Converging',
+        Diverging : 'Diverging',
+        Mixed : 'Mixed'
+    }
+
 define(
     ['./../flowNode'],
     function(FlowNode){
@@ -16,14 +23,9 @@ define(
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-            //incoming : [],
-            //outgoing : [],
-
-            direction : {Unspecified : 0, Converging : 1, Diverging : 2, Mixed : 3},
-
-
             init: function(cm, params){
                 this._super(cm,params);
+                this.defaultFlow = null;
             },
 
             name: function(value) {
@@ -35,14 +37,29 @@ define(
             },
 
             execute : function() {
-                console.log('execute node [%s]', this.name);
+                console.log('Выполняется gateway [%s]', this.name);
             },
 
             cancel : function() {
 
+            },
+
+            getDirection : function() {
+                var _direction = gatewayDirection.Unspecified;
+                if (this.incoming.length > 1) {
+                    _direction = gatewayDirection.Converging
+                };
+                if (this.outgoing.length > 1) {
+                    if (_direction == gatewayDirection.Converging) {_direction = gatewayDirection.Mixed}
+                    else (_direction = gatewayDirection.Diverging)
+                }
+
+                return _direction;
             }
         });
 
         return Gateway;
     }
 )
+
+if (module) { module.exports.direction = gatewayDirection };

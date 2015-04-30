@@ -4,6 +4,7 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
     var Class = require('class.extend');
+    //var NodeProcess = require('Process');
 }
 
 var tokenState = {alive: 0, dead: 1};
@@ -114,23 +115,21 @@ define(
                     var _request = nodeProps.requests[i]
                     _request.state = Request.state.Exposed;
 
-                    EngineSingleton.getInstance().requestStorage.addRequest(_request, function(token){
-                        console.log('Вызов callback-а');
-                        console.log('token [%s]', token.tokenID);
-                        token.execute();
-                    });
-                    EngineSingleton.getInstance().notifier.notify({
-                        processID : this.processInstance.processID,
-                        tokenID : this.tokenID,
-                        requestID : _request.ID,
-                        requestName : _request.name,
-                        nodeName : this.currentNode.name
-                    })
-                }
-            },
+                    var _requestEventParams = {
+                        processID: this.processInstance.processID,
+                        tokenID: this.tokenID,
+                        requestID: _request.ID,
+                        requestName: _request.name,
+                        nodeName: this.currentNode.name
+                    };
 
-            _callback : function(){
-                this.execute()
+                    EngineSingleton.getInstance().exposeRequest(
+                        _request, _requestEventParams, function (token) {
+                            console.log('Вызов callback-а');
+                            console.log('token [%s]', token.tokenID);
+                            token.execute();
+                        });
+                }
             },
 
             getNextNode : function() {
@@ -153,19 +152,12 @@ define(
                 }
 
                 return null;
-
-                //for (var i in this.nodesProps) {
-                //    if (!this.nodesProps.hasOwnProperty(i)) continue;
-                //
-                //    if (this.nodesProps[i].name === nodeName) {return this.nodesProps[i]}
-                //}
             },
 
             addResponse : function (response){
                 var _nodeProps = this.getPropertiesOfNode(this.currentNode.name);
                 _nodeProps.responses.push(response);
                 _nodeProps.addParameter(response.parameters[0]);
-
             },
 
             doOnInitialized : function() {

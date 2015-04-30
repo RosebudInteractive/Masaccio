@@ -21,13 +21,13 @@ define(
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-            //incoming : [],
-            //outgoing : [],
-
             init: function(cm, params){
                 this._super(cm,params);
                 this.parameters = [];
                 this.processInstance = null;
+
+                this.incoming = [];
+                this.outgoing = [];
             },
 
             name: function(value) {

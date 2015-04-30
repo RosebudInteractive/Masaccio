@@ -29,14 +29,15 @@ define(
                 this.observers = [];
             },
 
-            registerObserver : function (observer) {
-                this.observers.push(observer);
+            registerObserver : function (observer, callback) {
+                this.observers.push({observer : observer, callback : callback});
             },
 
             notify : function (eventParams) {
                 this.observers.forEach(function(item, i, arr) {
                     /* Todo возможно тоже callback нужен*/
-                    item.handleNewRequest(eventParams);
+                    //item.handleNewRequest(eventParams);
+                    item.callback(eventParams);
                 })
             }
 
