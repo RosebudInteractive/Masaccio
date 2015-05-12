@@ -86,6 +86,14 @@ define(
 
             getNodeTokens : function(node) {
 
+            },
+
+            isAllTokensDead : function() {
+                for (var i = 0; this.tokens.length; i++) {
+                    if (this.tokens[i].state == 0) {
+                        return false;
+                    }
+                }
             }
         });
 

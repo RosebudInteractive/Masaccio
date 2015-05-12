@@ -134,7 +134,7 @@ define([
                 defineTokens: function (processInstance) {
                 var _token = new Token(this.pvt.controlMgr, {}, processInstance);
                 _token.currentNode = processInstance.getStartNode();
-                _token.state = Token.tokenState.alive;
+                _token.state = Token.state.alive;
                 processInstance.enqueueToken(_token);
             },
 
@@ -154,7 +154,8 @@ define([
             activateProcess : function(processID) {
                 var _process = this.findProcess(processID);
                 if (_process !== null) {
-                    console.log('Процесс [%s] активирован', _process.processID)
+                    console.log('Процесс [%s] активирован', _process.processID);
+                    _process.state = Process.state.Running;
                     return _process;
                 }
                 else {
@@ -163,7 +164,8 @@ define([
             },
 
             deactivateProcess: function (processInstance) {
-                console.log('Процесс [%s] деактивирован', processInstance.processID)
+                console.log('Процесс [%s] деактивирован', processInstance.processID);
+                processInstance.state = Process.state.Waiting;
             },
 
             switchToken : function(token) {
@@ -184,32 +186,52 @@ define([
                     for (var i = 0; i < _outgoingNodes.length; i++){
                         _newToken = new Token(this.pvt.controlMgr, {}, _process);
                         _newToken.currentNode = _outgoingNodes[i];
-
+                        _newToken.state = Token.state.alive;
+                        _newToken.copyNodePropsFromToken(token);
+                        _process.enqueueToken(_newToken);
                     }
                 } else {
                     token.currentNode.close();
                     token.currentNode = _outgoingNodes[0];
                     token.currentNode.state = FlowNode.state.Initialized;
                     _process.enqueueToken(token);
-                    _newToken = token;
                 }
 
-                this.continueProcess(_newToken);
+                this.continueProcess(token);
             },
 
             continueProcess : function (token) {
-                var _newToken = token.processInstance.dequeueToken();
-                // && _newToken.tokenID != token.tokenID
-                if (_newToken !== null){
-                    _newToken.execute();
+                var _process = this.getActiveProcess(token.processInstance.processID)
+
+                if (_process !== null) {
+                    var _newToken = _process.dequeueToken();
+                    if (_newToken !== null) {
+                        _newToken.execute();
+                    }
+                    else {
+                        this.deactivateProcess(token.processInstance);
+                    }
+                } else {
+                    if (!token.processInstance.isAllTokensDead()) {
+                        token.currentNode.state = FlowNode.state.Closed;
+                        token.execute();
+                    }
                 }
-                else {
-                    this.deactivateProcess(token.processInstance);
-                }
+            },
+
+            getActiveProcess : function(processID) {
+                for (var i = 0; this.processes.length; i++) {
+                    if (this.processes[i].processID == processID && this.processes[i].state == Process.state.Running){
+                        return this.processes[i];
+                    }
+                };
+
+                return null;
             },
 
             exposeRequest : function(request, eventParams, callback){
                 this.requestStorage.addRequest(request, callback);
+                console.log('Выставлен request [%s]', request.name);
                 this.notifier.notify(eventParams);
             },
 

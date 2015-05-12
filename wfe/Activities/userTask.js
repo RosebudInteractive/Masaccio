@@ -25,9 +25,10 @@ define(
             },
 
             execute : function() {
-                console.log("Выполняется узел %s [%s]", this.name, typeof(this));
+
                 /* Todo : свое выполнение */
                 if (this.state == FlowNode.state.Executing) {
+                    console.log("Выполняется узел %s [%s]", this.name, typeof(this));
                     var _activityState = this.exposeRequests()
                     if (_activityState == Activity.state.Waiting) {
                         this.state = FlowNode.state.WaitingRequest;
@@ -38,6 +39,10 @@ define(
 
                 }
                 else if (this.state == FlowNode.state.WaitingRequest) {
+                    console.log("Узел ожидает response %s", this.name);
+                    var _requestCount = this.processInstance.currentToken.getPropertiesOfNode(this.name).requests.length;
+                    var _responseCount = this.processInstance.currentToken.getPropertiesOfNode(this.name).responses.length;
+                    console.log("Ответов %d из %d", _responseCount, _requestCount);
                     if (this.processInstance.currentToken.getPropertiesOfNode(this.name).isAllResponseReceived()) {
                         var _param = this.processInstance.currentToken.getPropertiesOfNode(this.name).parameters[0];
                         console.log('[%s] : %s', _param.name, _param.value)
@@ -46,6 +51,7 @@ define(
                     else { this.state = FlowNode.state.WaitingRequest }
                 }
                 else {
+                    console.log("Узел отработал %s", this.name);
                     this.state = FlowNode.state.ExecutionComplete
                 }
             },

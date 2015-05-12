@@ -13,32 +13,30 @@ define(
 
             className: "Parameter",
             classGuid: UCCELLO_CONFIG.classGuids.Parameter,
-            //metaFields: [
-            //    {fname:"Name",ftype:"string"},
-            //    {fname:"State",ftype:"string"},
-            //    {fname:"TokenID",ftype:"string"},
-            //    {fname:"ProcessID",ftype:"string"}
-            //],
+            metaFields: [
+                {fname : "Name"   , ftype : "string"},
+                {fname : "Value"  , ftype : "string"}
+            ],
             ///* Todo : Необходимо сохраннять коллекцию параметров */
             //metaCols: [],
 
-            init: function(cm, params){
-                this._super(cm,params);
-
-                //this.state = requestState.Exposed;
-                this.parameters = [];
-            },
+            //init: function(cm, params){
+            //    this._super(cm,params);
+            //},
 
             name: function(value) {
                 return this._genericSetter("Name",value);
             },
 
-            state: function(value) {
-                return this._genericSetter("State",value);
+            value: function(value) {
+                return this._genericSetter("Value",value);
             },
 
             clone : function() {
-
+                var _newParam = new Parameter(this.pvt.controlMgr);
+                _newParam.name = this.name;
+                _newParam.value = this.value;
+                return _newParam;
             }
 
         });

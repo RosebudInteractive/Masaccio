@@ -9,10 +9,10 @@ if (typeof define !== 'function') {
 define(
     [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
     function(UObject){
-        var TokenProperties = UObject.extend({
+        var NodeProperties = UObject.extend({
 
-            className: "TokenProperties",
-            classGuid: UCCELLO_CONFIG.classGuids.TokenProperties,
+            className: "NodeProperties",
+            classGuid: UCCELLO_CONFIG.classGuids.NodeProperties,
             //metaFields: [
             //    {fname:"Name",ftype:"string"},
             //    {fname:"State",ftype:"string"},
@@ -61,11 +61,27 @@ define(
 
             isAllResponseReceived : function() {
                 return this.requests.length == this.responses.length;
+            },
+
+            clone : function() {
+                var _newProp = new NodeProperties(this.pvt.controlMgr);
+                _newProp.name = this.name;
+                for (var i = 0; i < this.parameters.length; i++) {
+                    _newProp.addParameter(this.parameters[i].clone());
+                }
+
+                for (var i = 0; i < this.requests.length; i++) {
+                    _newProp.addRequest(this.requests[i]);
+                }
+
+                for (var i = 0; i < this.responses.length; i++) {
+                    _newProp.addRequest(this.responses[i]);
+                }
             }
 
         });
 
-        return TokenProperties;
+        return NodeProperties;
     }
 )
 

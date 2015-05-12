@@ -7,7 +7,7 @@ if (typeof define !== 'function') {
     //var NodeProcess = require('Process');
 }
 
-var tokenState = {alive: 0, dead: 1};
+var tokenState = {Alive: 0, Dead: 1};
 
 define(
     [UCCELLO_CONFIG.uccelloPath+'system/uobject', './flowNode', './process', './NodeProps/nodeProperties', './request',
@@ -68,27 +68,16 @@ define(
 
                     case (FlowNode.state.WaitingRequest) || (FlowNode.state.WaitingTokens) : {
                         /* Todo : возможно нужен callback*/
-                        EngineSingleton.getInstance().continueProcess(this);
+                        EngineSingleton.getInstance().deactivateProcess(this.processInstance);
                         /* Сохранение и выгрузка из памяти процесса */
                         //return this.execute();
                         return 'Процесс ожидает ответ';
                     };
 
                     case (FlowNode.state.ExecutionComplete) : {
-                        //var _nextNode = this.hasNextNode();
-                        //if (_nextNode !== undefined) {
-                        //    this.currentNode = _nextNode;
-                        //    this.currentNode.state = FlowNode.state.Initialized;
-                        //}
-                        //else {
-                        //    this.currentNode.state = FlowNode.state.Closed;
-                        //};
-                        //
-                        //return this.execute();
-
-
                         if (this.hasNextNode()) {
                             EngineSingleton.getInstance().switchToken(this)
+                            break;
                         } else {
                             this.currentNode.state = FlowNode.state.Closed;
                             return this.execute();
@@ -193,6 +182,14 @@ define(
                 this.clearNodeResponses();
             },
 
+            copyNodePropsFromToken : function(token) {
+                for (var i in token.nodesProps) {
+                    if (!token.nodesProps.hasOwnProperty(i)) continue;
+
+                    this.nodesProps.push(token.nodesProps[i].clone())
+                }
+            },
+
             doOnExecuting: function () {
                 this.executeNode();
 
@@ -210,4 +207,4 @@ define(
 )
 
 
-module.exports.tokenState = tokenState;
+module.exports.state = tokenState;

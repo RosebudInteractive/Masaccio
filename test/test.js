@@ -51,6 +51,6 @@ function getTestDefinition() {
 function defineTokens(processInstance) {
     var _token = new Token(null, {}, processInstance);
     _token.currentNode = processInstance.getStartNode();
-    _token.state = Token.tokenState.alive;
+    _token.state = Token.state.alive;
     processInstance.enqueueToken(_token);
 };
