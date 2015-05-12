@@ -3,10 +3,28 @@ if (typeof define !== 'function') {
     var Class = require('class.extend');
 }
 
-define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './process', './processDefinition',
-        './flowNode', './Token', './notify', './requestStorage'],
-    function(UObject, Process, Definition, FlowNode, Token, Notify, RequestStorage) {
+define([
+        UCCELLO_CONFIG.uccelloPath+'system/uobject',
+        './process',
+        './processDefinition',
+        './flowNode',
+        './token',
+        './notify',
+        './requestStorage',
+        './Gateways/gateway',
+        './Gateways/exclusiveGateway'
+    ],
+    function(
+        UObject,
+        Process,
+        Definition,
+        FlowNode,
+        Token,
+        Notify,
+        RequestStorage,
+        Gateway,
+        ExclusiveGateway
+    ) {
         var Engine = UObject.extend({
 
             className: "Engine",
@@ -148,9 +166,41 @@ define(
                 console.log('Процесс [%s] деактивирован', processInstance.processID)
             },
 
+            switchToken : function(token) {
+                //throw 'NotImplementedException';
+                var _newToken = null;
+
+                var _process = token.processInstance;
+                var _outgoingNodes = token.currentNode.getOutgoingNodes();
+
+                var _isGateway = token.currentNode === Gateway;
+                var _isExclusiveGateWay = token.currentNode === ExclusiveGateway;
+                var _hasSingleIn = token.currentNode.incoming <= 1;
+                var _hasSingleOut = _outgoingNodes.length == 1;
+
+                var _needNewToken = _isGateway && !_isExclusiveGateWay && !(_hasSingleIn && !_hasSingleOut);
+
+                if (_needNewToken) {
+                    for (var i = 0; i < _outgoingNodes.length; i++){
+                        _newToken = new Token(this.pvt.controlMgr, {}, _process);
+                        _newToken.currentNode = _outgoingNodes[i];
+
+                    }
+                } else {
+                    token.currentNode.close();
+                    token.currentNode = _outgoingNodes[0];
+                    token.currentNode.state = FlowNode.state.Initialized;
+                    _process.enqueueToken(token);
+                    _newToken = token;
+                }
+
+                this.continueProcess(_newToken);
+            },
+
             continueProcess : function (token) {
                 var _newToken = token.processInstance.dequeueToken();
-                if (_newToken !== null && _newToken.tokenID != token.tokenID){
+                // && _newToken.tokenID != token.tokenID
+                if (_newToken !== null){
                     _newToken.execute();
                 }
                 else {

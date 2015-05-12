@@ -39,9 +39,12 @@ define(
                 this.nodes.push(activity)
             },
 
+            /* Todo : сделать методы  addParameter, addRequest*/
             addParameter : function(parameter) {},
 
-            addGateway : function() {},
+            addGateway : function(gateway) {
+                this.nodes.push(gateway)
+            },
 
             addRequest : function() {},
 

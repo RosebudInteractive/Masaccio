@@ -55,6 +55,11 @@ define(
                 }
 
                 return _direction;
+            },
+
+            setDefaultFlow : function(sequence){
+                this.defaultFlow = sequence;
+                sequence.isDefault = true;
             }
         });
 

@@ -82,6 +82,10 @@ define(
                     return this.tokenQueue.splice(0, 1)[0];
                 }
                 else {return null};
+            },
+
+            getNodeTokens : function(node) {
+
             }
         });
 

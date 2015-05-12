@@ -13,15 +13,23 @@ define(
 
             className: "SequinceFlow",
             classGuid: UCCELLO_CONFIG.classGuids.SequinceFlow,
-            metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
+            metaFields: [
+                {fname : "Name" ,       ftype : "string"},
+                {fname : "State" ,      ftype : "string"},
+                {fname : "IsDefault",   ftype : "boolean"},
+                {fname : "Expression",  ftype : "string"}
+            ],
             metaCols: [],
 
-            source : null,
-            target : null,
+
 
 
             init: function(cm, params){
                 this._super(cm,params);
+                this.isDefault = false;
+                this.expression = null;
+                this.source = null;
+                this.target = null;
             },
 
             name: function(value) {
@@ -30,6 +38,14 @@ define(
 
             state: function(value) {
                 return this._genericSetter("State",value);
+            },
+
+            isDefault : function(value) {
+                return this._genericSetter("IsDefault",value);
+            },
+
+            expression : function(value) {
+                return this._genericSetter("Expression",value);
             },
 
             connect : function(from, to, expession) {
@@ -44,7 +60,17 @@ define(
             },
 
             hasCondition : function() {
-                return this.expression !== undefined || this.expression !== null;
+                //var _expr = this.expression;
+                return !(this.expression === undefined || this.expression === null);
+            },
+
+            isConditionSatisfied : function(processObject){
+                var _processObject = processObject;
+                /* Todo : Код не безопасен, так как в eval передается инстанс процесса, да и не известно что оттуда вернется */
+                this.expression = "var process = _processObject; " + this.expression;
+                /* Todo : Необходимо обработать асинхронность */
+                var _result = eval(this.expression);
+                return _result == true ? true : false;
             }
         });
 

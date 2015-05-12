@@ -75,20 +75,28 @@ define(
                     };
 
                     case (FlowNode.state.ExecutionComplete) : {
-                        var _nextNode = this.getNextNode();
-                        if (_nextNode !== undefined) {
-                            this.currentNode = _nextNode;
-                            this.currentNode.state = FlowNode.state.Initialized;
-                        }
-                        else {
-                            this.currentNode.state = FlowNode.state.Closed;
-                        };
+                        //var _nextNode = this.hasNextNode();
+                        //if (_nextNode !== undefined) {
+                        //    this.currentNode = _nextNode;
+                        //    this.currentNode.state = FlowNode.state.Initialized;
+                        //}
+                        //else {
+                        //    this.currentNode.state = FlowNode.state.Closed;
+                        //};
+                        //
+                        //return this.execute();
 
-                        return this.execute();
-                        //break;
+
+                        if (this.hasNextNode()) {
+                            EngineSingleton.getInstance().switchToken(this)
+                        } else {
+                            this.currentNode.state = FlowNode.state.Closed;
+                            return this.execute();
+                        }
                     };
 
                     case (FlowNode.state.Closed) : {
+                        this.state = tokenState.dead;
                         return "Token " + this.tokenID + " выполнен"; };
 
                     default : { return "Неизвестный статус узла" };
@@ -132,8 +140,8 @@ define(
                 }
             },
 
-            getNextNode : function() {
-                return (this.currentNode.outgoing[0] !== undefined) ? this.currentNode.outgoing[0].target : undefined;
+            hasNextNode : function() {
+                return (this.currentNode.getOutgoingNodes().length != 0);
             },
 
             clearNodeResponses: function (nodeName) {

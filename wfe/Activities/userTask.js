@@ -15,8 +15,7 @@ define(
 
             className: "UserTask",
             classGuid: UCCELLO_CONFIG.classGuids.UserTask,
-            //metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
-            //metaCols: [],
+            metaCols: [],
 
             init: function(cm, params){
                 this._super(cm);
@@ -25,16 +24,7 @@ define(
                 this.responses = [];
             },
 
-            //name: function(value) {
-            //    return this._genericSetter("Name",value);
-            //},
-            //
-            //state: function(value) {
-            //    return this._genericSetter("State",value);
-            //},
-
             execute : function() {
-                //this._super();
                 console.log("Выполняется узел %s [%s]", this.name, typeof(this));
                 /* Todo : свое выполнение */
                 if (this.state == FlowNode.state.Executing) {

@@ -51,12 +51,29 @@ define(
 
             },
 
-            addOutgoing : function(sequence) {
-                this.outgoing.push(sequence);
-            },
+            //addOutgoing : function(sequence) {
+            //    this.outgoing.push(sequence);
+            //},
+            //
+            //addIncoming : function(sequence) {
+            //    this.incoming.push(sequence);
+            //},
 
-            addIncoming : function(sequence) {
-                this.incoming.push(sequence);
+            getOutgoingNodes : function() {
+                var _confirmedOutgoing = [];
+                for (var i = 0; i < this.outgoing.length; i++) {
+                    var _sequence = this.outgoing[i];
+                    if (_sequence.hasCondition()) {
+                        if (_sequence.isConditionSatisfied(this.processInstance)) {
+                            _confirmedOutgoing.push(_sequence.target)
+                        }
+                    }
+                    else {
+                        _confirmedOutgoing.push(_sequence.target)
+                    };
+                }
+
+                return _confirmedOutgoing;
             }
         });
 

@@ -40,6 +40,22 @@ define(
 
             cancel : function() {
 
+            },
+
+            getOutgoingNodes : function() {
+                throw 'NotImplementedException';
+            },
+
+            close : function() {
+                this.state = flowNodeState.Closed;
+            },
+
+            addOutgoing : function(sequence) {
+                this.outgoing.push(sequence);
+            },
+
+            addIncoming : function(sequence) {
+                this.incoming.push(sequence);
             }
         });
 
