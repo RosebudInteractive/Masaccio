@@ -16,14 +16,11 @@ define(
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-
-            definitionID : "",
-            connectors : [],
-            nodes : [],
-
-
             init: function(cm, params){
                 this._super(cm,params);
+                this.definitionID = "";
+                this.connectors = [];
+                this.nodes = [];
             },
 
             name: function(value) {
@@ -39,9 +36,12 @@ define(
                 this.nodes.push(activity)
             },
 
+            /* Todo : сделать методы  addParameter, addRequest*/
             addParameter : function(parameter) {},
 
-            addGateway : function() {},
+            addGateway : function(gateway) {
+                this.nodes.push(gateway)
+            },
 
             addRequest : function() {},
 
