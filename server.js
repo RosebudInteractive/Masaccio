@@ -109,6 +109,9 @@ engine.notifier.registerObserver(testClient, testClient.handleNewRequest);
 http.createServer(app).listen(1328);
 console.log('Сервер запущен на http://127.0.0.1:1328/masaccio');
 
-var _def = TestDefinitions.simpleTestDefinition(cm);
-EngineSingleton.getInstance().addProcessDefinition(_def);
-EngineSingleton.getInstance().startProcessInstance(_def.definitionID);
+var _def1 = TestDefinitions.exclusiveGatewayTest_Definition(cm);
+var _def2 = TestDefinitions.inclusiveGatewayTest_Definition(cm);
+EngineSingleton.getInstance().addProcessDefinition(_def1);
+EngineSingleton.getInstance().addProcessDefinition(_def2);
+
+EngineSingleton.getInstance().startProcessInstance(_def2.definitionID);

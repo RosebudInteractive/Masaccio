@@ -8,9 +8,16 @@ if (typeof define !== 'function') {
 
 var processStates = {Initialized : 0, Running : 1, Finished : 2, Aborted : 3, Waiting : 4, None : 5};
 
-define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './processDefinition', UCCELLO_CONFIG.uccelloPath + 'system/utils'],
-    function(UObject, Definition, UUtils){
+define([
+        UCCELLO_CONFIG.uccelloPath+'system/uobject',
+        './processDefinition',
+        UCCELLO_CONFIG.uccelloPath + 'system/utils'
+    ],
+    function(
+        UObject,
+        Definition,
+        UUtils
+    ){
         var Process = UObject.extend({
 
             className: "Process",
@@ -18,7 +25,6 @@ define(
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-            definition : null,
             tokens : [],
 
             sequenceValue : 0,
@@ -85,7 +91,14 @@ define(
             },
 
             getNodeTokens : function(node) {
+                var _nodeTokens = [];
+                for (var i = 0; this.tokens.length; i++) {
+                    if (this.tokens[i].currentNode == node) {
+                        _nodeTokens.push(this.tokens[i])
+                    }
+                }
 
+                return _nodeTokens;
             },
 
             isAllTokensDead : function() {

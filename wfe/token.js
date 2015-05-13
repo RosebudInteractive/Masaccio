@@ -160,8 +160,8 @@ define(
             doOnInitialized : function() {
 
                 this.isContainsCurrentNodeParams = function () {
-                    var _extProps = this.getPropertiesOfNode(this.currentNode.name);
-                    return (_extProps !== undefined && _extProps !== null)
+                    var _nodeProps = this.getPropertiesOfNode(this.currentNode.name);
+                    return (_nodeProps !== undefined && _nodeProps !== null)
                 };
 
                 this.copyNodeParams = function (properties) {

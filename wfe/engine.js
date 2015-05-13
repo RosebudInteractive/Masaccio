@@ -175,17 +175,18 @@ define([
                 var _process = token.processInstance;
                 var _outgoingNodes = token.currentNode.getOutgoingNodes();
 
-                var _isGateway = token.currentNode === Gateway;
-                var _isExclusiveGateWay = token.currentNode === ExclusiveGateway;
-                var _hasSingleIn = token.currentNode.incoming <= 1;
+                var _isGateway = (token.currentNode instanceof Gateway);
+                var _isExclusiveGateWay = (token.currentNode instanceof ExclusiveGateway);
+                var _hasSingleIn = token.currentNode.incoming.length <= 1;
                 var _hasSingleOut = _outgoingNodes.length == 1;
 
-                var _needNewToken = _isGateway && !_isExclusiveGateWay && !(_hasSingleIn && !_hasSingleOut);
+                var _needNewToken = _isGateway && !_isExclusiveGateWay && (_hasSingleIn && !_hasSingleOut);
 
                 if (_needNewToken) {
                     for (var i = 0; i < _outgoingNodes.length; i++){
                         _newToken = new Token(this.pvt.controlMgr, {}, _process);
                         _newToken.currentNode = _outgoingNodes[i];
+                        _newToken.currentNode.state = FlowNode.state.Initialized;
                         _newToken.state = Token.state.alive;
                         _newToken.copyNodePropsFromToken(token);
                         _process.enqueueToken(_newToken);

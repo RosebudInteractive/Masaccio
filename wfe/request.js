@@ -9,8 +9,8 @@ if (typeof define !== 'function') {
 var requestState = {Exposed : 0, Acquire : 1, Canceled : 2, ResponseReceived : 3};
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', '../public/utils', UCCELLO_CONFIG.uccelloPath + 'system/utils'],
-    function(UObject, Utils, UUtils){
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject', '../public/utils', UCCELLO_CONFIG.uccelloPath + 'system/utils', './parameter'],
+    function(UObject, Utils, UUtils, Parameter){
         var Request = UObject.extend({
 
             className: "Request",
@@ -54,7 +54,10 @@ define(
             },
 
             addParameter : function(parameterName){
-                this.parameters.push({name : parameterName, value : ''});
+                var _param = new Parameter(this.pvt.controlMgr);
+                _param.name = parameterName;
+                _param.value = null;
+                this.parameters.push(_param);
             },
 
             clone : function() {

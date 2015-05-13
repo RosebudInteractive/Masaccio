@@ -27,7 +27,17 @@ define(
 
             execute : function() {
                 this._super();
-                /* Todo : своя реализация*/
+                if (this.getDirection() == Gateway.direction.Converging || this.getDirection() == Gateway.direction.Mixed){
+                    if (this.processInstance.getNodeTokens(this).length == this.incoming.length) {
+                        this.state = FlowNode.state.ExecutionComplete
+                    } else {
+                        this.state = FlowNode.state.WaitingRequest
+                    }
+                } else if (this.getDirection() == Gateway.direction.Diverging) {
+                    this.state = FlowNode.state.ExecutionComplete
+                } else {
+                    throw 'Неизвестный тип GatewayDirection'
+                }
             },
 
             cancel : function() {
@@ -62,8 +72,6 @@ define(
                 } else {
                     return [this.defaultFlow.target]
                 }
-
-
             }
 
         });

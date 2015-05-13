@@ -16,14 +16,11 @@ define(
             metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-
-            definitionID : "",
-            connectors : [],
-            nodes : [],
-
-
             init: function(cm, params){
                 this._super(cm,params);
+                this.definitionID = "";
+                this.connectors = [];
+                this.nodes = [];
             },
 
             name: function(value) {

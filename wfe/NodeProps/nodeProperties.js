@@ -77,6 +77,8 @@ define(
                 for (var i = 0; i < this.responses.length; i++) {
                     _newProp.addRequest(this.responses[i]);
                 }
+
+                return _newProp;
             }
 
         });

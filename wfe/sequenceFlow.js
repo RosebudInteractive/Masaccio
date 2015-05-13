@@ -21,9 +21,6 @@ define(
             ],
             metaCols: [],
 
-
-
-
             init: function(cm, params){
                 this._super(cm,params);
                 this.isDefault = false;
