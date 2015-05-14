@@ -20,7 +20,7 @@ define(
 
             className: "Gateway",
             classGuid: UCCELLO_CONFIG.classGuids.Activity,
-            metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
+            //metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
             init: function(cm, params){

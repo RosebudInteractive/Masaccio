@@ -11,6 +11,18 @@ define(
     function(UObject) {
         var RequestStorage = UObject.extend({
 
+                className: "RequestStorage",
+                classGuid: UCCELLO_CONFIG.classGuids.RequestStorage,
+                //metaFields: [
+                //    {fname:"Name",ftype:"string"},
+                //    {fname:"State",ftype:"string"},
+                //    {fname:"TokenID",ftype:"string"},
+                //    {fname:"ProcessID",ftype:"string"},
+                //    {fname:"ID", ftype:"string"}
+                //],
+                /* Todo : Необходимо сохраннять коллекцию параметров */
+                metaCols: [],
+
                 init: function (cm, params) {
                     this._super(cm, params);
                     this.storage = [];

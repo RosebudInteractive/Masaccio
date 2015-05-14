@@ -17,12 +17,10 @@ define(
                 {fname : "Name"   , ftype : "string"},
                 {fname : "Value"  , ftype : "string"}
             ],
-            ///* Todo : Необходимо сохраннять коллекцию параметров */
-            //metaCols: [],
-
-            //init: function(cm, params){
-            //    this._super(cm,params);
-            //},
+            ///* Todo : Не уверен что нужен UObject */
+            init: function(cm, params){
+                this._super(cm,{});
+            },
 
             name: function(value) {
                 return this._genericSetter("Name",value);

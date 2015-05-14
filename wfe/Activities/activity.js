@@ -7,15 +7,17 @@ if (typeof define !== 'function') {
 }
 
 /* Todo : сделано по аналогии с Calypso при рефакторинге подумать */
-var ActivityState = {Passive : 0,
+var ActivityState = {
+    Passive : 0,
     Initializing : 1,
     ProcessingChildSteps : 2,
     ExposingRequests : 3,
     Waiting : 4,
     Executing : 5,
-    Transfering : 6,
+    Transferring : 6,
     Closed : 7,
-    Abort : 8}
+    Abort : 8
+}
 
 define(
     ['./../flowNode'],
@@ -28,10 +30,7 @@ define(
             metaCols: [],
 
             init: function(cm, params){
-                this._super(cm);
-
-                //this.incoming = [];
-                //this.outgoing = [];
+                this._super(cm, params);
             },
 
             name: function(value) {
@@ -50,14 +49,6 @@ define(
             cancel : function() {
 
             },
-
-            //addOutgoing : function(sequence) {
-            //    this.outgoing.push(sequence);
-            //},
-            //
-            //addIncoming : function(sequence) {
-            //    this.incoming.push(sequence);
-            //},
 
             getOutgoingNodes : function() {
                 var _confirmedOutgoing = [];

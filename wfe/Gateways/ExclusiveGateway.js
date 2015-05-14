@@ -13,10 +13,13 @@ define(
         var ExclusiveGateway = Gateway.extend({
 
             className: "ExclusiveGateway",
-            classGuid: UCCELLO_CONFIG.classGuids.Activity,
-            metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
+            classGuid: UCCELLO_CONFIG.classGuids.ExclusiveGateway,
+            //metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
+            init: function(cm, params){
+                this._super(cm,{});
+            },
 
             name: function(value) {
                 return this._genericSetter("Name",value);
