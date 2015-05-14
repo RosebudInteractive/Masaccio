@@ -17,6 +17,7 @@ define(
             metaCols: [],
 
             init: function(cm, params){
+                if (!params) {params = {}};
                 this._super(cm,params);
                 this.definitionID = "";
                 this.connectors = [];

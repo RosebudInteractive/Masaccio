@@ -10,6 +10,7 @@ var app = express();
 // Обработчики express
 // ----------------------------------------------------------------------------------------------------------------------
 
+require('ejs');
 // обработчик файлов html будет шаблонизатор ejs
 app.engine('html', require('ejs').renderFile);
 
@@ -48,24 +49,30 @@ function fakeAuthenticate(user, pass, done) {
 
 var config = {
     controls:[
-        {className:'Engine', component:'./wfe/engine', guid:'387e8d92-e2ca-4a94-9732-b4a479ff8bb8'},
-        {className:'ProcessDefinition', component:'./wfe/processDefinition', guid:'acd97fff-93f9-47ed-84bb-e24ffdf28fc5'},
-        {className:'Process', component:'./wfe/process', guid:'74441683-a11f-4b59-9e04-0aefcc5bc18a'},
-        {className:'FlowNode', component:'./wfe/flowNode', guid:'199a78b0-b555-4f97-9d8f-41234ae7f06f'},
-        {className:'SequenceFlow', component:'./wfe/sequenceFlow', guid:'c7a6cd70-653f-4e12-b6dc-8a6085b7fc7f'},
-        {className:'TokenProperties', component:'./wfe/tokenProperties', guid:'867a7d2e-8868-48f7-8086-3d2817aec604'},
+        {className:'Engine', component:'wfe/engine', guid:'387e8d92-e2ca-4a94-9732-b4a479ff8bb8'},
+        {className:'ProcessDefinition', component:'wfe/processDefinition', guid:'acd97fff-93f9-47ed-84bb-e24ffdf28fc5'},
+        {className:'Process', component:'wfe/process', guid:'74441683-a11f-4b59-9e04-0aefcc5bc18a'},
+        {className:'FlowNode', component:'wfe/flowNode', guid:'199a78b0-b555-4f97-9d8f-41234ae7f06f'},
+        {className:'SequenceFlow', component:'wfe/sequenceFlow', guid:'c7a6cd70-653f-4e12-b6dc-8a6085b7fc7f'},
+        {className:'NodeProperties', component:'wfe/NodeProps/NodeProperties', guid:'867a7d2e-8868-48f7-8086-3d2817aec604'},
         /*Activities*/
-        {className:'Activity', component:'/wfe/Activities/activity', guid:'173a2e1f-909d-432d-9255-895f35335f65'},
+        {className:'Activity', component:'wfe/Activities/activity', guid:'173a2e1f-909d-432d-9255-895f35335f65'},
         {className:'UserTask', component:'wfe/Activities/userTask', guid:'e9af2d49-ef3c-4b9a-b693-36a9f7a5cd4a'},
         /*Gateways*/
-        {className:'Gateway', component:'./wfe/Gateways/Gateway', guid:'05e31d1c-7b7e-4fb8-b23d-063fee27b9f6'},
-        {className:'Token', component:'./wfe/token', guid:'d09117fc-b298-42f6-84fc-c8807e83ca12'},
-        {className:'Request', component:'./wfe/request', guid:'783cc459-0b03-4cbd-9960-6401a031537c'}
+        {className:'Gateway', component:'wfe/Gateways/Gateway', guid:'05e31d1c-7b7e-4fb8-b23d-063fee27b9f6'},
+        {className:'ExclusiveGateway', component:'wfe/Gateways/exclusiveGateway', guid:'8a1cfe3d-d0d5-4ee6-aa4b-667b1f8934ec'},
+        {className:'InclusiveGateway', component:'wfe/Gateways/inclusiveGateway', guid:'fb2384a6-ea09-4c48-a069-864d6af845f7'},
+
+        {className:'Token', component:'wfe/token', guid:'d09117fc-b298-42f6-84fc-c8807e83ca12'},
+        {className:'Request', component:'wfe/request', guid:'783cc459-0b03-4cbd-9960-6401a031537c'},
+        {className:'RequestStorage', component:'wfe/requestStorage', guid:'d59ea34f-a525-4551-b8e8-8d182e32571c'},
+        {className:'Notifier', component:'wfe/notify', guid:'98f90a0e-0fdf-482a-996e-8197d982689a'},
+        {className:'Parameter', component:'wfe/parameter', guid:'9232bbd5-e2f8-466a-877f-5bc6576b5d02'}
     ],
 
-    controlsPath: __dirname+'/../Masaccio/public/controls/',
-    dataPath: __dirname+'/../Masaccio/data/',
-    uccelloPath: __dirname+'/../'+uccelloDir+'/',
+    controlsPath:   __dirname + '/../Masaccio/',
+    dataPath:       __dirname + '/../Masaccio/data/',
+    uccelloPath:    __dirname + '/../' +uccelloDir+ '/',
     webSocketServer: {port:8082}
 };
 
@@ -91,8 +98,9 @@ var TestDefinitions = require('./test/definitions')
 
 // objects
 var dbc = uccelloServ.getUserMgr().getController();
-var db = dbc.newDataBase({name: "Engine", kind: "master", guid:'fb9653ea-4fc3-aee0-7a31-172a91aa196b'});
-var cm = new ControlMgr(db);
+var dbp = {name: "Engine", kind: "master", guid:'fb9653ea-4fc3-aee0-7a31-172a91aa196b'};
+var db = dbc.newDataBase(dbp);
+var cm = new ControlMgr({ controller: db.pvt.controller, dbparams: dbp});
 
 // meta
 new UObject(cm);

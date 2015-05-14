@@ -18,15 +18,13 @@ define(
             metaCols: [],
 
             init: function(cm, params){
-                this._super(cm);
+                this._super(cm, {});
 
                 this.requests = [];
                 this.responses = [];
             },
 
             execute : function() {
-
-                /* Todo : свое выполнение */
                 if (this.state == FlowNode.state.Executing) {
                     console.log("Выполняется узел %s [%s]", this.name, typeof(this));
                     var _activityState = this.exposeRequests()
@@ -36,7 +34,6 @@ define(
                     else if (_activityState == Activity.stat.Executing) {
                         this.state = FlowNode.state.ExecutionComplete
                     }
-
                 }
                 else if (this.state == FlowNode.state.WaitingRequest) {
                     console.log("Узел ожидает response %s", this.name);
@@ -90,7 +87,6 @@ define(
                     return Activity.state.Executing
                 }
             }
-
         });
 
         return UserTask;

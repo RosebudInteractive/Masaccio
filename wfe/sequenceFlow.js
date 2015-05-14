@@ -11,8 +11,8 @@ define(
     function(UObject, FlowNode, util){
         var SequenceFlow = UObject.extend({
 
-            className: "SequinceFlow",
-            classGuid: UCCELLO_CONFIG.classGuids.SequinceFlow,
+            className: "SequenceFlow",
+            classGuid: UCCELLO_CONFIG.classGuids.SequenceFlow,
             metaFields: [
                 {fname : "Name" ,       ftype : "string"},
                 {fname : "State" ,      ftype : "string"},

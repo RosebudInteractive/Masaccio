@@ -44,6 +44,7 @@ define([
 
             /* FIELDS */
             init: function (cm, params) {
+                if (!params) {params = {}};
                 this._super(cm, params);
 
                 this.notifier = new Notify(cm)

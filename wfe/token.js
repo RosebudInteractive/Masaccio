@@ -31,6 +31,7 @@ define(
             //processInstance : null,
 
             init: function(cm, params, processInstance){
+                if (!params) {params = {}};
                 this._super(cm,params);
                 this.processInstance = processInstance;
                 this.nodesProps = [];
