@@ -3,7 +3,7 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var Class = require('class.extend');
+    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define(
@@ -17,9 +17,18 @@ define(
                 {fname : "Name"   , ftype : "string"},
                 {fname : "Value"  , ftype : "string"}
             ],
-            ///* Todo : Не уверен что нужен UObject */
+
             init: function(cm, params){
-                this._super(cm,{});
+                //if (!params) {
+                //    params = {
+                //        parent  : root,
+                //            colName : 'Parameters'
+                //    }
+                //}
+                if (!params) {
+                    throw 'не указан params Parameter'
+                }
+                UccelloClass.super.apply(this, [cm, params]);
             },
 
             name: function(value) {
@@ -30,10 +39,10 @@ define(
                 return this._genericSetter("Value",value);
             },
 
-            clone : function() {
-                var _newParam = new Parameter(this.pvt.controlMgr);
-                _newParam.name = this.name;
-                _newParam.value = this.value;
+            clone : function(cm, params) {
+                var _newParam = new Parameter(cm, params);
+                _newParam.name(this.name());
+                _newParam.value(this.value());
                 return _newParam;
             }
 
@@ -41,5 +50,5 @@ define(
 
         return Parameter;
     }
-)
+);
 

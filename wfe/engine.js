@@ -1,6 +1,7 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var Class = require('class.extend');
+    //var Class = require('class.extend');
+    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define([
@@ -12,7 +13,8 @@ define([
         './notify',
         './requestStorage',
         './Gateways/gateway',
-        './Gateways/exclusiveGateway'
+        './Gateways/exclusiveGateway',
+        'fs'
     ],
     function(
         UObject,
@@ -23,18 +25,32 @@ define([
         Notify,
         RequestStorage,
         Gateway,
-        ExclusiveGateway
+        ExclusiveGateway,
+        fs
     ) {
         var Engine = UObject.extend({
 
             className: "Engine",
             classGuid: UCCELLO_CONFIG.classGuids.Engine,
-            metaFields: [{fname: "Name", ftype: "string"}, {fname: "State", ftype: "string"}],
-            metaCols: [],
-
-            definitions: [],
-            processes: [],
-            //requests: [],
+            metaFields: [
+                //{
+                //    fname: "Notifier",
+                //    ftype: {
+                //        type: "ref",
+                //        res_elem_type: UCCELLO_CONFIG.classGuids.Notifier
+                //    }
+                //},
+                {
+                    fname: "RequestStorage", ftype: {
+                    type: "ref",
+                    res_elem_type: UCCELLO_CONFIG.classGuids.RequestStorage
+                }
+                }
+            ],
+            metaCols: [
+                {'cname' : 'Definitions', 'ctype' : 'ProcessDefinition'},
+                {'cname' : 'Processes', 'ctype' : 'Process'}
+            ],
 
             /**
              * @constructs
@@ -42,32 +58,38 @@ define([
              * @param params
              */
 
-            /* FIELDS */
             init: function (cm, params) {
                 if (!params) {params = {}};
-                this._super(cm, params);
+                UccelloClass.super.apply(this, [cm, params]);
 
-                this.notifier = new Notify(cm)
-                this.activeProcesses = [];
-                this.requestStorage = new RequestStorage(cm);
+                this.notifier = new Notify();
+                this.requestStorage = new RequestStorage();
+                this.uploadedProcesses = [];
             },
 
-            name: function (value) {
-                return this._genericSetter("Name", value);
+            //<editor-fold desc="MetaFields & MetaCols">
+            //notifier: function (value) {
+            //    return this._genericSetter("Notifier", value);
+            //},
+
+            //requestStorage: function (value) {
+            //    return this._genericSetter("RequestStorage", value);
+            //},
+
+            definitions : function() {
+                return this.getCol('Definitions');
             },
 
-            state: function (value) {
-                return this._genericSetter("State", value);
+            processes : function() {
+                return this.getCol('Processes');
             },
+            //</editor-fold>
 
             /*  ----- Definitions ----- */
             findDefinition: function (definitionID)
             {
-                for (var i in this.definitions) {
-                    if (!this.definitions.hasOwnProperty(i)) continue;
-
-                    var _def = this.definitions[i];
-
+                for (var i = 0; i < this.definitions().count(); i++) {
+                    var _def = this.definitions().get(i);
                     if (_def.definitionID == definitionID) {
                         return _def;
                     }
@@ -77,10 +99,9 @@ define([
             addProcessDefinition : function(definiton)
             {
                 var _def = this.findDefinition(definiton.definitionID)
-                if ((_def === null) || (_def === undefined))
-                {
-                    this.definitions.push(definiton);
-                    console.log('Добавлено описание процесса [%s]', definiton.name)
+                if (!_def) {
+                    this.definitions()._add(definiton);
+                    console.log('[%s] : => Добавлено описание процесса [%s]', (new Date()).toLocaleTimeString(), definiton.name())
                 }
 
             },
@@ -89,64 +110,77 @@ define([
 
             startProcessInstance : function(definitionID)
             {
-                console.log('Создание процесса definitionID [%s]', definitionID);
+                console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
                 var _process = this.createNewProcess(definitionID);
-                console.log('запуск процесса processID [%s]', _process.processID);
-                this.runProcess(_process, function(result){
-                    console.log(result + ' [%s]', _process.processID)
-                });
+                if (_process) {
+                    console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), _process.processID());
+                    this.runProcess(_process, function (result) {
+                        //console.log(result + ' [%s]', _process.processID)
+                    });
 
-                return _process.ProcessID;
+                    return _process.processID();
+                } else {
+                    console.log('[%s] : => не удалось создать процесс', (new Date()).toLocaleTimeString());
+                }
             },
 
                 createNewProcess: function (definitionID)
                 {
-                    console.log('Создание инстанса процесса %s', definitionID);
+                    console.log('[%s] : => Создание инстанса процесса %s', (new Date()).toLocaleTimeString(), definitionID);
                     var _def = this.findDefinition(definitionID);
-                    if ((_def !== null) && (_def !== undefined))
-                    {
+                    if (_def) {
                         return new Process(this.pvt.controlMgr, {}, _def)
                     }
                 },
 
                 runProcess : function(processInstance, callback)
                 {
-                this.processes.push(processInstance);
+                    this.processes()._add(processInstance);
 
-                this.defineTokens(processInstance);
+                    this.defineTokens(processInstance);
 
-                this.activeProcesses.push(processInstance);
+                    processInstance.activate();
+                    var _startToken = processInstance.dequeueToken();
+                    _startToken.currentNode().state(FlowNode.state.Initialized);
+                    var result = _startToken.execute();
 
-                var _startToken = processInstance.dequeueToken();
-                _startToken.currentNode.state = FlowNode.state.Initialized;
-                var result = _startToken.execute();
-
-                callback(result);
-            },
+                    callback(result);
+                },
 
                 findProcess: function (processID) {
-                for (i = 0; i < this.processes.length; i++) {
-                    if (this.processes[i].processID == processID) {return this.processes[i]}
-                };
+                    for (var i = 0; i < this.processes().count(); i++) {
+                        if (this.processes().get(i).processID() == processID) {return this.processes().get(i)}
+                    };
 
-                return null;
-            },
+                    for (var i = 0; i < this.uploadedProcesses.length; i++) {
+                        if (this.uploadedProcesses[i] == processID) {
+                            var _process = this.deserializeProcess(processID, this.createComponentFunction);
+                            this.processes()._add(_process);
+                            this.uploadedProcesses.splice(i, 1);
+
+                            return _process;
+                        }
+                    }
+
+                    return null;
+                },
 
                 defineTokens: function (processInstance) {
-                var _token = new Token(this.pvt.controlMgr, {}, processInstance);
-                _token.currentNode = processInstance.getStartNode();
-                _token.state = Token.state.alive;
-                processInstance.enqueueToken(_token);
-            },
+                    var _token = new Token(this.getControlManager(), {parent  : processInstance, colName : 'Tokens'});
+                    var _node = processInstance.getStartNode();
+                    if (!_node) {
+                        throw 'Неопределен стартовый узел для процесса'
+                    }
+                    _token.currentNode(_node.getInstance(processInstance));
+                    _token.state(Token.state.Alive);
+                    processInstance.enqueueToken(_token);
+                },
 
             getProcessInstance : function(processID)
             {
-                for (var i in this.processes) {
-                    if (!this.processes.hasOwnProperty(i)) continue;
-
-                    var _process = this.processes[i];
-
-                    if (_process.processID == processID) { return _process; }
+                for (var i = 0; i < this.processes().count(); i++) {
+                    var _process = this.processes().get(i);
+                    if (_process.processID() == processID) { return _process; }
                 }
 
                 return null;
@@ -154,9 +188,8 @@ define([
 
             activateProcess : function(processID) {
                 var _process = this.findProcess(processID);
-                if (_process !== null) {
-                    console.log('Процесс [%s] активирован', _process.processID);
-                    _process.state = Process.state.Running;
+                if (_process) {
+                    _process.activate();
                     return _process;
                 }
                 else {
@@ -165,92 +198,164 @@ define([
             },
 
             deactivateProcess: function (processInstance) {
-                console.log('Процесс [%s] деактивирован', processInstance.processID);
-                processInstance.state = Process.state.Waiting;
-            },
-
-            switchToken : function(token) {
-                //throw 'NotImplementedException';
-                var _newToken = null;
-
-                var _process = token.processInstance;
-                var _outgoingNodes = token.currentNode.getOutgoingNodes();
-
-                var _isGateway = (token.currentNode instanceof Gateway);
-                var _isExclusiveGateWay = (token.currentNode instanceof ExclusiveGateway);
-                var _hasSingleIn = token.currentNode.incoming.length <= 1;
-                var _hasSingleOut = _outgoingNodes.length == 1;
-
-                var _needNewToken = _isGateway && !_isExclusiveGateWay && (_hasSingleIn && !_hasSingleOut);
-
-                if (_needNewToken) {
-                    for (var i = 0; i < _outgoingNodes.length; i++){
-                        _newToken = new Token(this.pvt.controlMgr, {}, _process);
-                        _newToken.currentNode = _outgoingNodes[i];
-                        _newToken.currentNode.state = FlowNode.state.Initialized;
-                        _newToken.state = Token.state.alive;
-                        _newToken.copyNodePropsFromToken(token);
-                        _process.enqueueToken(_newToken);
-                    }
+                if (!processInstance.isAllTokensDead()) {
+                    console.log('[%s] : => Процесс [%s] деактивирован', (new Date()).toLocaleTimeString(), processInstance.processID());
+                    if (!processInstance.isWaitingScriptAnswer())
+                        processInstance.wait();
                 } else {
-                    token.currentNode.close();
-                    token.currentNode = _outgoingNodes[0];
-                    token.currentNode.state = FlowNode.state.Initialized;
-                    _process.enqueueToken(token);
+                    processInstance.finish();
                 }
 
-                this.continueProcess(token);
             },
 
-            continueProcess : function (token) {
-                var _process = this.getActiveProcess(token.processInstance.processID)
+            startOutgoingNodes : function(token) {
+                var _newToken = null;
+
+                var _process = token.processInstance();
+                var _outgoingNodes = token.currentNode().getOutgoingNodes();
+
+                if (_outgoingNodes.length > 0) {
+                    var _isGateway = (token.currentNode() instanceof Gateway);
+                    var _isExclusiveGateWay = (token.currentNode() instanceof ExclusiveGateway);
+                    var _hasSingleIn = token.currentNode().incoming().count() <= 1;
+                    var _hasSingleOut = _outgoingNodes.length == 1;
+
+                    var _needNewToken = _isGateway && !_isExclusiveGateWay && (_hasSingleIn && !_hasSingleOut);
+
+                    if (_needNewToken) {
+                        token.die();
+                        for (var i = 0; i < _outgoingNodes.length; i++){
+                            _newToken = new Token(this.getControlManager(), {parent  : _process, colName : 'Tokens'});
+                            _newToken.currentNode(_outgoingNodes[i].getInstance(_process));
+                            _newToken.currentNode().state(FlowNode.state.Initialized);
+                            _newToken.state(Token.state.Alive);
+                            _newToken.copyNodePropsFromToken(token);
+                            _process.enqueueToken(_newToken);
+                            _process.activate()
+                        }
+                    } else {
+                        token.currentNode().close();
+                        token.currentNode(_outgoingNodes[0].getInstance(_process));
+                        token.currentNode().state(FlowNode.state.Initialized);
+                        _process.enqueueToken(token);
+                        _process.activate()
+                    }
+                } else {
+                    token.die();
+                    token.currentNode().close();
+                }
+
+                this.switchTokens(token);
+            },
+
+            switchTokens : function(token){
+                var _process = this.getActiveProcess(token.processInstance().processID());
+                var _token;
 
                 if (_process !== null) {
                     var _newToken = _process.dequeueToken();
-                    if (_newToken !== null) {
-                        _newToken.execute();
+                    if (_newToken && _process.canContinue()) {
+                        _token = _newToken
+                    } else {
+                        _token = token
                     }
-                    else {
-                        this.deactivateProcess(token.processInstance);
-                    }
+
+                    _process.currentToken(_token);
+                    _token.execute()
                 } else {
-                    if (!token.processInstance.isAllTokensDead()) {
-                        token.currentNode.state = FlowNode.state.Closed;
-                        token.execute();
+                    /* Todo : здесь какая-то лажа!!!! */
+                    if (!token.processInstance().isWaiting()) {
+                        if (!token.processInstance().isAllTokensDead()) {
+                            token.currentNode().close();
+                            token.execute();
+                        }
                     }
                 }
             },
 
             getActiveProcess : function(processID) {
-                for (var i = 0; this.processes.length; i++) {
-                    if (this.processes[i].processID == processID && this.processes[i].state == Process.state.Running){
-                        return this.processes[i];
+                for (var i = 0; i < this.processes().count(); i++) {
+                    var _process = this.processes().get(i);
+                    if (_process.processID() == processID && _process.isRunning()){
+                        return _process;
                     }
                 };
 
                 return null;
             },
 
-            exposeRequest : function(request, eventParams, callback){
-                this.requestStorage.addRequest(request, callback);
-                console.log('Выставлен request [%s]', request.name);
+            exposeRequest : function(request, eventParams){
+                this.requestStorage.addRequest(request);
+                console.log('[%s] : => Выставлен request [%s]', (new Date()).toLocaleTimeString(), request.name());
                 this.notifier.notify(eventParams);
             },
 
             submitResponse : function(response) {
-                var _processID = response.processID;
-                /* Todo : сделать RequestStorage */
-                if (this.requestStorage.isRequestExists(response.ID)) {
-                    var _process = this.activateProcess(_processID);
-                    var _token = _process.getToken(response.tokenID);
+                var _processID = response.processID();
+                if (this.requestStorage.isRequestExists(response.ID())) {
+
+                    var _process = this.findProcess(_processID);
+                    if (_process.canContinue()) {
+                        _process = this.activateProcess(_processID);
+                    }
+
+                    var _token = _process.getToken(response.tokenID());
                     _token.addResponse(response);
 
-                    var _receivingNode = _token.currentNode;
-                    /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
-                    _receivingNode.execute();
-                    var _callback = this.requestStorage.getCallback(response.ID);
-                    _callback(_token);
+                    var _receivingNode = _token.currentNode();
+                    if (_process.isRunning()){
+                        /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
+                        _receivingNode.execute(function() {
+                            _token.execute();
+                        });
+                    } else {
+                        if (!_process.isTokenInQueue(_token)) {
+                            _process.enqueueToken(_token)
+                        }
+
+                        _receivingNode.execute();
+                    }
+                    //var _callback = this.requestStorage.getCallback(response.ID);
+
+                    setTimeout(function() {_token.execute()}, 0);
                 }
+            },
+
+            saveProcess : function(processID) {
+                this.serializeProcess(processID);
+                for (var i = 0; i < this.processes().count();i++) {
+                    var _process = this.processes().get(i);
+                    if (_process.processID() == processID) {
+                        this.processes()._del(_process);
+                        this.uploadedProcesses.push(processID);
+                    }
+                }
+            },
+
+            serializeProcess : function(processID) {
+                var _process = this.getProcessInstance(processID);
+
+                if (_process) {
+                    var _obj = _process.pvt.db.serialize(_process);
+                    if (_obj) {
+                        fs.writeFileSync(UCCELLO_CONFIG.dataPath + processID + '.txt', JSON.stringify(_obj));
+                        console.log('[%s] : {{ Процесс [%s] выгружен из памяти', (new Date()).toLocaleTimeString(), processID)
+                    }
+                }
+            },
+
+            deserializeProcess : function(processID, callback){
+                var _obj = fs.readFileSync(UCCELLO_CONFIG.dataPath + processID + '.txt');
+                _obj = JSON.parse(_obj);
+
+                var _process = this.pvt.db.deserialize(_obj, {}, callback);
+                console.log('[%s] : }} Процесс [%s] восстановлен', (new Date()).toLocaleTimeString(), processID)
+
+                return _process;
+            },
+
+            getControlManager : function() {
+                return this.pvt.controlMgr;
             }
         });
 

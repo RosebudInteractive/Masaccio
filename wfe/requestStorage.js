@@ -7,69 +7,30 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
-    function(UObject) {
-        var RequestStorage = UObject.extend({
-
-                className: "RequestStorage",
-                classGuid: UCCELLO_CONFIG.classGuids.RequestStorage,
-                //metaFields: [
-                //    {fname:"Name",ftype:"string"},
-                //    {fname:"State",ftype:"string"},
-                //    {fname:"TokenID",ftype:"string"},
-                //    {fname:"ProcessID",ftype:"string"},
-                //    {fname:"ID", ftype:"string"}
-                //],
-                /* Todo : Необходимо сохраннять коллекцию параметров */
-                metaCols: [],
-
-                init: function (cm, params) {
-                    this._super(cm, params);
-                    this.storage = [];
+    [],
+    function() {
+        var RequestStorage = Class.extend({
+                init: function () {
+                    this.requests = [];
                 },
 
-                addRequest : function(request, callback){
-                    if (!this.isRequestExists(request.ID)){
-                        this.storage.push({request : request, callback : callback})
+                addRequest : function(request){
+                    if (!this.isRequestExists(request.ID())){
+                        this.requests.push(request)
                     }
-                },
-
-                getStorageItem : function(requestID){
-                    for (var i = 0; i < this.storage.length; i++) {
-                        var _item = this.storage[i];
-
-                        if (_item.request.ID == requestID) {return _item}
-                    }
-
-                    return null;
                 },
 
                 getRequest : function(requestID){
-                    var _item = this.getStorageItem(requestID);
-                    if (_item !== null) {
-                        return _item.request
-                    }
-                    else {
-                        return null;
+                    for (var i = 0; i < this.requests.length; i++) {
+                        if (this.requests[i].ID() == requestID) {return this.requests[i]}
                     }
                 },
 
                 isRequestExists : function(requestID) {
-                    return (this.getRequest(requestID) !== null);
-                },
-
-                getCallback : function(requestID){
-                    var _item = this.getStorageItem(requestID);
-                    if (_item !== null) {
-                        return _item.callback
-                    }
-                    else {
-                        return null;
-                    }
+                    return (this.getRequest(requestID) ? true : false);
                 }
-
             }
-        )
+        );
 
         return RequestStorage;
     }
