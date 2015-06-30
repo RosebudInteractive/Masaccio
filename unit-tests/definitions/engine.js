@@ -28,7 +28,7 @@ var Definitions = {
         var _controlManager = Main.Config.getControlManager();
 
         var _definition = new ProcessDefinition(_controlManager);
-        _definition.definitionID = "bcfb9471-2364-4dd8-a12e-166245f35f5f";
+        _definition.definitionID("bcfb9471-2364-4dd8-a12e-166245f35f5f")
         _definition.name('Тестовый процесс - Проверка прохождения узлов несколькими токенами');
         _definition.addParameter('count').value(0);
 
@@ -88,7 +88,7 @@ var Definitions = {
         var _controlManager = Main.Config.getControlManager();
 
         var _definition = new ProcessDefinition(_controlManager);
-        _definition.definitionID = "3289be23-3e15-4be2-957e-62e1c8516376";
+        _definition.definitionID("3289be23-3e15-4be2-957e-62e1c8516376");
         _definition.name('Определение тестового процесса с использованием inclusiveGateway');
 
         var _activity1 = new Activity(_controlManager, {parent  : _definition, colName : 'Nodes'});

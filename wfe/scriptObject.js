@@ -1,15 +1,13 @@
 /**
  * Created by staloverov on 18.05.2015.
  */
-
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
     var Class = require('class.extend');
 }
 
-define(
-    ['./process'],
-    function(Process){
+define([],
+    function(){
         var ScriptObject = Class.extend({
 
             init: function(process){
@@ -37,5 +35,5 @@ define(
 
         return ScriptObject;
     }
-)
+);
 

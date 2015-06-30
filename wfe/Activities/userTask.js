@@ -33,7 +33,7 @@ define(
                 return new UserTask(cm, params);
             },
 
-            assign : function(source, process){
+            copyCollectionDefinitions : function(source, process) {
                 UccelloClass.super.apply(this, [source, process]);
 
                 for (var i = 0; i < source.requests().count(); i++){
@@ -42,6 +42,18 @@ define(
 
                 for (var i = 0; i < source.responses().count(); i++){
                     this.responses()._add(source.responses().get(i).clone(process.getControlManager(), {parent : process, colName : 'Responses'}))
+                }
+            },
+
+            addCollectionInstances : function(nodeDefinition) {
+                UccelloClass.super.apply(this, [nodeDefinition]);
+
+                for (var i = 0; i < nodeDefinition.requests().count(); i++){
+                    this.requests()._add(nodeDefinition.requests().get(i).clone(this.getControlManager(), {parent : this.processInstance(), colName : 'Requests'}));
+                }
+
+                for (var i = 0; i < nodeDefinition.responses().count(); i++){
+                    this.responses()._add(nodeDefinition.responses().get(i).clone(this.getControlManager(), {parent : this.processInstance(), colName : 'Responses'}))
                 }
             },
 

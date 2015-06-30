@@ -12,7 +12,7 @@ describe('Engine', function(){
         it('Должен быть запущен процесс с распараллеливанием токена и прохождением по одному узлу 2 токенов', function(done){
             var _def = Definition.forTestNodeStateWithTwoTokens();
             EngineSingleton.getInstance().addProcessDefinition(_def);
-            var _processID =  EngineSingleton.getInstance().startProcessInstance(_def.definitionID);
+            var _processID =  EngineSingleton.getInstance().startProcessInstance(_def.definitionID());
             var _process;
 
             var _interval = setInterval(function(){
@@ -58,7 +58,7 @@ describe('Engine', function(){
 
             var _def = Definition.forTestInclusiveGatewayProcess()
             EngineSingleton.getInstance().addProcessDefinition(_def);
-            var _processID =  EngineSingleton.getInstance().startProcessInstance(_def.definitionID);
+            var _processID =  EngineSingleton.getInstance().startProcessInstance(_def.definitionID());
             var _process;
 
             var _interval = setInterval(function(){

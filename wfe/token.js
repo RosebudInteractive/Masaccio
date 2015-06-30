@@ -41,7 +41,8 @@ define([
                 }
             ],
             metaCols: [
-                {'cname' : 'NodesProps', 'ctype' : 'NodeProperties'}
+                {'cname' : 'NodesProps', 'ctype' : 'NodeProperties'},
+                {'cname' : 'NodeInstances', 'ctype' : 'FlowNode'}
             ],
             //</editor-fold>
 
@@ -152,6 +153,7 @@ define([
                 if (this.state() == tokenState.Alive) {
                     this.state(tokenState.Dead);
                     console.log('[%s] : XX Token [%s] закончил выполнение', (new Date()).toLocaleTimeString(), this.tokenID());
+                    EngineSingleton.getInstance().archiveToken(this);
                 }
             },
 
@@ -220,8 +222,7 @@ define([
 
             addResponse : function (response){
                 var _nodeProps = this.getPropertiesOfNode(this.currentNode().name());
-                _nodeProps.responses()._add(response);
-                //_nodeProps.addParameter(response.parameters().get(0));
+                _nodeProps.addResponse(response);
             },
 
             doOnInitialized : function() {
@@ -254,6 +255,10 @@ define([
 
             isLive : function() {
                 return this.state() != tokenState.Dead
+            },
+
+            findNode : function(node) {
+                return this.getParent().findNode(node);
             }
         });
 

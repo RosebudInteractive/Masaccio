@@ -40,15 +40,7 @@ define([
                 {fname : 'State', ftype : 'integer'},
                 {fname : 'SequenceValue', ftype : 'integer'},
                 {fname : 'ProcessID', ftype : 'string'},
-                //{
-                //    fname : 'Definition',
-                //    ftype : {
-                //        type : 'ref',
-                //        external: true,
-                //        res_type : UCCELLO_CONFIG.classGuids.ProcessDefinition,
-                //        res_elem_type : UCCELLO_CONFIG.classGuids.ProcessDefinition
-                //    }
-                //},
+                {fname : 'DefinitionID', ftype : 'string'},
                 {
                     fname : 'CurrentToken',
                     ftype : {
@@ -63,7 +55,7 @@ define([
                 {'cname' : 'TokenQueue', 'ctype' : 'Token'},
                 {'cname' : 'Parameters', 'ctype' : 'Parameter'},
                 {'cname' : 'Nodes', 'ctype' : 'FlowNode'},
-                {'cname' : 'NodeInstances', 'ctype' : 'FlowNode'},
+                //{'cname' : 'NodeInstances', 'ctype' : 'FlowNode'},
                 {'cname' : 'Connectors', 'ctype' : 'SequenceFlow'},
                 {'cname' : 'Requests', 'ctype' : 'Request'}
             ],
@@ -81,10 +73,10 @@ define([
                     this.copyDefinition(definition);
                     this.state(processStates.Initialized);
                 }
-                //this.definition(definition.clone());
             },
 
             copyDefinition: function (definition) {
+                this.definitionID(definition.definitionID());
                 this.cloneParameters(definition);
 
                 for (var i = 0; i < definition.nodes().count(); i++){
@@ -129,9 +121,9 @@ define([
                 return this._genericSetter("SequenceValue",value);
             },
 
-            //definition : function(value) {
-            //    return this._genericSetter("Definition",value);
-            //},
+            definitionID : function(value) {
+                return this._genericSetter("DefinitionID",value);
+            },
 
             currentToken : function(value) {
                 return this._genericSetter("CurrentToken",value);

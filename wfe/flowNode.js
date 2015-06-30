@@ -46,7 +46,7 @@ define([
                 {'cname' : 'Incoming', 'ctype' : 'SequenceFlow'},
                 {'cname' : 'Outgoing', 'ctype' : 'SequenceFlow'},
                 {'cname' : 'Connectors', 'ctype' : 'SequenceFlow'},
-                {'cname' : 'Parameters', 'ctype' : 'Parameter'},
+                {'cname' : 'Parameters', 'ctype' : 'Parameter'}
             ],
 
             init: function(cm, params){
@@ -62,6 +62,7 @@ define([
                 this.conditionsResult = new ConditionsResult();
             },
 
+            //<editor-fold desc="MetaFields & MetaCols">
             id : function(value) {
                 return this._genericSetter("ID",value);
             },
@@ -85,20 +86,22 @@ define([
             parameters : function() {
                 return this.getCol('Parameters');
             },
+            //</editor-fold>
 
-            getInstance : function(process, params){
+            getInstance : function(token, params){
                 // todo : возможно обойтись без process
                 if (!params) {
                     params = {
-                        parent  : process,
+                        parent  : token,
                         colName : 'NodeInstances'
                     }
                 }
 
-                var _node= this.createInstance(process.getControlManager(), params);
-                _node.assign(this, process);
-                //_node.id(this.id());
+                var _node= this.createInstance(token.getControlManager(), params);
+                _node.assign(this, token);
                 _node.assignConnections(this);
+                //_node.addLinkToParameters(this);
+                _node.addCollectionInstances(this);
 
                 return _node;
             },
@@ -107,11 +110,13 @@ define([
                 var _node= this.createInstance(process.getControlManager(), params);
                 _node.assign(this, process);
                 _node.id(this.id());
+                _node.copyCollectionDefinitions(this, process);
+                //_node.copyParameters(this)
 
                 return _node;
             },
 
-            createInstance : function(process, params){
+            createInstance : function(){
                 throw 'NotImplementedException';
             },
 
@@ -122,11 +127,10 @@ define([
             assignConnections: function (source) {
                 for (var i = 0; i < source.incoming().count(); i++) {
                     this.incoming()._add(source.incoming().get(i).clone(this, {parent  : this, colName : 'Connectors'} ))
-                };
-
+                }
                 for (var i = 0; i < source.outgoing().count(); i++) {
                     this.outgoing()._add(source.outgoing().get(i).clone(this, {parent  : this, colName : 'Connectors'}))
-                };
+                }
             },
 
             findNode : function(node) {
@@ -146,24 +150,41 @@ define([
                 return this.getParent().getControlManager();
             },
 
-            assign : function(source, process){
+            assign : function(source){
                 this.name(source.name());
                 this.state(source.state());
+            },
 
+            addCollectionInstances : function(nodeDefinition) {
+                this.addLinkToParameters(nodeDefinition);
+            },
+
+            addLinkToParameters : function(nodeDefinition) {
+                for (var i = 0; i < nodeDefinition.parameters().count(); i++) {
+                    this.parameters()._add(nodeDefinition.parameters().get(i));
+                }
+            },
+
+            copyCollectionDefinitions : function(source) {
+                this.copyParameters(source);
+            },
+
+            copyParameters : function(source) {
                 for (var i = 0; i < source.parameters().count(); i++) {
                     source.parameters().get(i).clone(this.getControlManager(), {parent  : this, colName : 'Parameters'});
-                };
+                }
             },
 
-            name: function(value) {
-                return this._genericSetter("Name",value);
-            },
 
             state: function(value) {
                 return this._genericSetter("State",value);
             },
 
             processInstance : function(){
+                return this.token().getParent();
+            },
+
+            token : function() {
                 return this.getParent();
             },
 
@@ -171,16 +192,16 @@ define([
 
             },
 
-            calcOutgoingNodes : function(callback) {
+            calcOutgoingNodes : function() {
                 throw 'NotImplementedException';
             },
 
             close : function() {
-                console.log('[%s] : => [%s] узел закончил выполнение', (new Date()).toLocaleTimeString(), this.name())
+                console.log('[%s] : => [%s] узел закончил выполнение', (new Date()).toLocaleTimeString(), this.name());
                 this.state(flowNodeState.Closed);
             },
 
-            execute : function(callback) {
+            execute : function() {
                 for (var i = 0; i < this.outgoing().count(); i++){
                     this.outgoing().get(i).state(SequenceFlow.state.Unchecked);
                 }
@@ -260,6 +281,6 @@ define([
 
         return FlowNode;
     }
-)
+);
 
 module.exports.state = flowNodeState;

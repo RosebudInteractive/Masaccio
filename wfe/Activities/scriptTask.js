@@ -77,6 +77,7 @@ define([
 
             assign : function(source, controlManager){
                 UccelloClass.super.apply(this, [source, controlManager]);
+
                 this.scriptName(source.scriptName());
                 this.scriptMethod(source.scriptMethod());
                 Utils.copyCollection(source.scriptParams(), this.scriptParams());

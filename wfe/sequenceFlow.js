@@ -3,7 +3,6 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    //var Class = require('class.extend');
     var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
@@ -57,12 +56,6 @@ define([
             ],
 
             init: function(cm, params){
-                //if (!params) {
-                //    params = {
-                //        parent  : root,
-                //        colName : 'Connectors'
-                //    }
-                //}
                 if (!params) { throw 'не указан params SequenceFlow'};
                 UccelloClass.super.apply(this, [cm, params]);
                 if (!this.id()) {

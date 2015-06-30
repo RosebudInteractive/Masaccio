@@ -65,6 +65,7 @@ define([
                 this.notifier = new Notify();
                 this.requestStorage = new RequestStorage();
                 this.uploadedProcesses = [];
+                this.tokensArchive = [];
             },
 
             //<editor-fold desc="MetaFields & MetaCols">
@@ -90,7 +91,7 @@ define([
             {
                 for (var i = 0; i < this.definitions().count(); i++) {
                     var _def = this.definitions().get(i);
-                    if (_def.definitionID == definitionID) {
+                    if (_def.definitionID() == definitionID) {
                         return _def;
                     }
                 }
@@ -98,7 +99,7 @@ define([
 
             addProcessDefinition : function(definiton)
             {
-                var _def = this.findDefinition(definiton.definitionID)
+                var _def = this.findDefinition(definiton.definitionID())
                 if (!_def) {
                     this.definitions()._add(definiton);
                     console.log('[%s] : => Добавлено описание процесса [%s]', (new Date()).toLocaleTimeString(), definiton.name())
@@ -171,7 +172,7 @@ define([
                     if (!_node) {
                         throw 'Неопределен стартовый узел для процесса'
                     }
-                    _token.currentNode(_node.getInstance(processInstance));
+                    _token.currentNode(_node.getInstance(_token));
                     _token.state(Token.state.Alive);
                     processInstance.enqueueToken(_token);
                 },
@@ -226,7 +227,7 @@ define([
                         token.die();
                         for (var i = 0; i < _outgoingNodes.length; i++){
                             _newToken = new Token(this.getControlManager(), {parent  : _process, colName : 'Tokens'});
-                            _newToken.currentNode(_outgoingNodes[i].getInstance(_process));
+                            _newToken.currentNode(_outgoingNodes[i].getInstance(_newToken));
                             _newToken.currentNode().state(FlowNode.state.Initialized);
                             _newToken.state(Token.state.Alive);
                             _newToken.copyNodePropsFromToken(token);
@@ -235,7 +236,7 @@ define([
                         }
                     } else {
                         token.currentNode().close();
-                        token.currentNode(_outgoingNodes[0].getInstance(_process));
+                        token.currentNode(_outgoingNodes[0].getInstance(token));
                         token.currentNode().state(FlowNode.state.Initialized);
                         _process.enqueueToken(token);
                         _process.activate()
@@ -356,6 +357,12 @@ define([
 
             getControlManager : function() {
                 return this.pvt.controlMgr;
+            },
+
+            archiveToken : function(token) {
+                var _process = this.findProcess(token.processInstance().processID());
+                this.tokensArchive.push({processID : _process.processID(), token : token})
+                _process.tokens()._del(token);
             }
         });
 
