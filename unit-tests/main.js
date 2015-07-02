@@ -4,21 +4,24 @@
 var _parentDir = __dirname;
 var _uccelloDir = _parentDir + '/../../Uccello/';
 var _enginePath = _parentDir + '/../wfe/';
+var _dbPath = _parentDir + '/../../ProtoOne/data/';
 var _definitionsPath = _parentDir + '/definitions/';
 
 var _path = {
     engine : _enginePath,
     definitions : _definitionsPath,
     Uccello : _uccelloDir,
-    Masaccio : _parentDir + '/../'
+    Masaccio : _parentDir + '/../',
+    DbPath : _dbPath
 };
 
 var _initializer = {
     getConfig : function(){
         return {
             controls: [
-                {className: 'Engine',               component: 'wfe/engine',                    guid: '387e8d92-e2ca-4a94-9732-b4a479ff8bb8'},
                 {className: 'ProcessDefinition',    component: 'wfe/processDefinition',         guid: 'acd97fff-93f9-47ed-84bb-e24ffdf28fc5'},
+                {className: 'Engine',               component: 'wfe/engine',                    guid: '387e8d92-e2ca-4a94-9732-b4a479ff8bb8'},
+                //{className: 'ProcessDefinition',    component: 'wfe/processDefinition',         guid: 'acd97fff-93f9-47ed-84bb-e24ffdf28fc5'},
                 {className: 'Process',              component: 'wfe/process',                   guid: '74441683-a11f-4b59-9e04-0aefcc5bc18a'},
                 {className: 'FlowNode',             component: 'wfe/flowNode',                  guid: '199a78b0-b555-4f97-9d8f-41234ae7f06f'},
                 {className: 'SequenceFlow',         component: 'wfe/sequenceFlow',              guid: 'c7a6cd70-653f-4e12-b6dc-8a6085b7fc7f'},
@@ -41,7 +44,8 @@ var _initializer = {
             ],
 
             controlsPath    : _path.Masaccio,
-            dataPath        : _path.Masaccio + 'data/',
+            processStorage  : _path.Masaccio + 'data/',
+            dataPath        : _path.DbPath,
             uccelloPath     : _path.Uccello,
             scriptsPath     : _path.Masaccio + 'UserScripts/',
             webSocketServer : {port: 8082},

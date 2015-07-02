@@ -50,11 +50,9 @@ define([
             ],
 
             init: function(cm, params){
-                if (!params) {
-                    throw 'не указан params FlowNode'
-                }
-
                 UccelloClass.super.apply(this, [cm, params]);
+                if (!params) { return }
+
                 if (!this.id()) {
                     this.id(UUtils.guid());
                 }

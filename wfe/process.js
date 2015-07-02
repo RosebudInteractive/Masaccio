@@ -55,7 +55,6 @@ define([
                 {'cname' : 'TokenQueue', 'ctype' : 'Token'},
                 {'cname' : 'Parameters', 'ctype' : 'Parameter'},
                 {'cname' : 'Nodes', 'ctype' : 'FlowNode'},
-                //{'cname' : 'NodeInstances', 'ctype' : 'FlowNode'},
                 {'cname' : 'Connectors', 'ctype' : 'SequenceFlow'},
                 {'cname' : 'Requests', 'ctype' : 'Request'}
             ],
@@ -64,6 +63,7 @@ define([
 
             init: function(cm, params, definition){
                 UccelloClass.super.apply(this, [cm, params]);
+                if (!params) { return }
 
                 // Todo : Костыль!!!!
                 if (!this.processID()) {

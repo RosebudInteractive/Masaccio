@@ -56,8 +56,9 @@ define([
             ],
 
             init: function(cm, params){
-                if (!params) { throw 'не указан params SequenceFlow'};
+                //if (!params) { throw 'не указан params SequenceFlow'};
                 UccelloClass.super.apply(this, [cm, params]);
+                if (!params) { return };
                 if (!this.id()) {
                     this.id(UUtils.guid());
                     this.isDefault(false);

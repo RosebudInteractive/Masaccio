@@ -14,7 +14,8 @@ define([
         './requestStorage',
         './Gateways/gateway',
         './Gateways/exclusiveGateway',
-        'fs'
+        'fs',
+        './classRegister'
     ],
     function(
         UObject,
@@ -26,7 +27,8 @@ define([
         RequestStorage,
         Gateway,
         ExclusiveGateway,
-        fs
+        fs,
+        Register
     ) {
         var Engine = UObject.extend({
 
@@ -59,6 +61,8 @@ define([
              */
 
             init: function (cm, params) {
+                Register.exec(cm);
+
                 if (!params) {params = {}};
                 UccelloClass.super.apply(this, [cm, params]);
 
@@ -291,7 +295,7 @@ define([
                 this.notifier.notify(eventParams);
             },
 
-            submitResponse : function(response) {
+            submitResponse : function(response, callback) {
                 var _processID = response.processID();
                 if (this.requestStorage.isRequestExists(response.ID())) {
 
@@ -316,9 +320,11 @@ define([
 
                         _receivingNode.execute();
                     }
-                    //var _callback = this.requestStorage.getCallback(response.ID);
-
-                    setTimeout(function() {_token.execute()}, 0);
+                    setTimeout(function() {
+                        /* Todo : результат в callback */
+                        if (callback) {callback};
+                        _token.execute();
+                    }, 0);
                 }
             },
 
@@ -339,18 +345,19 @@ define([
                 if (_process) {
                     var _obj = _process.pvt.db.serialize(_process);
                     if (_obj) {
-                        fs.writeFileSync(UCCELLO_CONFIG.dataPath + processID + '.txt', JSON.stringify(_obj));
+                        fs.writeFileSync(UCCELLO_CONFIG.processStorage + processID + '.txt', JSON.stringify(_obj));
                         console.log('[%s] : {{ Процесс [%s] выгружен из памяти', (new Date()).toLocaleTimeString(), processID)
                     }
                 }
             },
 
             deserializeProcess : function(processID, callback){
-                var _obj = fs.readFileSync(UCCELLO_CONFIG.dataPath + processID + '.txt');
+                var _obj = fs.readFileSync(UCCELLO_CONFIG.processStorage + processID + '.txt');
                 _obj = JSON.parse(_obj);
 
                 var _process = this.pvt.db.deserialize(_obj, {}, callback);
-                console.log('[%s] : }} Процесс [%s] восстановлен', (new Date()).toLocaleTimeString(), processID)
+                console.log('[%s] : }} Процесс [%s] восстановлен', (new Date()).toLocaleTimeString(), processID);
+                fs.unlink(UCCELLO_CONFIG.processStorage + processID + '.txt');
 
                 return _process;
             },

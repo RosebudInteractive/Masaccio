@@ -36,21 +36,9 @@ define([
             ],
             //</editor-fold>
 
-            //init: function(root, params){
             init: function(cm, params){
-                if (!params) {
-                    throw 'не указан params Request'
-                }
-
                 UccelloClass.super.apply(this, [cm, params]);
-
-                //if (!params) {
-                //    params = {
-                //        parent  : root,
-                //        colName : 'Requests'
-                //    }
-                //}
-                //UccelloClass.super.apply(this, [root.getControlManager(), params]);
+                if (!params) { return }
 
                 this.state(requestState.Exposed);
                 this.ID(UUtils.guid());

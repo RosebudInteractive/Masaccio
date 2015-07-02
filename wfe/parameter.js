@@ -19,16 +19,8 @@ define(
             ],
 
             init: function(cm, params){
-                //if (!params) {
-                //    params = {
-                //        parent  : root,
-                //            colName : 'Parameters'
-                //    }
-                //}
-                if (!params) {
-                    throw 'не указан params Parameter'
-                }
                 UccelloClass.super.apply(this, [cm, params]);
+                if (!params) { return }
             },
 
             name: function(value) {

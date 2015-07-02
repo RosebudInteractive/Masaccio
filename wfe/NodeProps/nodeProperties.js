@@ -28,10 +28,8 @@ define(
             //endregion
 
             init: function(cm, params){
-                if (!params) {
-                    throw 'не указан params NodeProperties'
-                }
                 UccelloClass.super.apply(this, [cm, params]);
+                if (!params) { return }
             },
 
             //<editor-fold desc="MetaFields & MetaCols">

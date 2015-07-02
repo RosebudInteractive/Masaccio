@@ -47,8 +47,8 @@ define([
             //</editor-fold>
 
             init: function(cm, params){
-                if (!params) { throw 'не указан params Token'};
                 UccelloClass.super.apply(this, [cm, params]);
+                if (!params) { return };
             },
 
             //<editor-fold desc="MetaFields & MetaCols">
