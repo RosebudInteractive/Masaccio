@@ -3,7 +3,8 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var Class = require('class.extend');
+    //var Class = require('class.extend');
+    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 /* Todo : сделано по аналогии с Calypso при рефакторинге подумать */
@@ -26,11 +27,9 @@ define(
 
             className: "Activity",
             classGuid: UCCELLO_CONFIG.classGuids.Activity,
-            metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
-            metaCols: [],
 
-            init: function(cm, params){
-                this._super(cm, params);
+            createInstance : function(cm, params){
+                return new Activity(cm, params);
             },
 
             name: function(value) {
@@ -41,30 +40,48 @@ define(
                 return this._genericSetter("State",value);
             },
 
-            execute : function() {
-                this.state = FlowNode.state.ExecutionComplete;
-                console.log("Выполняется узел %s [%s]", this.name, typeof(this))
+            execute : function(callback) {
+                UccelloClass.super.apply(this, [callback]);
+                this.state(FlowNode.state.ExecutionComplete);
+                console.log('[%s] : => Выполняется узел [%s]', (new Date()).toLocaleTimeString(), this.name())
+                this.callExecuteCallBack(callback)
             },
 
             cancel : function() {
 
             },
 
-            getOutgoingNodes : function() {
-                var _confirmedOutgoing = [];
-                for (var i = 0; i < this.outgoing.length; i++) {
-                    var _sequence = this.outgoing[i];
+            calcOutgoingNodes : function(callback) {
+                if (this.outgoing().count() == 0) {
+                    //this.processInstance.wait();
+                    setTimeout(callback(null), 0)
+                };
+
+                for (var i = 0; i < this.outgoing().count(); i++) {
+                    var _sequence = this.outgoing().get(i);
                     if (_sequence.hasCondition()) {
-                        if (_sequence.isConditionSatisfied(this.processInstance)) {
-                            _confirmedOutgoing.push(_sequence.target)
-                        }
+                        var _scriptObject = this.createSequenceScriptObject(_sequence, callback);
+
+                        this.waitUserScriptAnswer();
+                        _sequence.checkConditionSatisfied(_scriptObject);
                     }
                     else {
-                        _confirmedOutgoing.push(_sequence.target)
+                        this.conditionsResult.addResult(_sequence, true);
+                        _sequence.check();
+                        if (this.isAllOutgoingChecked()) {
+                            //this.processInstance.wait();
+                            setTimeout(callback(null), 0)
+                        }
                     };
                 }
+            },
 
-                return _confirmedOutgoing;
+            getOutgoingNodes : function() {
+                if (!this.isAllOutgoingChecked()) {
+                    throw 'Не все исходящие ветви проверены'
+                };
+
+                return this.conditionsResult.getConfirmedNodes();
             }
         });
 

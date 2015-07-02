@@ -4,7 +4,8 @@
 
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var Class = require('class.extend');
+    //var Class = require('class.extend');
+    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define(
@@ -14,11 +15,10 @@ define(
 
             className: "InclusiveGateway",
             classGuid: UCCELLO_CONFIG.classGuids.InclusiveGateway,
-            //metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-            init: function(cm, params){
-                this._super(cm,{});
+            createInstance : function(cm, params){
+                return new InclusiveGateway(cm, params);
             },
 
             name: function(value) {
@@ -29,19 +29,21 @@ define(
                 return this._genericSetter("State",value);
             },
 
-            execute : function() {
-                this._super();
+            execute : function(callback) {
+                UccelloClass.super.apply(this, [callback]);
                 if (this.getDirection() == Gateway.direction.Converging || this.getDirection() == Gateway.direction.Mixed){
-                    if (this.processInstance.getNodeTokens(this).length == this.incoming.length) {
-                        this.state = FlowNode.state.ExecutionComplete
+                    if (this.processInstance.getNodeTokens(this).length == this.incoming().count()) {
+                        this.state(FlowNode.state.ExecutionComplete)
                     } else {
-                        this.state = FlowNode.state.WaitingRequest
+                        this.state(FlowNode.state.WaitingRequest)
                     }
                 } else if (this.getDirection() == Gateway.direction.Diverging) {
-                    this.state = FlowNode.state.ExecutionComplete
+                    this.state(FlowNode.state.ExecutionComplete)
                 } else {
                     throw 'Неизвестный тип GatewayDirection'
                 }
+
+                this.callExecuteCallBack(callback)
             },
 
             cancel : function() {
@@ -49,32 +51,19 @@ define(
             },
 
             getOutgoingNodes : function() {
-                if (this.getDirection() == Gateway.direction.Converging) {
-                    return [this.outgoing[0].target]
+                if (!this.isAllOutgoingChecked()) {
+                    throw 'Не все исходящие ветви проверены'
                 };
 
-                var _confirmedOutgoingNodes = [];
-
-                for (var i  = 0; i < this.outgoing.length; i++) {
-                    var _sequence = this.outgoing[i];
-                    if (_sequence.hasCondition()) {
-                        if (_sequence.isConditionSatisfied(this.processInstance)) {
-                            _confirmedOutgoingNodes.push(_sequence.target);
-                        }
-                    }
-                    else if (_sequence.isDefault) {
-                        throw "Не задано условие для исходящего коннектора по умолчанию!"
-                    }
-                };
-
-                if (_confirmedOutgoingNodes.length > 0) {
-                    return _confirmedOutgoingNodes;
-                }
-
-                if (this.defaultFlow === undefined || this.defaultFlow === null) {
-                    throw 'Ни одно из условий исходящих коннекторов не выполнено и не задан коннектор по умолчанию!'
+                var _outgoingNodes = this.conditionsResult.getConfirmedNodes();
+                if (_outgoingNodes.length != 0) {
+                    return _outgoingNodes
                 } else {
-                    return [this.defaultFlow.target]
+                    if (!this.defaultFlow) {
+                        throw 'Ни одно из условий исходящих коннекторов не выполнено и не задан коннектор по умолчанию!'
+                    } else {
+                        return [this.defaultFlow.target]
+                    }
                 }
             }
 

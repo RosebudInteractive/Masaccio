@@ -5,6 +5,8 @@ var Definition = require('./../wfe/processDefinition');
 var FlowNode = require('./../wfe/flowNode');
 var Activity = require('./../wfe/Activities/activity');
 var UserTask = require('./../wfe/Activities/userTask');
+var ScriptTask = require('./../wfe/Activities/scriptTask');
+
 var SequenceFlow = require('./../wfe/sequenceFlow');
 var ExclusiveGateway = require('./../wfe/Gateways/exclusiveGateway');
 var InclusiveGateway = require('./../wfe/Gateways/inclusiveGateway');
@@ -38,14 +40,22 @@ Definitions.exclusiveGatewayTest_Definition = function(controlManager){
     var _activityTrue = new Activity(controlManager);
     _activityTrue.name = "testActivity_true";
 
+    var _scriptForTask = {moduleName : 'testScriptTask', methodName : 'execScript', methodParams : { message : 'Привет от узла [%s]'}};
+    var _scriptTask = new ScriptTask(controlManager, null, _scriptForTask)
+
     _definition.addActivity(_activity1);
     _definition.addActivity(_userTask);
     _definition.addGateway(_gateway);
     _definition.addActivity(_activityFalse);
     _definition.addActivity(_activityTrue);
+    _definition.addActivity(_scriptTask);
+
+    var _sqToScript = new SequenceFlow(controlManager);
+    _sqToScript.connect(_activity1, _scriptTask);
+    _definition.addConnector(_sqToScript);
 
     var _sq1 = new SequenceFlow(controlManager);
-    _sq1.connect(_activity1, _userTask);
+    _sq1.connect(_scriptTask, _userTask);
     _definition.addConnector(_sq1);
 
     var _sq2 = new SequenceFlow(controlManager);
@@ -53,11 +63,13 @@ Definitions.exclusiveGatewayTest_Definition = function(controlManager){
     _definition.addConnector(_sq2);
 
     var _sqFalse = new SequenceFlow(controlManager);
-    _sqFalse.connect(_gateway, _activityFalse, 'process.currentToken.getPropertiesOfNode("UserTask1").parameters[0].value == "False"');
+    var _script1 = {moduleName : 'test', methodName : 'execTest', methodParams : { paramNumber : 0, value : 'False'}};
+    _sqFalse.connect(_gateway, _activityFalse, _script1);
     _definition.addConnector(_sqFalse);
 
     var _sqTrue = new SequenceFlow(controlManager);
-    _sqTrue.connect(_gateway, _activityTrue, 'process.currentToken.getPropertiesOfNode("UserTask1").parameters[0].value == "YAHOO!"');
+    var _script2 = {moduleName : 'test', methodName : 'execTest', methodParams : { paramNumber : 0, value : 'YAHOO!'}};
+    _sqTrue.connect(_gateway, _activityTrue, _script2);
     _definition.addConnector(_sqTrue);
 
     return _definition;
@@ -90,27 +102,43 @@ Definitions.inclusiveGatewayTest_Definition = function(controlManager){
     var _activityTrue = new Activity(controlManager);
     _activityTrue.name = "testActivity_true";
 
+    var _scriptForTask = {moduleName : 'testScriptTask', methodName : 'execScript', methodParams : { message : 'Привет от узла [%s]'}};
+    var _scriptTask = new ScriptTask(controlManager, null, _scriptForTask)
+    _scriptTask.name = 'scriptTask';
+
     _definition.addActivity(_activity1);
     _definition.addActivity(_userTask);
     _definition.addGateway(_gateway);
     _definition.addActivity(_activityFalse);
     _definition.addActivity(_activityTrue);
 
-    var _sq1 = new SequenceFlow(controlManager);
-    _sq1.connect(_activity1, _userTask);
-    _definition.addConnector(_sq1);
+    /*
+                             -> _activityFalse -> _scriptTask
+     _activity1 -> _gateway
+                            -> _activityTrue -> _userTask
+     */
 
-    var _sq2 = new SequenceFlow(controlManager);
-    _sq2.connect(_userTask, _gateway);
-    _definition.addConnector(_sq2);
+    var _sqToGateway = new SequenceFlow(controlManager);
+    _sqToGateway.connect(_activity1, _gateway);
+    _definition.addConnector(_sqToGateway);
 
     var _sqFalse = new SequenceFlow(controlManager);
-    _sqFalse.connect(_gateway, _activityFalse, 'process.currentToken.getPropertiesOfNode("UserTask1").parameters[0].value == "YAHOO!"');
+    var _script1 = {moduleName : 'test', methodName : 'execTest', methodParams : { paramNumber : 0, value : 'YAHOO!'}};
+    _sqFalse.connect(_gateway, _activityFalse, _script1);
     _definition.addConnector(_sqFalse);
 
     var _sqTrue = new SequenceFlow(controlManager);
-    _sqTrue.connect(_gateway, _activityTrue, 'process.currentToken.getPropertiesOfNode("UserTask1").parameters[1].value == "YAHOO!"');
+    var _script2 = {moduleName : 'test', methodName : 'execTest', methodParams : { paramNumber : 1, value : 'YAHOO!'}};
+    _sqTrue.connect(_gateway, _activityTrue, _script2);
     _definition.addConnector(_sqTrue);
+
+    var _sqToScript = new SequenceFlow(controlManager);
+    _sqToScript.connect(_activityFalse, _scriptTask);
+    _definition.addConnector(_sqToScript);
+
+    var _sqToUserTask = new SequenceFlow(controlManager);
+    _sqToUserTask.connect(_activityTrue, _userTask);
+    _definition.addConnector(_sqToUserTask);
 
     return _definition;
 }

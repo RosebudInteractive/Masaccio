@@ -6,26 +6,11 @@ if (typeof define !== 'function') {
     var Class = require('class.extend');
 }
 
-define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
-    function(UObject){
-        var Notifier = UObject.extend({
+define([],
+    function(){
+        var Notifier = Class.extend({
 
-            className: "Notifier",
-            classGuid: UCCELLO_CONFIG.classGuids.Notifier,
-            //metaFields: [
-            //    {fname:"Name",ftype:"string"},
-            //    {fname:"State",ftype:"string"},
-            //    {fname:"TokenID",ftype:"string"},
-            //    {fname:"ProcessID",ftype:"string"}
-            //],
-            ///* Todo : Необходимо сохраннять коллекцию параметров */
-            //metaCols: [],
-
-            init: function(cm, params){
-                this._super(cm,params);
-
-                //this.state = requestState.Exposed;
+            init: function(){
                 this.observers = [];
             },
 
@@ -35,8 +20,6 @@ define(
 
             notify : function (eventParams) {
                 this.observers.forEach(function(item, i, arr) {
-                    /* Todo возможно тоже callback нужен*/
-                    //item.handleNewRequest(eventParams);
                     item.callback(eventParams);
                 })
             }

@@ -4,12 +4,18 @@
 
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var Class = require('class.extend');
+    //var Class = require('class.extend');
+    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
-define(
-    ['./gateway', './../flowNode'],
-    function(Gateway, FlowNode){
+define([
+        './gateway',
+        './../flowNode'
+    ],
+    function(
+        Gateway,
+        FlowNode
+    ){
         var ExclusiveGateway = Gateway.extend({
 
             className: "ExclusiveGateway",
@@ -17,8 +23,15 @@ define(
             //metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
             metaCols: [],
 
-            init: function(cm, params){
-                this._super(cm,{});
+            //init: function(cm, params){
+            //    if (!params) {
+            //        params = {}
+            //    }
+            //    UccelloClass.super.apply(this, [cm, params]);
+            //},
+
+            createInstance : function(cm, params){
+                return new ExclusiveGateway(cm, params);
             },
 
             name: function(value) {
@@ -29,9 +42,11 @@ define(
                 return this._genericSetter("State",value);
             },
 
-            execute : function() {
-                this._super();
-                this.state = FlowNode.state.ExecutionComplete;
+            execute : function(callback) {
+                UccelloClass.super.apply(this, [callback]);
+
+                this.state(FlowNode.state.ExecutionComplete);
+                this.callExecuteCallBack(callback)
             },
 
             cancel : function() {
@@ -39,31 +54,21 @@ define(
             },
 
             getOutgoingNodes : function() {
-                if (this.getDirection() == Gateway.direction.Converging) {
-                    return [this.outgoing[0].target]
+                if (!this.isAllOutgoingChecked()) {
+                    throw 'Не все исходящие ветви проверены'
                 };
 
-                for (var i  = 0; i < this.outgoing.length; i++) {
-                    var _sequence = this.outgoing[i];
-                    if (_sequence.hasCondition()) {
-                        if (_sequence.isConditionSatisfied(this.processInstance)) {
-                            return [_sequence.target];
-                        }
-                    }
-                    else if (_sequence.isDefault) {
-                        throw "Не задано условие для исходящего коннектора по умолчанию!"
-                    }
-                };
-
-                if (this.defaultFlow === undefined || this.defaultFlow === null) {
-                    throw 'Ни одно из условий исходящих коннекторов не выполнено и не задан коннектор по умолчанию!'
+                var _outgoingNodes = this.conditionsResult.getConfirmedNodes();
+                if (_outgoingNodes.length != 0) {
+                    return [_outgoingNodes[0]]
                 } else {
-                    return [this.defaultFlow.target]
+                    if (!this.defaultFlow()) {
+                        throw 'Ни одно из условий исходящих коннекторов не выполнено и не задан коннектор по умолчанию!'
+                    } else {
+                        return [this.defaultFlow().target]
+                    }
                 }
-
-
             }
-
         });
 
         return ExclusiveGateway;
