@@ -23,15 +23,6 @@ describe('Engine', function(){
                     _value.should.equal(7); //7
 
                     EngineSingleton.getInstance().saveProcess(_processID);
-
-                    var createComponent = function (typeObj, parent, sobj) {
-                        var params = { ini: sobj, parent: parent.obj, colName: parent.colName };
-                        var constr = Main.Config.getConstructHolder().getComponent(typeObj.getGuid()).constr;
-                        return new constr(Main.Config.getControlManager(), params);
-                    };
-
-                    EngineSingleton.getInstance().createComponentFunction = createComponent;
-
                     EngineSingleton.getInstance().findProcess(_processID);
 
                     done()
@@ -47,15 +38,6 @@ describe('Engine', function(){
 
     describe('#inclusiveGateway_with_reqeusts_&_script', function(){
         it('Выставить реквесты и все остальное', function(done){
-
-            var createComponent = function (typeObj, parent, sobj) {
-                var params = { ini: sobj, parent: parent.obj, colName: parent.colName };
-                var constr = Main.Config.getConstructHolder().getComponent(typeObj.getGuid()).constr;
-                return new constr(Main.Config.getControlManager(), params);
-            };
-
-            EngineSingleton.getInstance().createComponentFunction = createComponent;
-
             var _def = Definition.forTestInclusiveGatewayProcess()
             EngineSingleton.getInstance().addProcessDefinition(_def);
             var _processID =  EngineSingleton.getInstance().startProcessInstance(_def.definitionID());

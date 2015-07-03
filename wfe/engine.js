@@ -15,7 +15,7 @@ define([
         './Gateways/gateway',
         './Gateways/exclusiveGateway',
         'fs',
-        './classRegister'
+        './engineInitializer'
     ],
     function(
         UObject,
@@ -28,7 +28,7 @@ define([
         Gateway,
         ExclusiveGateway,
         fs,
-        Register
+        Initializer
     ) {
         var Engine = UObject.extend({
 
@@ -60,11 +60,14 @@ define([
              * @param params
              */
 
-            init: function (cm, params) {
-                Register.exec(cm);
+            //init: function (cm, params) {
+            init: function (initParams) {
+                this.db = Initializer.createInternalDb(initParams.dbController);
+                this.controlManager = Initializer.createControlManager(this.db);
+                this.constructHolder = initParams.constructHolder;
+                Initializer.registerTypes(this.controlManager);
 
-                if (!params) {params = {}};
-                UccelloClass.super.apply(this, [cm, params]);
+                UccelloClass.super.apply(this, [this.controlManager, {}]);
 
                 this.notifier = new Notify();
                 this.requestStorage = new RequestStorage();
@@ -73,14 +76,6 @@ define([
             },
 
             //<editor-fold desc="MetaFields & MetaCols">
-            //notifier: function (value) {
-            //    return this._genericSetter("Notifier", value);
-            //},
-
-            //requestStorage: function (value) {
-            //    return this._genericSetter("RequestStorage", value);
-            //},
-
             definitions : function() {
                 return this.getCol('Definitions');
             },
@@ -363,7 +358,7 @@ define([
             },
 
             getControlManager : function() {
-                return this.pvt.controlMgr;
+                return this.controlManager;
             },
 
             archiveToken : function(token) {

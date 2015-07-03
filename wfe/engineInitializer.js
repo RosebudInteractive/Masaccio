@@ -1,6 +1,8 @@
 /**
  * Created by staloverov on 01.07.2015.
  */
+var ControlMgr = require(UCCELLO_CONFIG.uccelloPath + 'controls/controlMgr');
+
 var ProcessDefinition = require('./processDefinition');
     var FlowNode = require('./flowNode');
     var SequenceFlow = require('./sequenceFlow');
@@ -11,8 +13,10 @@ var Process = require('./process');
     var Token = require('./token');
     var NodeProps = require('./NodeProps/nodeProperties');
 
-var Register = {
-    exec : function(controlManager){
+var Initializer = {
+    dbp : {name: "Engine", kind: "master", guid: 'fb9653ea-4fc3-aee0-7a31-172a91aa196b'},
+
+    registerTypes : function(controlManager){
         new Parameter(controlManager);
         new SequenceFlow(controlManager);
         new FlowNode(controlManager);
@@ -22,9 +26,16 @@ var Register = {
         new NodeProps(controlManager);
         new Token(controlManager);
         new Process(controlManager);
+    },
 
+    createInternalDb : function(dbController) {
+        return dbController.newDataBase(this.dbp);
+    },
+
+    createControlManager : function(engineDb) {
+        return new ControlMgr({controller : engineDb.pvt.controller, dbparams : this.dbp});
     }
 }
 
 
-if (module) {module.exports.exec = Register.exec}
+if (module) {module.exports = Initializer}
