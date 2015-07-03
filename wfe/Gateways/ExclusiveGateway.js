@@ -10,25 +10,19 @@ if (typeof define !== 'function') {
 
 define([
         './gateway',
-        './../flowNode'
+        './../flowNode',
+        './../controls'
     ],
     function(
         Gateway,
-        FlowNode
+        FlowNode,
+        Controls
     ){
         var ExclusiveGateway = Gateway.extend({
 
             className: "ExclusiveGateway",
-            classGuid: UCCELLO_CONFIG.classGuids.ExclusiveGateway,
-            //metaFields: [ {fname:"Name",ftype:"string"}, {fname:"State",ftype:"string"} ],
+            classGuid: Controls.guidOf('ExclusiveGateway'),
             metaCols: [],
-
-            //init: function(cm, params){
-            //    if (!params) {
-            //        params = {}
-            //    }
-            //    UccelloClass.super.apply(this, [cm, params]);
-            //},
 
             createInstance : function(cm, params){
                 return new ExclusiveGateway(cm, params);

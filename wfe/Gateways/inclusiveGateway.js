@@ -9,12 +9,12 @@ if (typeof define !== 'function') {
 }
 
 define(
-    ['./gateway', './../flowNode'],
-    function(Gateway, FlowNode){
+    ['./gateway', './../flowNode', './../controls'],
+    function(Gateway, FlowNode, Controls){
         var InclusiveGateway = Gateway.extend({
 
             className: "InclusiveGateway",
-            classGuid: UCCELLO_CONFIG.classGuids.InclusiveGateway,
+            classGuid: Controls.guidOf('InclusiveGateway'),
             metaCols: [],
 
             createInstance : function(cm, params){

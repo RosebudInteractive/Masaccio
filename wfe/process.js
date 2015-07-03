@@ -21,20 +21,22 @@ define([
         './processDefinition',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
         './sequenceFlow',
-        './engineSingleton'
+        './engineSingleton',
+        './controls'
     ],
     function(
         UObject,
         Definition,
         UUtils,
         SequenceFlow,
-        EngineSingleton
+        EngineSingleton,
+        Controls
     ){
         var Process = UObject.extend({
 
             //<editor-fold desc="Class description">
             className: "Process",
-            classGuid: UCCELLO_CONFIG.classGuids.Process,
+            classGuid: Controls.guidOf('Process'),
             metaFields: [
                 {fname : 'Name', ftype : 'string'},
                 {fname : 'State', ftype : 'integer'},
@@ -45,7 +47,7 @@ define([
                     fname : 'CurrentToken',
                     ftype : {
                         type : 'ref',
-                        res_elem_type : UCCELLO_CONFIG.classGuids.Token
+                        res_elem_type : Controls.guidOf('Token')
                     }
                 }
 
@@ -283,7 +285,7 @@ define([
                 this.idleTimer = setInterval(function() {
                     clearInterval(that.idleTimer);
                     EngineSingleton.getInstance().saveProcess(that.processID());
-                }, UCCELLO_CONFIG.idleTimeout)
+                }, UCCELLO_CONFIG.wfe.idleTimeout)
             },
 
             waitScriptAnswer : function(){

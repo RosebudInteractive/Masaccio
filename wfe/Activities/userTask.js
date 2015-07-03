@@ -10,12 +10,12 @@ if (typeof define !== 'function') {
 /* Todo : возможно необходимо промежуточное наследование Activity -> Task -> UserTask */
 
 define(
-    ['./activity', './../request', './../flowNode'],
-    function(Activity, Request, FlowNode){
+    ['./activity', './../request', './../flowNode', './../controls'],
+    function(Activity, Request, FlowNode, Controls){
         var UserTask = Activity.extend({
 
             className: "UserTask",
-            classGuid: UCCELLO_CONFIG.classGuids.UserTask,
+            classGuid: Controls.guidOf('UserTask'),
             metaCols: [
                 {'cname' : 'Requests', 'ctype' : 'Request'},
                 {'cname' : 'Responses', 'ctype' : 'Request'}

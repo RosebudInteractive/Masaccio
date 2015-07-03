@@ -8,13 +8,13 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
-    function(UObject){
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './../controls'],
+    function(UObject, Controls){
         var NodeProperties = UObject.extend({
 
             //region Class description
             className: "NodeProperties",
-            classGuid: UCCELLO_CONFIG.classGuids.NodeProperties,
+            classGuid: Controls.guidOf('NodeProperties'),
             metaFields: [
                 {fname : "Name", ftype : "string"},
                 {fname : "TokenID", ftype : "string"},

@@ -15,24 +15,20 @@ var gatewayDirection = {
     }
 
 define(
-    ['./../flowNode'],
-    function(FlowNode){
+    ['./../flowNode', './../controls'],
+    function(FlowNode, Controls){
         var Gateway = FlowNode.extend({
 
             className: "Gateway",
-            classGuid: UCCELLO_CONFIG.classGuids.Activity,
+            classGuid: Controls.guidOf('Gateway'),
             metaFields: [{
                 fname : 'DefaultFlow',
                 ftype : {
                     type :'ref',
-                    res_elem_type : UCCELLO_CONFIG.classGuids.FlowNode
+                    res_elem_type : Controls.guidOf('FlowNode')
                 }}
             ],
             //metaCols: [],
-
-            //init: function(definition, params){
-            //    UccelloClass.super.apply(this, [definition, params]);
-            //},
 
             assign : function(source, process){
                 UccelloClass.super.apply(this, [source, process]);

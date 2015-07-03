@@ -24,19 +24,21 @@ define([
         './sequenceFlow',
         './scriptObject',
         './Gateways/conditionsResult',
-        UCCELLO_CONFIG.uccelloPath + 'system/utils'
+        UCCELLO_CONFIG.uccelloPath + 'system/utils',
+        './controls'
     ],
     function(
         UObject,
         SequenceFlow,
         ScriptObject,
         ConditionsResult,
-        UUtils
+        UUtils,
+        Controls
     ){
         var FlowNode = UObject.extend({
 
             className: "FlowNode",
-            classGuid: UCCELLO_CONFIG.classGuids.FlowNode,
+            classGuid: Controls.guidOf('FlowNode'),
             metaFields: [
                 {fname : 'Name',  ftype : 'string'},
                 {fname : 'State', ftype : 'integer'},

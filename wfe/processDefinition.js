@@ -9,14 +9,16 @@ if (typeof define !== 'function') {
 define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
         '../public/utils',
-        './parameter'
+        './parameter',
+        './controls'
     ],
-    function(UObject, Utils, Parameter){
+    function(UObject, Utils, Parameter, Controls){
         var ProcessDefinition = UObject.extend({
 
             //<editor-fold desc="Class description">
             className: "ProcessDefinition",
-            classGuid: UCCELLO_CONFIG.classGuids.ProcessDefinition,
+            //classGuid: UCCELLO_CONFIG.classGuids.ProcessDefinition,
+            classGuid : Controls.guidOf('ProcessDefinition'),
             metaFields: [
                 {fname : "Name", ftype : "string"},
                 {fname : 'DefinitionID', ftype : 'string'}

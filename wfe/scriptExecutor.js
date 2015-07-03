@@ -12,7 +12,7 @@ define(
         var ScriptExecutor = Class.extend({
 
             exec : function(scriptObject) {
-                var Script = require(UCCELLO_CONFIG.scriptsPath + scriptObject.moduleName);
+                var Script = require(UCCELLO_CONFIG.wfe.scriptsPath + scriptObject.moduleName);
                 if (!Script) {
                     var _instance = new Script();
                     _instance.scriptObject = scriptObject.processFacade;

@@ -17,13 +17,15 @@ define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
         '../public/utils',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
-        './parameter'],
-    function(UObject, Utils, UUtils, Parameter){
+        './parameter',
+        './controls'
+    ],
+    function(UObject, Utils, UUtils, Parameter, Controls){
         var Request = UObject.extend({
 
             //<editor-fold desc="Class description">
             className: "Request",
-            classGuid: UCCELLO_CONFIG.classGuids.Request,
+            classGuid: Controls.guidOf('Request'),
             metaFields: [
                 {fname:"Name",ftype:"string"},
                 {fname:"State",ftype:"integer"},
