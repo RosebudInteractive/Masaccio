@@ -43,6 +43,15 @@ var _initializer = {
                 {className: 'Parameter',            component: 'wfe/parameter',                 guid: '9232bbd5-e2f8-466a-877f-5bc6576b5d02'}
             ],
 
+            //wfe : {
+            //    controlsPath    : _path.Masaccio,
+            //    processStorage  : _path.Masaccio + 'data/',
+            //    dataPath        : _path.DbPath,
+            //    uccelloPath     : _path.Uccello,
+            //    scriptsPath     : _path.Masaccio + 'UserScripts/',
+            //    webSocketServer : {port: 8082},
+            //    idleTimeout     : 10000
+            //}
             controlsPath    : _path.Masaccio,
             processStorage  : _path.Masaccio + 'data/',
             dataPath        : _path.DbPath,
@@ -81,31 +90,15 @@ var _initializer = {
         var uccelloServ = new UccelloServ({authenticate: fakeAuthenticate});
         this.constructHolder = uccelloServ.pvt.constructHolder;
 
-        var ControlMgr = require(_path.Uccello + 'controls/controlMgr');
-        //var UObject = require(_path.Uccello + 'system/uobject');
         var dbc = uccelloServ.getUserMgr().getController();
-        var dbp = {name: "Engine", kind: "master", guid: 'fb9653ea-4fc3-aee0-7a31-172a91aa196b'};
-        this.db = dbc.newDataBase(dbp);
-        this.controlManager = new ControlMgr({controller: this.db.pvt.controller, dbparams: dbp});
-        //new UObject(_controlManager);
 
-        var Engine = require(_path.engine + 'engine');
         var EngineSingleton = require(_path.engine + 'engineSingleton');
-
-        var engine = new Engine(this.controlManager, { ini: { fields: { Name: 'Engine', State: 'Ok' } } });
-
-        var that = this;
-        engine.createComponentFunction = function (typeObj, parent, sobj) {
-            var params = { ini: sobj, parent: parent.obj, colName: parent.colName };
-            var constr = that.getConstructHolder().getComponent(typeObj.getGuid()).constr;
-            return new constr(that.getConstructHolder(), params);
-        };
-
-        EngineSingleton.setInstance(engine);
+        EngineSingleton.initInstance({dbController : dbc, constructHolder : this.constructHolder});
+        this.controlManager = EngineSingleton.getInstance().getControlManager();
 
         var TestClient = require('./../test/testClient');
         var testClient = new TestClient();
-        engine.notifier.registerObserver(testClient, testClient.handleNewRequest);
+        EngineSingleton.getInstance().notifier.registerObserver(testClient, testClient.handleNewRequest);
     },
 
     getControlManager : function() {
