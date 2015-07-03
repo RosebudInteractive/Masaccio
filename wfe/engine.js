@@ -44,7 +44,7 @@ define([
             getProcessInstance: "function",
             submitResponse: "function",
             addProcessDefinition: "function",
-            submitResponse: "function",
+            getRequests: "function"
         }
 
         var Engine = UObject.extend({
@@ -121,7 +121,7 @@ define([
                 }
             },
 
-            addProcessDefinition : function(definiton)
+            addProcessDefinition : function(definiton, callback)
             {
                 var _def = this.findDefinition(definiton.definitionID())
                 if (!_def) {
@@ -129,14 +129,31 @@ define([
                     console.log('[%s] : => Добавлено описание процесса [%s]', (new Date()).toLocaleTimeString(), definiton.name())
                 }
 
+                if (callback) {
+                    callback({result : 'OK'})
+                }
             },
             /*  ----- Definitions ----- */
 
 
-            startProcessInstance : function(definitionID)
+            startProcessInstance : function(definitionID, callback)
             {
+                var _result = {};
                 console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
                 var _process = this.createNewProcess(definitionID);
+
+                if (callback) {
+                    if (_process) {
+                        _result.result = 'OK';
+                        _result.processID = _process.processID();
+                    } else {
+                        _result.result = 'error';
+                        _result.message = 'не удалось создать процесс';
+                    }
+
+                    setTimeout( function() {callback(_result)}, 0);
+                }
+
                 if (_process) {
                     console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), _process.processID());
                     this.runProcess(_process, function (result) {
@@ -342,7 +359,7 @@ define([
                     }
                     setTimeout(function() {
                         /* Todo : результат в callback */
-                        if (callback) {callback};
+                        if (callback) {callback ({result : 'OK'})};
                         _token.execute();
                     }, 0);
                 }
@@ -390,6 +407,17 @@ define([
                 var _process = this.findProcess(token.processInstance().processID());
                 this.tokensArchive.push({processID : _process.processID(), token : token})
                 _process.tokens()._del(token);
+            },
+
+            getRequests : function(processGuid) {
+                var _requests = [];
+                for (var i = 0; i < this.requestStorage.requests.length; i++) {
+                    if ((!processGuid) || (processGuid && this.requestStorage.requests[i].processID() == processGuid)) {
+                        _requests.push(this.requestStorage.requests[i]);
+                    }
+                }
+
+                return _requests;
             }
         });
 
