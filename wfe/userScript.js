@@ -7,12 +7,13 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
-    function(UObject){
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject',
+    './controls'],
+    function(UObject, Controls){
         var Parameter = UObject.extend({
 
             className: "Parameter",
-            classGuid: UCCELLO_CONFIG.classGuids.Parameter,
+            classGuid: Controls.guidOf('Parameter'),
             metaFields: [
                 {fname : "ModuleName"   , ftype : "string"},
                 {fname : "MethodName"   , ftype : "string"}

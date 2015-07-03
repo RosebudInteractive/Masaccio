@@ -14,7 +14,8 @@ define([
         './process',
         './NodeProps/nodeProperties',
         './request',
-        './engineSingleton'
+        './engineSingleton',
+        './controls'
     ],
     function(
         UObject,
@@ -22,13 +23,14 @@ define([
         Process,
         NodeProps,
         Request,
-        EngineSingleton
+        EngineSingleton,
+        Controls
     ){
         var Token = UObject.extend({
 
             //<editor-fold desc="Class description">
             className: "Token",
-            classGuid: UCCELLO_CONFIG.classGuids.Token,
+            classGuid: Controls.guidOf('Token'),
             metaFields: [
                 {fname : "State", ftype : "string"},
                 {fname : 'TokenID', ftype : 'string'},
@@ -36,7 +38,7 @@ define([
                     fname: 'CurrentNode',
                     ftype: {
                         type : 'ref',
-                        res_elem_type : UCCELLO_CONFIG.classGuids.FlowNode
+                        res_elem_type : Controls.guidOf('FlowNode')
                     }
                 }
             ],

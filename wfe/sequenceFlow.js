@@ -16,19 +16,21 @@ define([
         'util',
         './../public/utils',
         './parameter',
-        UCCELLO_CONFIG.uccelloPath + 'system/utils'
+        UCCELLO_CONFIG.uccelloPath + 'system/utils',
+        './controls'
     ],
     function(
         UObject,
         util,
         Utils,
         Parameter,
-        UUtils
+        UUtils,
+        Controls
     ){
         var SequenceFlow = UObject.extend({
 
             className: "SequenceFlow",
-            classGuid: UCCELLO_CONFIG.classGuids.SequenceFlow,
+            classGuid: Controls.guidOf('SequenceFlow'),
             metaFields: [
                 {fname : 'ID',          ftype : 'string'},
                 {fname : "Name" ,       ftype : "string"},
@@ -38,14 +40,14 @@ define([
                     fname: 'Source',
                     ftype: {
                         type : 'ref',
-                        res_elem_type : UCCELLO_CONFIG.classGuids.FlowNode
+                        res_elem_type : Controls.guidOf('FlowNode')
                     }
                 },
                 {
                     fname: 'Target',
                     ftype: {
                         type : 'ref',
-                        res_elem_type : UCCELLO_CONFIG.classGuids.FlowNode
+                        res_elem_type : Controls.guidOf('FlowNode')
                     }
                 },
                 {fname : 'ScriptName',      ftype : 'string'},

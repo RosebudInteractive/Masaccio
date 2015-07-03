@@ -21,12 +21,12 @@ var ActivityState = {
 }
 
 define(
-    ['./../flowNode'],
-    function(FlowNode){
+    ['./../flowNode', './../controls'],
+    function(FlowNode, Controls){
         var Activity = FlowNode.extend({
 
             className: "Activity",
-            classGuid: UCCELLO_CONFIG.classGuids.Activity,
+            classGuid: Controls.guidOf('Activity'),
 
             createInstance : function(cm, params){
                 return new Activity(cm, params);

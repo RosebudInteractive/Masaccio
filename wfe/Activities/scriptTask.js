@@ -12,18 +12,21 @@ define([
         './../flowNode',
         './../scriptObject',
         './../../public/utils',
-        './../parameter'],
+        './../parameter',
+        './../controls'
+    ],
     function(
         Activity,
         FlowNode,
         ScriptObject,
         Utils,
-        Parameter
+        Parameter,
+        Controls
     ){
         var ScriptTask = Activity.extend({
 
             className: "ScriptTask",
-            classGuid: UCCELLO_CONFIG.classGuids.ScriptTask,
+            classGuid: Controls.guidOf('ScriptTask'),
             metaFields: [
                 {fname : 'ScriptName',      ftype : 'string'},
                 {fname : 'ScriptMethod',    ftype : 'string'}
