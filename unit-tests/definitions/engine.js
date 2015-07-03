@@ -10,7 +10,7 @@ var UserTask = require(PATH.engine + 'Activities/userTask')
 var SequenceFlow = require(PATH.engine + 'sequenceFlow');
 var ScriptTask = require(PATH.engine + 'Activities/scriptTask');
 var InclusiveGateway = require(PATH.engine + 'Gateways/inclusiveGateway');
-
+var EngineSingleton = require(PATH.engine + 'engineSingleton');
 
 var Definitions = {
     forTestNodeStateWithTwoTokens : function () {
@@ -27,7 +27,7 @@ var Definitions = {
 
         var _controlManager = Main.Config.getControlManager();
 
-        var _definition = new ProcessDefinition(_controlManager, {});
+        var _definition = EngineSingleton.getInstance().newDefinition();
         _definition.definitionID("bcfb9471-2364-4dd8-a12e-166245f35f5f")
         _definition.name('Тестовый процесс - Проверка прохождения узлов несколькими токенами');
         _definition.addParameter('count').value(0);
@@ -87,15 +87,16 @@ var Definitions = {
 
         var _controlManager = Main.Config.getControlManager();
 
-        var _definition = new ProcessDefinition(_controlManager, {});
+        var _definition = EngineSingleton.getInstance().newDefinition();
         _definition.definitionID("3289be23-3e15-4be2-957e-62e1c8516376");
         _definition.name('Определение тестового процесса с использованием inclusiveGateway');
 
         var _activity1 = new Activity(_controlManager, {parent  : _definition, colName : 'Nodes'});
         _activity1.name("testActivity1");
 
-        var _userTask =  new UserTask(_controlManager, {parent  : _definition, colName : 'Nodes'});
-        _userTask.name('UserTask1');
+        //var _userTask =  new UserTask(_controlManager, {parent  : _definition, colName : 'Nodes'});
+
+        var _userTask = _definition.addUserTask('UserTask1');
         _userTask.addRequest('Реквест1').addParameter('param1');
         _userTask.addRequest('Реквест2').addParameter('param1');
 

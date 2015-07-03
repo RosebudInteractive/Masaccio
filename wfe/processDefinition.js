@@ -10,9 +10,10 @@ define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
         '../public/utils',
         './parameter',
-        './controls'
+        './controls',
+        './Activities/userTask'
     ],
-    function(UObject, Utils, Parameter, Controls){
+    function(UObject, Utils, Parameter, Controls, UserTask){
         var ProcessDefinition = UObject.extend({
 
             //<editor-fold desc="Class description">
@@ -106,6 +107,12 @@ define([
                         return _node;
                     }
                 }
+            },
+
+            addUserTask : function(name) {
+                var _node = new UserTask(this.getControlManager(), {parent  : this, colName : 'Nodes'});
+                if (name) {_node.name(name)}
+                return _node;
             }
 
         });

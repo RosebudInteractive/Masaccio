@@ -16,7 +16,8 @@ define([
         './Gateways/exclusiveGateway',
         'fs',
         './engineInitializer',
-        './controls'
+        './controls',
+        './processDefinition'
     ],
     function(
         UObject,
@@ -30,7 +31,8 @@ define([
         ExclusiveGateway,
         fs,
         Initializer,
-        Controls
+        Controls,
+        ProcessDefinition
     ) {
 
         var wfeInterfaceGUID = "a75970d5-f9dc-4b1b-90c7-f70c37bbbb9b";
@@ -44,7 +46,8 @@ define([
             getProcessInstance: "function",
             submitResponse: "function",
             addProcessDefinition: "function",
-            getRequests: "function"
+            getRequests: "function",
+            newDefinition : "function"
         }
 
         var Engine = UObject.extend({
@@ -418,6 +421,10 @@ define([
                 }
 
                 return _requests;
+            },
+
+            newDefinition : function() {
+                return new ProcessDefinition(this.getControlManager(), {});
             }
         });
 

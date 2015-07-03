@@ -55,8 +55,7 @@ var Definitions = {
         var _gateway = new InclusiveGateway(_controlManager, {parent  : _definition, colName : 'Nodes'});
         _gateway.name('inclusiveGateway');
 
-        var _userTask = new UserTask(_controlManager, {parent  : _definition, colName : 'Nodes'});
-        _userTask.name('userTask');
+        var _userTask = _definition.addUserTask('userTask');
         _userTask.addRequest('request1').addParameter('request_param1');
 
         var _script1 = {moduleName : 'Test/Process/CopyDefinitionStruct/script1', methodName : 'execScript'};
