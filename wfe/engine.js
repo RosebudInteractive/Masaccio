@@ -32,6 +32,21 @@ define([
         Initializer,
         Controls
     ) {
+
+        var wfeInterfaceGUID = "a75970d5-f9dc-4b1b-90c7-f70c37bbbb9b";
+
+        var wfeInterface = {
+
+            className: "InterfWFE",
+            classGuid: wfeInterfaceGUID,
+
+            startProcessInstance: "function",
+            getProcessInstance: "function",
+            submitResponse: "function",
+            addProcessDefinition: "function",
+            submitResponse: "function",
+        }
+
         var Engine = UObject.extend({
 
             className: "Engine",
@@ -68,10 +83,21 @@ define([
                 this.requestStorage = new RequestStorage();
                 this.uploadedProcesses = [];
                 this.tokensArchive = [];
+                if (initParams && initParams.router) {
+                    this.router = initParams.router;
+                    this.router.add('wfeInterface', function (data, done)
+                    {
+                        done({ intf: wfeInterface });
+                    });
+                }
             },
 
             getGuid : function() {
                 return Controls.guidOf('Engine')
+            },
+
+            getInterface: function () {
+                return wfeInterface;
             },
 
             //<editor-fold desc="MetaFields & MetaCols">
