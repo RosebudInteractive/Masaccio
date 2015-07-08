@@ -54,14 +54,7 @@ define([
 
             className: "Engine",
             classGuid: Controls.guidOf('Engine'),
-            metaFields: [
-                {
-                    fname: "RequestStorage", ftype: {
-                    type: "ref",
-                    res_elem_type: Controls.guidOf('RequestStorage')
-                }
-                }
-            ],
+            metaFields: [],
             metaCols: [
                 {'cname' : 'Definitions', 'ctype' : 'ProcessDefinition'},
                 {'cname' : 'Processes', 'ctype' : 'Process'}
@@ -86,6 +79,7 @@ define([
                 this.requestStorage = new RequestStorage();
                 this.uploadedProcesses = [];
                 this.tokensArchive = [];
+                this.definitions = [];
                 if (initParams && initParams.router) {
                     this.router = initParams.router;
                     this.router.add('wfeInterface', function (data, done)
@@ -103,10 +97,10 @@ define([
                 return wfeInterface;
             },
 
-            //<editor-fold desc="MetaFields & MetaCols">
-            definitions : function() {
-                return this.getCol('Definitions');
+            clearDefinitions : function() {
+                this.definitions.length = 0;
             },
+
 
             processes : function() {
                 return this.getCol('Processes');
@@ -116,8 +110,8 @@ define([
             /*  ----- Definitions ----- */
             findDefinition: function (definitionID)
             {
-                for (var i = 0; i < this.definitions().count(); i++) {
-                    var _def = this.definitions().get(i);
+                for (var i = 0; i < this.definitions.length; i++) {
+                    var _def = this.definitions[i];
                     if (_def.definitionID() == definitionID) {
                         return _def;
                     }
@@ -128,7 +122,7 @@ define([
             {
                 var _def = this.findDefinition(definiton.definitionID())
                 if (!_def) {
-                    this.definitions()._add(definiton);
+                    this.definitions.push(definiton);
                     console.log('[%s] : => Добавлено описание процесса [%s]', (new Date()).toLocaleTimeString(), definiton.name())
                 }
 
@@ -139,23 +133,20 @@ define([
             /*  ----- Definitions ----- */
 
 
+            startProcessInstanceAndWait : function(definitionID, requestName, timeout, callback) {
+                var result = this.startProcessInstance(definitionID);
+                if (result.result == 'OK') {
+                    this.waitForRequest(result.processID, result.tokenID, requestName, timeout, callback)
+                } else {
+                    callback(result);
+                }
+            },
+
             startProcessInstance : function(definitionID, callback)
             {
                 var _result = {};
                 console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
                 var _process = this.createNewProcess(definitionID);
-
-                if (callback) {
-                    if (_process) {
-                        _result.result = 'OK';
-                        _result.processID = _process.processID();
-                    } else {
-                        _result.result = 'error';
-                        _result.message = 'не удалось создать процесс';
-                    }
-
-                    setTimeout( function() {callback(_result)}, 0);
-                }
 
                 if (_process) {
                     console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), _process.processID());
@@ -163,10 +154,20 @@ define([
                         //console.log(result + ' [%s]', _process.processID)
                     });
 
-                    return _process.processID();
+                    _result.result = 'OK';
+                    _result.processID = _process.processID();
+                    _result.tokenID = _process.currentToken().tokenID();
                 } else {
-                    console.log('[%s] : => не удалось создать процесс', (new Date()).toLocaleTimeString());
-                }
+                    _result.result = 'ERROR';
+                    _result.message = 'не удалось создать процесс';
+                    console.log('[%s] : => %s', (new Date()).toLocaleTimeString(), _result.message);
+                };
+
+                if (callback) {
+                    setTimeout( function() {callback(_result)}, 0);
+                };
+
+                return _result;
             },
 
                 createNewProcess: function (definitionID)
@@ -229,6 +230,17 @@ define([
                 }
 
                 return null;
+            },
+
+            waitForRequest : function(processID, tokenID, requestID, timeout, callback){
+                this.notifier.registerObserverOnRequest(
+                    {
+                        processID: processID,
+                        tokenID: tokenID,
+                        requestName: requestID
+                    },
+                    timeout,
+                    callback)
             },
 
             activateProcess : function(processID) {
@@ -368,6 +380,11 @@ define([
                 }
             },
 
+            submitResponseAndWait : function(response, requestName, timeout, callback) {
+                this.waitForRequest(response.processID, response.tokenID, requestName, timeout, callback);
+                this.submitResponse(response);
+            },
+
             saveProcess : function(processID) {
                 this.serializeProcess(processID);
                 for (var i = 0; i < this.processes().count();i++) {
@@ -421,6 +438,14 @@ define([
                 }
 
                 return _requests;
+            },
+
+            getRequestsAsync : function(processGuid, callback) {
+                var that = this;
+                setTimeout(function() {
+                    var _requests = that.getRequests();
+                    return {result : 'OK', requests : _requests}
+                }, 0)
             },
 
             newDefinition : function() {

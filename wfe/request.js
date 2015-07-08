@@ -76,6 +76,8 @@ define([
                 var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'Parameters'});
                 _param.name(parameterName);
                 _param.value(null);
+
+                return _param;
             },
 
             getControlManager : function(){

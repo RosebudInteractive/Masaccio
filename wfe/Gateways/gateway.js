@@ -38,14 +38,10 @@ define(
             defaultFlow: function(value) {
                 return this._genericSetter("DefaultFlow",value);
             },
-            //
-            //state: function(value) {
-            //    return this._genericSetter("State",value);
-            //},
 
             execute : function(callback) {
                 UccelloClass.super.apply(this, [callback]);
-                console.log('[%s] :=> Выполняется gateway [%s]', (new Date()).toLocaleTimeString(), this.name());
+                console.log('[%s] : => Выполняется gateway [%s]', (new Date()).toLocaleTimeString(), this.name());
             },
 
             cancel : function() {

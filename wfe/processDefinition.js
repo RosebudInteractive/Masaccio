@@ -11,14 +11,29 @@ define([
         '../public/utils',
         './parameter',
         './controls',
-        './Activities/userTask'
+        './Activities/activity',
+        './Activities/userTask',
+        './Activities/scriptTask',
+        './Gateways/ExclusiveGateway',
+        './Gateways/inclusiveGateway',
+        './sequenceFlow'
     ],
-    function(UObject, Utils, Parameter, Controls, UserTask){
+    function(
+        UObject,
+        Utils,
+        Parameter,
+        Controls,
+        Activity,
+        UserTask,
+        ScriptTask,
+        ExclusiveGateway,
+        InclusiveGateway,
+        SequenceFlow
+    ){
         var ProcessDefinition = UObject.extend({
 
             //<editor-fold desc="Class description">
             className: "ProcessDefinition",
-            //classGuid: UCCELLO_CONFIG.classGuids.ProcessDefinition,
             classGuid : Controls.guidOf('ProcessDefinition'),
             metaFields: [
                 {fname : "Name", ftype : "string"},
@@ -32,12 +47,6 @@ define([
 
             ],
             //</editor-fold>
-
-            init: function(cm, params) {
-                //if (!params) {params = {}};
-                UccelloClass.super.apply(this, [cm, params]);
-                //if (!params) return
-            },
 
             //<editor-fold desc="MetaFields & MetaCols">
             name: function(value) {
@@ -65,23 +74,17 @@ define([
                 return this.pvt.controlMgr;
             },
 
-            addActivity : function(activity){
-            //    TODO Пока входящим параметром будет проинициализированный Узел
-                this.nodes()._add(activity)
-            },
-
-            /* Todo : сделать методы  addParameter, addRequest*/
             addParameter : function(parameterName) {
                 var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'Parameters'});
                 _param.name(parameterName);
                 return _param;
             },
 
-            addGateway : function(gateway) {
-                this.nodes()._add(gateway)
-            },
+            //addGateway : function(gateway) {
+            //    this.nodes()._add(gateway)
+            //},
 
-            addRequest : function() {},
+            //addRequest : function() {},
 
             addConnector : function(connector) {
                 this.connectors()._add(connector);
@@ -109,10 +112,37 @@ define([
                 }
             },
 
-            addUserTask : function(name) {
-                var _node = new UserTask(this.getControlManager(), {parent  : this, colName : 'Nodes'});
-                if (name) {_node.name(name)}
+            addActivity : function(activityName){
+                var _node = new Activity(this.getControlManager(), {parent  : this, colName : 'Nodes'});
+                if (activityName) {_node.name(activityName)}
                 return _node;
+            },
+
+            addUserTask : function(taskName) {
+                var _node = new UserTask(this.getControlManager(), {parent  : this, colName : 'Nodes'});
+                if (taskName) {_node.name(taskName)}
+                return _node;
+            },
+
+            addScriptTask : function(script, taskName) {
+                if (!script) {
+                    throw 'Не указан скрипт'
+                }
+                var _node = new ScriptTask(this.getControlManager(), {parent  : this, colName : 'Nodes'}, script);
+                if (taskName) {_node.name(taskName)}
+                return _node;
+            },
+
+            addInclusiveGateway : function(gatewayName) {
+                var _node = new InclusiveGateway(this.getControlManager(), {parent  : this, colName : 'Nodes'});
+                if (gatewayName) {_node.name(gatewayName)}
+                return _node;
+            },
+
+            connect : function(source, target, script) {
+                var _sequence = new SequenceFlow(this.getControlManager(), {parent  : this, colName : 'Connectors'});
+                _sequence.connect(source, target, script);
+                return _sequence;
             }
 
         });

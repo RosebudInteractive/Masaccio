@@ -10,36 +10,42 @@ define(
     ['./../wfe/request', './../wfe/engineSingleton'],
     function(Request, EngineSingleton){
         var TestClient = Class.extend({
+            responses : [],
 
-            init: function() {
-                //this.engine = engine;
-                this.responses = [];
-            },
+            //init: function() {
+            //    this.engine = engine;
+                //this.
+            //},
 
             handleNewRequest : function (eventParams) {
-                var that = this;
+                if (!this.responses) {
+                    this.responses = []
+                }
 
-                var _process = EngineSingleton.getInstance().getProcessInstance(eventParams.processID);
-                if (!_process) { throw 'Process ID [%s] do not exists', eventParams.processID };
+                if (eventParams.result != 'OK') {
+                    console.log('[%s] : !! Ошибка при обработке request [%s]', (new Date()).toLocaleTimeString(), eventParams.message);
+                    return
+                }
+                var requestInfo = eventParams.requestInfo;
+                var _process = EngineSingleton.getInstance().getProcessInstance(requestInfo.processID);
+                if (!_process) { throw 'Process ID [%s] do not exists', requestInfo.processID }
 
-                var _request = EngineSingleton.getInstance().requestStorage.getRequest(eventParams.requestID);
-                if (!_request) { throw 'Token ID [%s] do not exists', eventParams.requestID };
+                var _request = EngineSingleton.getInstance().requestStorage.getRequest(requestInfo.requestID);
+                if (!_request) { throw 'Token ID [%s] do not exists', requestInfo.requestID }
 
                 var _response = _request.createResponse(_request.getParent());
                 _response.ID(_request.ID());
 
                 _response.parameters().get(0).value('YAHOO!');
-                that.observer.responses.push(_response);
+                this.responses.push(_response);
                 console.log('[%s] : <= Готовим респонс [%s]', (new Date()).toLocaleTimeString(), _response.name());
-                //process.nextTick(function(){
-                //    console.log('Готовим респонс')
-                //});
+
+                var that = this;
                 setTimeout(function(){
                     console.log('[%s] : <= Отправляем респонс [%s]', (new Date()).toLocaleTimeString(), _response.name());
                     EngineSingleton.getInstance().submitResponse(_response);
-                }, 15000 * that.observer.responses.length);
+                }, 5000 * that.responses.length);
 
-                //EngineSingleton.getInstance().submitResponse(_response);
             }
         });
 

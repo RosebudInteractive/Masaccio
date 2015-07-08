@@ -15,7 +15,8 @@ define([
         './NodeProps/nodeProperties',
         './request',
         './engineSingleton',
-        './controls'
+        './controls',
+        './parameter'
     ],
     function(
         UObject,
@@ -24,7 +25,8 @@ define([
         NodeProps,
         Request,
         EngineSingleton,
-        Controls
+        Controls,
+        Parameter
     ){
         var Token = UObject.extend({
 
@@ -43,6 +45,7 @@ define([
                 }
             ],
             metaCols: [
+                {'cname' : 'Parameters', 'ctype' : 'Parameter'},
                 {'cname' : 'NodesProps', 'ctype' : 'NodeProperties'},
                 {'cname' : 'NodeInstances', 'ctype' : 'FlowNode'}
             ],
@@ -72,6 +75,10 @@ define([
 
             getControlManager : function() {
                 return this.processInstance().getControlManager();
+            },
+
+            parameters : function() {
+                return this.getCol('Parameters');
             },
 
             nodesProps : function() {
@@ -188,7 +195,7 @@ define([
                         tokenID: this.tokenID(),
                         requestID: _request.ID(),
                         requestName: _request.name(),
-                        nodeName: this.currentNode().name
+                        nodeName: this.currentNode().name()
                     };
 
                     EngineSingleton.getInstance().exposeRequest(
@@ -261,6 +268,14 @@ define([
 
             findNode : function(node) {
                 return this.getParent().findNode(node);
+            },
+
+            addParameter : function(parameterName){
+                var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'Parameters'});
+                _param.name(parameterName);
+                _param.value(null);
+
+                return _param;
             }
         });
 

@@ -21,7 +21,7 @@ var _initializer = {
             wfe : {
                 processStorage  : _path.Masaccio + 'data/',
                 scriptsPath     : _path.Masaccio + 'UserScripts/',
-                idleTimeout     : 10000
+                idleTimeout     : 3000
             },
 
             controlsPath    : _path.Masaccio,
@@ -67,12 +67,21 @@ var _initializer = {
 
         var TestClient = require('./../test/testClient');
         var testClient = new TestClient();
+        //EngineSingleton.getInstance().waitForRequest()
         EngineSingleton.getInstance().notifier.registerObserver(testClient, testClient.handleNewRequest);
     },
 
     getControlManager : function() {
         if (!this.controlManager) {this.init()}
         return this.controlManager
+    },
+
+    initServer : function() {
+        var EngineSingleton = require(_path.engine + 'engineSingleton');
+
+        if (!EngineSingleton.getInstance()) {
+            this.init();
+        }
     }
 };
 
