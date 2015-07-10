@@ -196,7 +196,7 @@ define([
                         requestID: _request.ID(),
                         requestName: _request.name(),
                         nodeName: this.currentNode().name(),
-                        request : _request
+                        request : _request.getParamsForMessage()
                     };
 
                     EngineSingleton.getInstance().exposeRequest(
