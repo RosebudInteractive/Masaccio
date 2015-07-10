@@ -362,36 +362,46 @@ define([
                 this.notifier.notify(eventParams);
             },
 
-            submitResponse : function(response, callback) {
-                var _processID = response.processID();
-                if (this.requestStorage.isRequestExists(response.ID())) {
+            submitResponse : function(answer, callback) {
+                var _request = this.requestStorage.getRequest(answer.requestID);
+                if (_request) {
+                    var response = _request.createResponse(_request.getParent());
+                    response.fillParams(answer.response)
 
-                    var _process = this.findProcess(_processID);
-                    if (_process.canContinue()) {
-                        _process = this.activateProcess(_processID);
-                    }
 
-                    var _token = _process.getToken(response.tokenID());
-                    _token.addResponse(response);
+                    var _processID = response.processID();
+                    if (this.requestStorage.isRequestExists(response.ID())) {
 
-                    var _receivingNode = _token.currentNode();
-                    if (_process.isRunning()){
-                        /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
-                        _receivingNode.execute(function() {
-                            _token.execute();
-                        });
-                    } else {
-                        if (!_process.isTokenInQueue(_token)) {
-                            _process.enqueueToken(_token)
+                        var _process = this.findProcess(_processID);
+                        if (_process.canContinue()) {
+                            _process = this.activateProcess(_processID);
                         }
 
-                        _receivingNode.execute();
+                        var _token = _process.getToken(response.tokenID());
+                        _token.addResponse(response);
+
+                        var _receivingNode = _token.currentNode();
+                        if (_process.isRunning()) {
+                            /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
+                            _receivingNode.execute(function () {
+                                _token.execute();
+                            });
+                        } else {
+                            if (!_process.isTokenInQueue(_token)) {
+                                _process.enqueueToken(_token)
+                            }
+
+                            _receivingNode.execute();
+                        }
+                        setTimeout(function () {
+                            /* Todo : результат в callback */
+                            if (callback) {
+                                callback({result: 'OK'})
+                            }
+                            ;
+                            _token.execute();
+                        }, 0);
                     }
-                    setTimeout(function() {
-                        /* Todo : результат в callback */
-                        if (callback) {callback ({result : 'OK'})};
-                        _token.execute();
-                    }, 0);
                 }
             },
 

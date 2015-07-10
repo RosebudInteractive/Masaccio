@@ -113,6 +113,25 @@ define([
                 }
 
                 return _params;
+            },
+
+            fillParams : function(paramsObject) {
+                for (var property in paramsObject) {
+                    var _param = this.findParameter(property);
+                    if (_param) {
+                        _param.value(paramsObject[property])
+                    }
+                }
+            },
+
+            findParameter : function(parameterName) {
+                for (var i = 0; i < this.parameters().count(); i++) {
+                    if (this.parameters().get(i).name(parameterName)) {
+                        return this.parameters().get(i)
+                    }
+
+                }
+                return null;
             }
 
         });
