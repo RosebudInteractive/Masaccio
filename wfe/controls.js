@@ -1,6 +1,8 @@
 /**
  * Created by staloverov on 03.07.2015.
  */
+var MegaAnswer = 'XXX';
+
 var controls = [
     {className: 'Engine',                   component: './engine',                          guid: '387e8d92-e2ca-4a94-9732-b4a479ff8bb8'},
     {className: 'ProcessDefinition',        component: './processDefinition',               guid: 'acd97fff-93f9-47ed-84bb-e24ffdf28fc5'},
@@ -50,5 +52,6 @@ var register = function(constructHolder){
 if (module) {
     module.exports.guidOf = guidOf;
     module.exports.register = register
+    module.exports.MegaAnswer = MegaAnswer;
 }
 

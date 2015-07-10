@@ -45,7 +45,7 @@ define([],
                             (item.requestParams.requestName == eventParams.requestName)) {
 
                             if (item.timer) {clearInterval(item.timer)};
-                            item.callback({result : 'OK', requestInfo :eventParams});
+                            item.callback({result : 'OK', requestInfo : eventParams});
                             arr.splice(i, 1);
                         }
                     };

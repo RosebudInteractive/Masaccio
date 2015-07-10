@@ -147,11 +147,17 @@ define([
                 if (_process) {
                     console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), _process.processID());
                     this.waitForRequest(_process.processID(), 1, requestName, timeout, callback);
-                    this.runProcess(_process, function (result) {});
+                    var that = this;
+                    setTimeout(function() {
+                        that.runProcess(_process);
+                    }, 0);
+
                 } else {
                     console.log('[%s] : => %s', (new Date()).toLocaleTimeString(), _result.message);
                     callback({result : 'ERROR', message : 'Не удалось создать процесс'});
                 }
+
+                return Controls.MegaAnswer;
             },
 
             startProcessInstance : function(definitionID, callback)
@@ -191,7 +197,7 @@ define([
                     }
                 },
 
-                runProcess : function(processInstance, callback)
+                runProcess : function(processInstance)
                 {
                     this.processes()._add(processInstance);
 
@@ -200,9 +206,7 @@ define([
                     processInstance.activate();
                     var _startToken = processInstance.dequeueToken();
                     _startToken.currentNode().state(FlowNode.state.Initialized);
-                    var result = _startToken.execute();
-
-                    callback(result);
+                    _startToken.execute();
                 },
 
                 findProcess: function (processID) {
@@ -253,6 +257,7 @@ define([
                     },
                     timeout,
                     callback)
+                return Controls.MegaAnswer;
             },
 
             activateProcess : function(processID) {
@@ -395,6 +400,7 @@ define([
             submitResponseAndWait : function(response, requestName, timeout, callback) {
                 this.waitForRequest(response.processID, response.tokenID, requestName, timeout, callback);
                 this.submitResponse(response);
+                return Controls.MegaAnswer;
             },
 
             saveProcess : function(processID) {
