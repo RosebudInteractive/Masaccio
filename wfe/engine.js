@@ -398,11 +398,20 @@ define([
                             if (callback) {
                                 callback({result: 'OK'})
                             }
-                            ;
+
                             _token.execute();
                         }, 0);
                     }
+                } else {
+                    setTimeout(function () {
+                        /* Todo : результат в callback */
+                        if (callback) {
+                            callback({result: 'ERROR'})
+                        }
+                    }, 0);
                 }
+
+                return Controls.MegaAnswer;
             },
 
             submitResponseAndWait : function(response, requestName, timeout, callback) {
