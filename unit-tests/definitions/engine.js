@@ -6,7 +6,7 @@ var EngineSingleton = require(PATH.engine + 'engineSingleton');
 
 var Definitions = {
     simpleProcessWithOneActivity : function() {
-        var _definition = EngineSingleton.getInstance().newDefinition();
+        var _definition = EngineSingleton.getInstance().newProcessDefinition();
         _definition.definitionID('68c621d9-3168-4655-98e6-36ed7700efe4')
         _definition.name('Тестовый процесс - простейший процесс с одним узлом Activity');
         _definition.addActivity('start');
@@ -22,7 +22,7 @@ var Definitions = {
          +---------+      +-----------+
          */
 
-        var _definition =  EngineSingleton.getInstance().newDefinition();
+        var _definition =  EngineSingleton.getInstance().newProcessDefinition();
         var _start = _definition.addActivity('start');
         var _userTask = _definition.addUserTask('userTask');
         _userTask.addRequest('request1').addParameter('param1').value(5);
@@ -43,7 +43,7 @@ var Definitions = {
                                 +-------------------+
          */
 
-        var _definition = EngineSingleton.getInstance().newDefinition();
+        var _definition = EngineSingleton.getInstance().newProcessDefinition();
         _definition.definitionID("bcfb9471-2364-4dd8-a12e-166245f35f5f")
         _definition.name('Тестовый процесс - Проверка прохождения узлов несколькими токенами');
         _definition.addParameter('count').value(0);
@@ -85,7 +85,7 @@ var Definitions = {
                                                   +-----------------+    +-------------+
          */
 
-        var _definition = EngineSingleton.getInstance().newDefinition();
+        var _definition = EngineSingleton.getInstance().newProcessDefinition();
         _definition.definitionID("3289be23-3e15-4be2-957e-62e1c8516376");
         _definition.name('Определение тестового процесса с использованием inclusiveGateway');
 

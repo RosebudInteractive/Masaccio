@@ -17,7 +17,9 @@ define([
         'fs',
         './engineInitializer',
         './controls',
-        './processDefinition'
+        './processDefinition',
+        UCCELLO_CONFIG.uccelloPath + 'system/utils',
+        './Messages/messageDefinition'
     ],
     function(
         UObject,
@@ -32,7 +34,9 @@ define([
         fs,
         Initializer,
         Controls,
-        ProcessDefinition
+        ProcessDefinition,
+        UUtils,
+        MessageDefinition
     ) {
 
         var wfeInterfaceGUID = "a75970d5-f9dc-4b1b-90c7-f70c37bbbb9b";
@@ -47,7 +51,10 @@ define([
             submitResponse: "function",
             addProcessDefinition: "function",
             getRequests: "function",
-            newDefinition : "function"
+            newProcessDefinition : "function",
+            startProcessInstanceAndWait : "function",
+            submitResponseAndWait : "function",
+            waitForRequest : "function"
         }
 
         var Engine = UObject.extend({
@@ -134,11 +141,16 @@ define([
 
 
             startProcessInstanceAndWait : function(definitionID, requestName, timeout, callback) {
-                var result = this.startProcessInstance(definitionID);
-                if (result.result == 'OK') {
-                    this.waitForRequest(result.processID, result.tokenID, requestName, timeout, callback)
+                console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
+                var _process = this.createNewProcess(definitionID);
+
+                if (_process) {
+                    console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), _process.processID());
+                    this.waitForRequest(_process.processID(), 1, requestName, timeout, callback);
+                    this.runProcess(_process, function (result) {});
                 } else {
-                    callback(result);
+                    console.log('[%s] : => %s', (new Date()).toLocaleTimeString(), _result.message);
+                    callback({result : 'ERROR', message : 'Не удалось создать процесс'});
                 }
             },
 
@@ -448,8 +460,16 @@ define([
                 }, 0)
             },
 
-            newDefinition : function() {
-                return new ProcessDefinition(this.getControlManager(), {});
+            newProcessDefinition : function() {
+                var _definition = new ProcessDefinition(this.getControlManager(), {});
+                _definition.definitionID(UUtils.guid())
+                return _definition;
+            },
+
+            newMessageDefinition : function() {
+                var _definition = new MessageDefinition(this.getControlManager(), {});
+                _definition.definitionID(UUtils.guid())
+                return _definition;
             }
         });
 

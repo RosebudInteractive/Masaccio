@@ -80,22 +80,11 @@ define([
                 return _param;
             },
 
-            //addGateway : function(gateway) {
-            //    this.nodes()._add(gateway)
-            //},
-
-            //addRequest : function() {},
-
-            addConnector : function(connector) {
-                this.connectors()._add(connector);
-            },
-
-
             clone : function()
             {
                 var _newDefinition = new ProcessDefinition(this.pvt.controlMgr, {});
 
-                _newDefinition.definitionID = this.definitionID;
+                _newDefinition.definitionID(this.definitionID());
                 _newDefinition.name(this.name());
                 Utils.copyCollection(this.nodes(), _newDefinition.nodes());
                 Utils.copyCollection(this.connectors(), _newDefinition.connectors());

@@ -20,7 +20,7 @@ define(
 
             init: function(cm, params){
                 UccelloClass.super.apply(this, [cm, params]);
-                if (!params) { return }
+                //if (!params) { return }
             },
 
             name: function(value) {

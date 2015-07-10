@@ -7,7 +7,7 @@ var EngineSingleton = require(PATH.engine + 'engineSingleton');
 
 var Definitions = {
     forCreateNewProcessTest : function () {
-        var _definition = EngineSingleton.getInstance().newDefinition();
+        var _definition = EngineSingleton.getInstance().newProcessDefinition();
         _definition.definitionID("8349600e-3d0e-4d4e-90c8-93d42c443ab3");
         _definition.name('Тестовый процесс - Создание нового процесса');
         _definition.addParameter('param1').value(3);
@@ -31,7 +31,7 @@ var Definitions = {
                                          +-------------+
         */
 
-        var _definition = EngineSingleton.getInstance().newDefinition();
+        var _definition = EngineSingleton.getInstance().newProcessDefinition();
         _definition.definitionID("1c27b462-ad68-422e-b4f9-2740b16b60f4");
         _definition.name('Тестовый процесс - Копирование структуры definition в процесс');
 
