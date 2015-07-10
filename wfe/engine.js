@@ -370,7 +370,7 @@ define([
 
 
                     var _processID = response.processID();
-                    if (this.requestStorage.isRequestExists(response.ID())) {
+                    //if (this.requestStorage.isRequestExists(response.ID())) {
 
                         var _process = this.findProcess(_processID);
                         if (_process.canContinue()) {
@@ -378,7 +378,7 @@ define([
                         }
 
                         var _token = _process.getToken(response.tokenID());
-                        _token.addResponse(response);
+                        //_token.addResponse(response);
 
                         var _receivingNode = _token.currentNode();
                         if (_process.isRunning()) {
@@ -401,7 +401,7 @@ define([
 
                             _token.execute();
                         }, 0);
-                    }
+                //    }
                 } else {
                     setTimeout(function () {
                         /* Todo : результат в callback */
