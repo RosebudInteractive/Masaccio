@@ -195,7 +195,8 @@ define([
                         tokenID: this.tokenID(),
                         requestID: _request.ID(),
                         requestName: _request.name(),
-                        nodeName: this.currentNode().name()
+                        nodeName: this.currentNode().name(),
+                        request : _request
                     };
 
                     EngineSingleton.getInstance().exposeRequest(
