@@ -89,12 +89,19 @@ define([
                 return this.pvt.parent;
             },
 
-            createInstance : function(messageDefintionName) {
+            createInstance : function(messageDefinitionName) {
                 var _instance = new CorrelationKeyInstance(this.getControlManager(), {parent : this.getParent(), colName : 'CorrelationKeyInstances'});
                 for (var i = 0; i < this.properties().count(); i++) {
-                    var _expressions = this.properties().get(i).getExpressionsForMessage();
+                    var _expressions = this.properties().get(i).getExpressionsForMessage(messageDefinitionName);
 
+                    var that = this;
+                    _expressions.forEach(function(element, index) {
+                        if (!element.nodeName()) {
 
+                        } else {
+
+                        }
+                    });
                 }
             }
         });
