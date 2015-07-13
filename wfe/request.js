@@ -85,7 +85,6 @@ define([
             },
 
             clone : function(cm, params) {
-                //var _newRequest = new Request(root.getControlManager(), {parent : root, colName : 'Requests'});
                 var _newRequest = new Request(cm, params);
 
                 _newRequest.name(this.name());
@@ -105,6 +104,34 @@ define([
                 Utils.copyCollection(this.parameters(), _response.parameters());
 
                 return _response;
+            },
+
+            getParamsForMessage : function() {
+                var _params = {};
+                for (var i = 0; i < this.parameters().count(); i++) {
+                    _params[this.parameters().get(i).name()] = this.parameters().get(i).value();
+                }
+
+                return _params;
+            },
+
+            fillParams : function(paramsObject) {
+                for (var property in paramsObject) {
+                    var _param = this.findParameter(property);
+                    if (_param) {
+                        _param.value(paramsObject[property])
+                    }
+                }
+            },
+
+            findParameter : function(parameterName) {
+                for (var i = 0; i < this.parameters().count(); i++) {
+                    if (this.parameters().get(i).name() == parameterName) {
+                        return this.parameters().get(i)
+                    }
+
+                }
+                return null;
             }
 
         });

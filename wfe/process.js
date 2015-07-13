@@ -230,7 +230,7 @@ define([
             },
 
             finish : function() {
-                if (this.state != processStates.Finished) {
+                if (this.state() != processStates.Finished) {
                     this.state(processStates.Finished);
                     console.log('[%s] : => Процесс [%s] закончил выполнение', (new Date()).toLocaleTimeString(), this.name());
                 }
@@ -271,7 +271,7 @@ define([
 
             findParameter : function(parameterName) {
                 for (var i = 0; i < this.parameters().count(); i++) {
-                    if (this.parameters().get(i).name(parameterName)) {
+                    if (this.parameters().get(i).name() == parameterName) {
                         return this.parameters().get(i)
                     }
 
