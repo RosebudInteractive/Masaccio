@@ -313,8 +313,8 @@ define([
                         _process.activate()
                     }
                 } else {
-                    token.die();
                     token.currentNode().close();
+                    token.die();
                 }
 
                 this.switchTokens(token);
