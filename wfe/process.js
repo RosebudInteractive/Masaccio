@@ -230,7 +230,7 @@ define([
             },
 
             finish : function() {
-                if (this.state != processStates.Finished) {
+                if (this.state() != processStates.Finished) {
                     this.state(processStates.Finished);
                     console.log('[%s] : => Процесс [%s] закончил выполнение', (new Date()).toLocaleTimeString(), this.name());
                 }
