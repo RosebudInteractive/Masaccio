@@ -10,9 +10,9 @@ if (typeof define !== 'function') {
 /* Todo : возможно необходимо промежуточное наследование Activity -> Task -> UserTask */
 
 define(
-    ['./activity', './../request', './../flowNode', './../controls'],
-    function(Activity, Request, FlowNode, Controls){
-        var UserTask = Activity.extend({
+    ['./scriptTask', './../request', './../flowNode', './../controls', './activity'],
+    function(ScriptTask, Request, FlowNode, Controls, Activity){
+        var UserTask = ScriptTask.extend({
 
             className: "UserTask",
             classGuid: Controls.guidOf('UserTask'),
@@ -58,6 +58,13 @@ define(
             },
 
             execute : function(callback) {
+                function logResponses() {
+                    console.log('[%s] : => Узел %s ожидает ответа', (new Date()).toLocaleTimeString(), this.name());
+                    var _requestCount = this.processInstance().currentToken().getPropertiesOfNode(this.name()).requests().count();
+                    var _responseCount = this.processInstance().currentToken().getPropertiesOfNode(this.name()).responses().count();
+                    console.log('[%s] : !! Ответов %d из %d', (new Date()).toLocaleTimeString(), _responseCount, _requestCount);
+                }
+
                 if (this.state() == FlowNode.state.Executing) {
                     console.log('[%s] : => Выполняется узел %s', (new Date()).toLocaleTimeString(), this.name());
                     var _activityState = this.exposeRequests();
@@ -70,27 +77,33 @@ define(
                     }
                 }
                 else if (this.state() == FlowNode.state.WaitingRequest) {
-                    console.log('[%s] : => Узел %s ожидает ответа', (new Date()).toLocaleTimeString(), this.name());
-                    var _requestCount = this.processInstance().currentToken().getPropertiesOfNode(this.name()).requests().count();
-                    var _responseCount = this.processInstance().currentToken().getPropertiesOfNode(this.name()).responses().count();
-                    console.log('[%s] : !! Ответов %d из %d', (new Date()).toLocaleTimeString(), _responseCount, _requestCount);
-                    if (this.processInstance().currentToken().getPropertiesOfNode(this.name()).isAllResponseReceived()){
-                        this.state(FlowNode.state.ExecutionComplete)
+                    logResponses.call(this);
+
+                    //if (this.processInstance().currentToken().getPropertiesOfNode(this.name()).isAllResponseReceived()){
+                    if (this.token().getPropertiesOfNode(this.name()).isAllResponseReceived()){
+                        this.state(FlowNode.state.ExecutionComplete);
                         if (this.processInstance().isWaitingScriptAnswer()){
                             this.processInstance().enqueueCurrentToken();
                             console.log('[%s] : => Узел [%s] ждет выполнения скрипта', (new Date()).toLocaleTimeString(), this.name());
                         } else {
                             console.log('[%s] : => Узел отработал %s', (new Date()).toLocaleTimeString(), this.name());
                         }
+                    } else {
+                        this.state(FlowNode.state.WaitingRequest)
                     }
-                    else { this.state(FlowNode.state.WaitingRequest) }
                 }
                 else {
                     console.log('[%s] : => Узел отработал %s', (new Date()).toLocaleTimeString(), this.name());
                     this.state(FlowNode.state.ExecutionComplete)
                 }
 
-                this.callExecuteCallBack(callback)
+                if ((this.state() == FlowNode.state.ExecutionComplete) && this.hasScript()) {
+                    UccelloClass.super.apply(this, [callback]);
+                    return;
+                }
+
+
+                this.callExecuteCallBack(callback);
             },
 
             cancel : function() {

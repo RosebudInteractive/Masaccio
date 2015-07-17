@@ -132,8 +132,19 @@ define([
 
                 }
                 return null;
-            }
+            },
 
+            cancel : function() {
+                this.state(requestState.Canceled);
+            },
+
+            responseReceived : function() {
+                this.state(requestState.ResponseReceived);
+            },
+
+            isActive : function() {
+                return !((this.state() == requestState.Canceled) || (this.state() == requestState.ResponseReceived))
+            }
         });
 
         return Request;

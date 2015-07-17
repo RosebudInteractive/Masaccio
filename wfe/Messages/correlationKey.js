@@ -90,16 +90,22 @@ define([
             },
 
             createInstance : function(messageDefinitionName) {
+                if (!(this.getParent() instanceof Process)) {
+                    throw 'Err'
+                }
+                var _processInstance = this.getParent();
+
                 var _instance = new CorrelationKeyInstance(this.getControlManager(), {parent : this.getParent(), colName : 'CorrelationKeyInstances'});
                 for (var i = 0; i < this.properties().count(); i++) {
                     var _expressions = this.properties().get(i).getExpressionsForMessage(messageDefinitionName);
 
                     var that = this;
                     _expressions.forEach(function(element, index) {
+                        var _param;
                         if (!element.nodeName()) {
-
+                            _param = that.getParent().findParameter(element.parameterName());
                         } else {
-
+                            _param = that.getParent().findParameter(element.parameterName());
                         }
                     });
                 }

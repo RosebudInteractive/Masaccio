@@ -44,7 +44,7 @@ var Definitions = {
         _userTask.addRequest('request1').addParameter('request_param1');
 
         var _script1 = {moduleName : 'Test/Process/CopyDefinitionStruct/script1', methodName : 'execScript'};
-        var _scriptTask = _definition.addScriptTask(_script1, 'scriptTask');
+        var _scriptTask = _definition.addScriptTask('scriptTask', _script1);
 
         _definition.connect(_start, _gateway);
 

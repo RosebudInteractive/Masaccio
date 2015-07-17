@@ -26,6 +26,8 @@ describe('Engine', function(){
             result.tokenID.should.equal(1);
             expect(result.message).to.be.undefined;
 
+            EngineSingleton.getInstance().deleteProcess(result.processID);
+
             done();
         });
 
@@ -44,18 +46,39 @@ describe('Engine', function(){
     describe('#startProcessInstanceAndWait', function() {
         it('Должен быть запущен процесс и вернуться request', function(done) {
             var _def = Definition.forTestWaitRequest();
+            var _processID;
             EngineSingleton.getInstance().addProcessDefinition(_def);
             EngineSingleton.getInstance().startProcessInstanceAndWait(_def.definitionID(), 'request1', 3000, function(result) {
                 result.result.should.equal('OK');
                 expect(result.requestInfo).to.be.exist;
                 expect(result.message).to.be.not.exist;
+                _processID = result.requestInfo.processID;
                 expect(result.requestInfo.processID).to.be.exist;
                 expect(result.requestInfo.tokenID).to.be.exist;
                 result.requestInfo.requestName.should.equal('request1');
                 result.requestInfo.nodeName.should.equal('userTask');
 
-                done();
+                //done();
             });
+
+            var _interval = setInterval(function(){
+                if (!_processID) {
+                    console.log('[%s] Не получен ProcessID', (new Date()).toLocaleTimeString())
+                } else {
+                    var _process = EngineSingleton.getInstance().getProcessInstance(_processID);
+                    if (_process && _process.isFinished()) {
+                        clearInterval(_interval);
+                        var _value = _process.findParameter('count').value();
+                        _value.should.equal(2);
+
+                        EngineSingleton.getInstance().deleteProcess(_processID);
+
+                        done()
+                    } else {
+                        console.log('[%s] Еще работает', (new Date()).toLocaleTimeString())
+                    }
+                }
+            }, 1000)
         })
     });
 
@@ -73,6 +96,8 @@ describe('Engine', function(){
                result.requestInfo.requestName.should.equal('request1');
                result.requestInfo.nodeName.should.equal('userTask');
 
+               EngineSingleton.getInstance().deleteProcess(_result.processID);
+
                done();
            });
         });
@@ -85,6 +110,8 @@ describe('Engine', function(){
                 result.result.should.equal('ERROR');
                 expect(result.requestInfo).to.be.not.exist;
                 expect(result.message).to.be.exist;
+
+                EngineSingleton.getInstance().deleteProcess(_result.processID);
                 done();
             });
         })
@@ -106,6 +133,8 @@ describe('Engine', function(){
 
                     EngineSingleton.getInstance().saveProcess(_processID);
                     EngineSingleton.getInstance().findProcess(_processID);
+
+                    EngineSingleton.getInstance().deleteProcess(_processID);
 
                     done()
                 } else {
@@ -130,6 +159,8 @@ describe('Engine', function(){
                     clearInterval(_interval);
                     //var _value = _process.findParameter('count').value;
                     //_value.should.equal(7);
+                    EngineSingleton.getInstance().deleteProcess(_processID);
+
                     done()
                 } else {
                     console.log('[%s] Еще работает', (new Date()).toLocaleTimeString())

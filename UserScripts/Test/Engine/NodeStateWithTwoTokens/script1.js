@@ -20,7 +20,11 @@ define(
                     if (_param) {
                         _param.value(_param.value() + 1);
                     }
-                    console.log('[token %s]->[%s] = [%s]', this.scriptObject.processFacade.currentToken().tokenID(), this.scriptObject.processFacade.currentToken().currentNode().name(), _param.value());
+                    console.log('[%s] : ES [token %s]->[%s] = [%s]',
+                        (new Date()).toLocaleTimeString(),
+                        this.scriptObject.processFacade.currentToken().tokenID(),
+                        this.scriptObject.processFacade.currentToken().currentNode().name(),
+                        _param.value());
                     this.scriptObject.returnResult(null);
                 } else {
                     throw 'scriptObject не определен'

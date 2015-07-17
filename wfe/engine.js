@@ -366,15 +366,24 @@ define([
 
             submitResponse : function(answer, callback) {
                 var _request = this.requestStorage.getRequest(answer.requestID);
-                if (_request) {
-                    var response = _request.createResponse(_request.getParent());
-                    response.fillParams(answer.response)
+                if (_request && _request.isActive()) {
+                    var _processID = answer.processID;
+                    var _process = this.findProcess(_processID);
+
+                    if (!_process) {
+                        if (callback) {
+                            console.log('[%s] : ER Процесс [%s] не найден', (new Date()).toLocaleTimeString(), _processID);
+                            callback({result: 'ERROR', message : 'Процесс не найден'});
+                        }
+                    } else {
+                        var response = _request.createResponse(_request.getParent());
+                        response.fillParams(answer.response)
 
 
-                    var _processID = response.processID();
-                    //if (this.requestStorage.isRequestExists(response.ID())) {
+                        //var _processID = response.processID();
+                        //if (this.requestStorage.isRequestExists(response.ID())) {
 
-                        var _process = this.findProcess(_processID);
+
                         if (_process.canContinue()) {
                             _process = this.activateProcess(_processID);
                         }
@@ -403,7 +412,7 @@ define([
 
                             _token.execute();
                         }, 0);
-                //    }
+                    }
                 } else {
                     setTimeout(function () {
                         /* Todo : результат в callback */
@@ -467,14 +476,11 @@ define([
             },
 
             getRequests : function(processGuid) {
-                var _requests = [];
-                for (var i = 0; i < this.requestStorage.requests.length; i++) {
-                    if ((!processGuid) || (processGuid && this.requestStorage.requests[i].processID() == processGuid)) {
-                        _requests.push(this.requestStorage.requests[i]);
-                    }
+                if (!processGuid) {
+                    return this.requestStorage.requests
+                } else {
+                    return this.requestStorage.getProcessRequests(processGuid)
                 }
-
-                return _requests;
             },
 
             getRequestsAsync : function(processGuid, callback) {
@@ -495,6 +501,18 @@ define([
                 var _definition = new MessageDefinition(this.getControlManager(), {});
                 _definition.definitionID(UUtils.guid())
                 return _definition;
+            },
+
+            deleteProcess : function(processID) {
+                this.requestStorage.cancelActiveRequestsForProcess(processID);
+
+                for (var i = 0; i < this.processes().count(); i++) {
+                    var _process = this.processes().get(i);
+                    if (_process.processID() == processID) {
+                        _process.finish();
+                        //this.processes()._del(_process);
+                    }
+                }
             }
         });
 

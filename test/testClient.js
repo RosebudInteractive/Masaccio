@@ -17,6 +17,15 @@ define(
                 //this.
             //},
 
+            createResponse : function(request) {
+                var _response = {};
+                for (var param in request) {
+                    _response[param] = 'Test answer';
+                }
+
+                return _response;
+            },
+
             handleNewRequest : function (eventParams) {
                 if (!this.responses) {
                     this.responses = []
@@ -27,24 +36,35 @@ define(
                     return
                 }
                 var requestInfo = eventParams.requestInfo;
-                var _process = EngineSingleton.getInstance().getProcessInstance(requestInfo.processID);
-                if (!_process) { throw 'Process ID [%s] do not exists', requestInfo.processID }
+                //var _process = EngineSingleton.getInstance().getProcessInstance(requestInfo.processID);
+                //if (!_process) { throw 'Process ID [%s] do not exists', requestInfo.processID }
 
-                var _request = EngineSingleton.getInstance().requestStorage.getRequest(requestInfo.requestID);
+                var _request = requestInfo.request; //EngineSingleton.getInstance().requestStorage.getRequest(requestInfo.requestID);
                 if (!_request) { throw 'Token ID [%s] do not exists', requestInfo.requestID }
 
-                var _response = _request.createResponse(_request.getParent());
-                _response.ID(_request.ID());
+                var _response = {};
+                for (var param in _request) {
+                    _response[param] = _request[param];
+                };
 
-                _response.parameters().get(0).value('YAHOO!');
-                this.responses.push(_response);
-                console.log('[%s] : <= Готовим респонс [%s]', (new Date()).toLocaleTimeString(), _response.name());
+
+                var _answer = {
+                    name : requestInfo.requestName,
+                    processID : requestInfo.processID,
+                    requestID : requestInfo.requestID,
+                    tokenID : requestInfo.tokenID,
+                    response : _response
+                }
+
+                //_response.parameters().get(0).value('YAHOO!');
+                this.responses.push(_answer);
+                console.log('[%s] : <= Готовим респонс [%s]', (new Date()).toLocaleTimeString(), _answer.name);
 
                 var that = this;
                 setTimeout(function(){
-                    console.log('[%s] : <= Отправляем респонс [%s]', (new Date()).toLocaleTimeString(), _response.name());
-                    EngineSingleton.getInstance().submitResponse(_response);
-                }, 5000 * that.responses.length);
+                    console.log('[%s] : <= Отправляем респонс [%s] process [%s]', (new Date()).toLocaleTimeString(), _answer.name, requestInfo.processID);
+                    EngineSingleton.getInstance().submitResponse(_answer);
+                }, 3000 * that.responses.length);
 
             }
         });

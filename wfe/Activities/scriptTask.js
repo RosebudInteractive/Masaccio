@@ -112,6 +112,10 @@ define([
                 var _scriptObject = this.createScriptObject(callback);
                 this.state(FlowNode.state.WaitingUserScriptAnswer);
                 Utils.execScript(_scriptObject);
+            },
+
+            hasScript : function() {
+                return (this.scriptMethod() && this.scriptName());
             }
         });
 

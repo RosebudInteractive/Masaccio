@@ -28,6 +28,26 @@ define(
 
                 isRequestExists : function(requestID) {
                     return (this.getRequest(requestID) ? true : false);
+                },
+
+                getProcessRequests : function(processID) {
+                    var _requests = [];
+                    this.requests.forEach(function(item){
+                        if (item.processID() == processID) {
+                            _requests.push(item);
+                        }
+                    });
+
+                    return _requests;
+                },
+
+                cancelActiveRequestsForProcess: function(processID) {
+                    var _requests = this.getProcessRequests(processID);
+                    _requests.forEach(function(item) {
+                        if (item.isActive()) {
+                            item.cancel();
+                        }
+                    })
                 }
             }
         );

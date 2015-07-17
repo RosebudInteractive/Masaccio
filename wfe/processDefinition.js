@@ -107,13 +107,19 @@ define([
                 return _node;
             },
 
-            addUserTask : function(taskName) {
+            addUserTask : function(taskName, script) {
                 var _node = new UserTask(this.getControlManager(), {parent  : this, colName : 'Nodes'});
-                if (taskName) {_node.name(taskName)}
+                if (taskName) {
+                    _node.name(taskName)
+                }
+
+                if (script) {
+                    _node.setUserScript(script)
+                }
                 return _node;
             },
 
-            addScriptTask : function(script, taskName) {
+            addScriptTask : function(taskName, script) {
                 if (!script) {
                     throw 'Не указан скрипт'
                 }

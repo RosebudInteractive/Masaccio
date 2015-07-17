@@ -23,8 +23,12 @@ var Definitions = {
          */
 
         var _definition =  EngineSingleton.getInstance().newProcessDefinition();
+        _definition.addParameter('count').value(1);
         var _start = _definition.addActivity('start');
-        var _userTask = _definition.addUserTask('userTask');
+        var _userTask = _definition.addUserTask('userTask', {
+                moduleName: 'Test/Engine/NodeStateWithTwoTokens/script1',
+                methodName: 'execScript'
+            });
         _userTask.addRequest('request1').addParameter('param1').value(5);
         _definition.connect(_start, _userTask);
 
@@ -51,7 +55,7 @@ var Definitions = {
         var _start = _definition.addActivity('start');
 
         var _script1 = {moduleName : 'Test/Engine/NodeStateWithTwoTokens/script1', methodName : 'execScript'};
-        var _scriptTask = _definition.addScriptTask(_script1, 'scriptTask');
+        var _scriptTask = _definition.addScriptTask('scriptTask', _script1);
 
         var _gateway = _definition.addInclusiveGateway('inclusiveGateway');
         var _finish = _definition.addActivity('finish');
@@ -100,7 +104,7 @@ var Definitions = {
         var _activityTrue = _definition.addActivity('testActivity_true');
 
         var _scriptForTask = {moduleName : 'Test/Engine/InclusiveGatewayProcess/scriptTask', methodName : 'execScript', methodParams : { message : 'Привет от узла [%s]'}};
-        var _scriptTask = _definition.addScriptTask(_scriptForTask, 'scriptTask');
+        var _scriptTask = _definition.addScriptTask('scriptTask', _scriptForTask);
 
         _definition.connect(_activity1, _gateway);
 
