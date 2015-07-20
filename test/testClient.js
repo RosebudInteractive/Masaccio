@@ -3,19 +3,14 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var Class = require('class.extend');
+    var UccelloClass = require(PATH.Uccello + 'system/uccello-class');
 }
 
 define(
     ['./../wfe/request', './../wfe/engineSingleton'],
     function(Request, EngineSingleton){
-        var TestClient = Class.extend({
+        var TestClient = UccelloClass.extend({
             responses : [],
-
-            //init: function() {
-            //    this.engine = engine;
-                //this.
-            //},
 
             createResponse : function(request) {
                 var _response = {};

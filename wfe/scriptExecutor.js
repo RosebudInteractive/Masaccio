@@ -3,15 +3,15 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var Class = require('class.extend');
+    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define(
     [],
     function(){
-        var ScriptExecutor = Class.extend({
+        return UccelloClass.extend({
 
-            exec : function(scriptObject) {
+            exec: function (scriptObject) {
                 var Script = require(UCCELLO_CONFIG.wfe.scriptsPath + scriptObject.moduleName);
                 if (!Script) {
                     var _instance = new Script();
@@ -21,7 +21,5 @@ define(
             }
 
         });
-
-        return ScriptExecutor;
     }
 )

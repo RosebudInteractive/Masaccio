@@ -1,6 +1,5 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    //var Class = require('class.extend');
     var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
@@ -63,7 +62,6 @@ define([
             classGuid: Controls.guidOf('Engine'),
             metaFields: [],
             metaCols: [
-                {'cname' : 'Definitions', 'ctype' : 'ProcessDefinition'},
                 {'cname' : 'Processes', 'ctype' : 'Process'}
             ],
 
@@ -209,13 +207,13 @@ define([
                     _startToken.execute();
                 },
 
-                findProcess: function (processID) {
+                findOrUploadProcess: function (processID) {
                     for (var i = 0; i < this.processes().count(); i++) {
                         if (this.processes().get(i).processID() == processID) {return this.processes().get(i)}
                     };
 
                     for (var i = 0; i < this.uploadedProcesses.length; i++) {
-                        if (this.uploadedProcesses[i] == processID) {
+                        if (this.uploadedProcesses[i].processID == processID) {
                             var _process = this.deserializeProcess(processID, this.createComponentFunction);
                             this.processes()._add(_process);
                             this.uploadedProcesses.splice(i, 1);
@@ -261,7 +259,7 @@ define([
             },
 
             activateProcess : function(processID) {
-                var _process = this.findProcess(processID);
+                var _process = this.findOrUploadProcess(processID);
                 if (_process) {
                     _process.activate();
                     return _process;
@@ -368,7 +366,7 @@ define([
                 var _request = this.requestStorage.getRequest(answer.requestID);
                 if (_request && _request.isActive()) {
                     var _processID = answer.processID;
-                    var _process = this.findProcess(_processID);
+                    var _process = this.findOrUploadProcess(_processID);
 
                     if (!_process) {
                         if (callback) {
@@ -436,8 +434,8 @@ define([
                 for (var i = 0; i < this.processes().count();i++) {
                     var _process = this.processes().get(i);
                     if (_process.processID() == processID) {
+                        this.uploadedProcesses.push({processID : processID, isFinished : _process.isFinished()});
                         this.processes()._del(_process);
-                        this.uploadedProcesses.push(processID);
                     }
                 }
             },
@@ -470,7 +468,7 @@ define([
             },
 
             archiveToken : function(token) {
-                var _process = this.findProcess(token.processInstance().processID());
+                var _process = this.findOrUploadProcess(token.processInstance().processID());
                 this.tokensArchive.push({processID : _process.processID(), token : token})
                 _process.tokens()._del(token);
             },
@@ -513,6 +511,30 @@ define([
                         //this.processes()._del(_process);
                     }
                 }
+            },
+
+            processExists : function(processID) {
+                for (var i = 0; i < this.processes().count(); i++) {
+                    if (this.processes().get(i).processID() == processID) {
+                        return true;
+                    }
+                }
+
+                return this.uploadedProcesses.some(function (element) {
+                    return element == processID;
+                });
+            },
+
+            processFinished : function(processID) {
+                for (var i = 0; i < this.processes().count(); i++) {
+                    if (this.processes().get(i).processID() == processID) {
+                        this.processes().get(i).isFinished();
+                    }
+                }
+
+                return this.uploadedProcesses.some(function (element) {
+                    return ((element.processID == processID) && element.isFinished);
+                });
             }
         });
 

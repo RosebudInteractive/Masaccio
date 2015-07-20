@@ -132,7 +132,7 @@ describe('Engine', function(){
                     _value.should.equal(7);
 
                     EngineSingleton.getInstance().saveProcess(_processID);
-                    EngineSingleton.getInstance().findProcess(_processID);
+                    EngineSingleton.getInstance().findOrUploadProcess(_processID);
 
                     EngineSingleton.getInstance().deleteProcess(_processID);
 
@@ -155,7 +155,7 @@ describe('Engine', function(){
 
             var _interval = setInterval(function(){
                 _process = EngineSingleton.getInstance().getProcessInstance(_processID);
-                if (_process && _process.isFinished()) {
+                if (EngineSingleton.getInstance().processFinished(_processID)) {
                     clearInterval(_interval);
                     //var _value = _process.findParameter('count').value;
                     //_value.should.equal(7);

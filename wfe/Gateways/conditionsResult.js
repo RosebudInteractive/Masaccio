@@ -3,18 +3,18 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var Class = require('class.extend');
+    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define([],
     function(){
-        var ConditionsResult = Class.extend({
+        return UccelloClass.extend({
 
-            init: function(){
+            init: function () {
                 this.storage = [];
             },
 
-            findConditionObject : function(conditon) {
+            findConditionObject: function (conditon) {
                 for (var i = 0; i < this.storage.length; i++) {
                     if (this.storage[i].condition == conditon) {
                         return this.storage[i];
@@ -22,20 +22,20 @@ define([],
                 }
             },
 
-            addResult : function(condition, result) {
+            addResult: function (condition, result) {
                 var _obj = this.findConditionObject(condition);
                 if (!_obj) {
-                    this.storage.push( {condition : condition, result : result} )
+                    this.storage.push({condition: condition, result: result})
                 } else {
                     _obj.result = result;
                 }
             },
 
-            clearResult : function(condtion) {
+            clearResult: function (condtion) {
                 this.addResult(condtion, false)
             },
 
-            getConfirmedNodes : function() {
+            getConfirmedNodes: function () {
                 var _confirmedNodes = [];
                 for (var i = 0; i < this.storage.length; i++) {
                     if (this.storage[i].result) {
@@ -45,8 +45,6 @@ define([],
                 return _confirmedNodes;
             }
         });
-
-        return ConditionsResult;
     }
 )
 

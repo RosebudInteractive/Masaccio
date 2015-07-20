@@ -3,36 +3,38 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var Class = require('class.extend');
+    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define(
     [],
     function() {
-        var RequestStorage = Class.extend({
+        return UccelloClass.extend({
                 init: function () {
                     this.requests = [];
                 },
 
-                addRequest : function(request){
-                    if (!this.isRequestExists(request.ID())){
+                addRequest: function (request) {
+                    if (!this.isRequestExists(request.ID())) {
                         this.requests.push(request)
                     }
                 },
 
-                getRequest : function(requestID){
+                getRequest: function (requestID) {
                     for (var i = 0; i < this.requests.length; i++) {
-                        if (this.requests[i].ID() == requestID) {return this.requests[i]}
+                        if (this.requests[i].ID() == requestID) {
+                            return this.requests[i]
+                        }
                     }
                 },
 
-                isRequestExists : function(requestID) {
+                isRequestExists: function (requestID) {
                     return (this.getRequest(requestID) ? true : false);
                 },
 
-                getProcessRequests : function(processID) {
+                getProcessRequests: function (processID) {
                     var _requests = [];
-                    this.requests.forEach(function(item){
+                    this.requests.forEach(function (item) {
                         if (item.processID() == processID) {
                             _requests.push(item);
                         }
@@ -41,9 +43,9 @@ define(
                     return _requests;
                 },
 
-                cancelActiveRequestsForProcess: function(processID) {
+                cancelActiveRequestsForProcess: function (processID) {
                     var _requests = this.getProcessRequests(processID);
-                    _requests.forEach(function(item) {
+                    _requests.forEach(function (item) {
                         if (item.isActive()) {
                             item.cancel();
                         }
@@ -51,8 +53,6 @@ define(
                 }
             }
         );
-
-        return RequestStorage;
     }
 
 )

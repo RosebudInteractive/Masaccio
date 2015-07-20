@@ -3,19 +3,19 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var Class = require('class.extend');
+    var UccelloClass = require(PATH.Uccello + 'system/uccello-class');
 }
 
 define(
     [],
     function (){
-        var TestScript = Class.extend({
-            init : function() {
+        return UccelloClass.extend({
+            init: function () {
                 this.scriptObject = null;
             },
 
-            execScript : function() {
-                if (this.scriptObject){
+            execScript: function () {
+                if (this.scriptObject) {
                     var _param = this.scriptObject.processFacade.findParameter('param1')
                     if (_param) {
                         _param.value(_param.value() + 1);
@@ -27,7 +27,5 @@ define(
                 }
             }
         });
-
-        return TestScript;
     }
 )

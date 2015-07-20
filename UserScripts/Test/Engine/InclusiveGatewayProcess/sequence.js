@@ -3,24 +3,24 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var Class = require('class.extend');
+    var UccelloClass = require(PATH.Uccello + 'system/uccello-class');
 }
 
 define(
     [],
     function (){
-        var Test = Class.extend({
-            init : function() {
+        return UccelloClass.extend({
+            init: function () {
                 this.scriptObject = null;
             },
 
-            execTest : function(params) {
-                if (this.scriptObject){
+            execTest: function (params) {
+                if (this.scriptObject) {
                     //var _result = this.scriptObject.processFacade.currentToken.getPropertiesOfNode("UserTask1").parameters[params.paramNumber].value == params.value;
                     var _result = true;
                     var that = this;
 
-                    setTimeout(function() {
+                    setTimeout(function () {
                         that.scriptObject.returnResult(_result)
                     }, 0);
                 } else {
@@ -28,7 +28,5 @@ define(
                 }
             }
         });
-
-        return Test;
     }
 )
