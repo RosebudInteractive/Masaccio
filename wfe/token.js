@@ -125,6 +125,7 @@ define([
                     };
 
                     case (FlowNode.state.WaitingUserScriptAnswer) : {
+                        EngineSingleton.getInstance().deactivateProcess(this.processInstance());
                         EngineSingleton.getInstance().switchTokens(this)
                         break;
                     };
