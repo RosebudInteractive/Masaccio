@@ -14,7 +14,7 @@ define([
         './Activities/activity',
         './Activities/userTask',
         './Activities/scriptTask',
-        './Gateways/ExclusiveGateway',
+        './Gateways/exclusiveGateway',
         './Gateways/inclusiveGateway',
         './sequenceFlow'
     ],
