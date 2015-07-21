@@ -11,14 +11,16 @@ define([
         './../controls',
         './correlationProperty',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
-        './correlationKeyInstance'
+        './correlationKeyInstance',
+        './../process'
     ],
     function(
         UObject,
         Controls,
         CorrelationProperty,
         UUtils,
-        CorrelationKeyInstance
+        CorrelationKeyInstance,
+        Process
     ){
         var CorrelationKey = UObject.extend({
 
@@ -95,20 +97,26 @@ define([
                 }
                 var _processInstance = this.getParent();
 
-                var _instance = new CorrelationKeyInstance(this.getControlManager(), {parent : this.getParent(), colName : 'CorrelationKeyInstances'});
+                var _instance = new CorrelationKeyInstance(this.getControlManager(), {parent : _processInstance, colName : 'CorrelationKeyInstances'});
+                _instance.keyName(this.name())
                 for (var i = 0; i < this.properties().count(); i++) {
                     var _expressions = this.properties().get(i).getExpressionsForMessage(messageDefinitionName);
 
-                    var that = this;
-                    _expressions.forEach(function(element, index) {
+                    _expressions.forEach(function(element) {
                         var _param;
                         if (!element.nodeName()) {
-                            _param = that.getParent().findParameter(element.parameterName());
+                            _param = _processInstance.findParameter(element.parameterName());
                         } else {
-                            _param = that.getParent().findParameter(element.parameterName());
+                            _param = _processInstance.currentToken().findParameter(element.parameterName());
+                        }
+
+                        if (_param) {
+                            _instance.addParameterValue(_param);
                         }
                     });
                 }
+
+                return _instance;
             }
         });
 

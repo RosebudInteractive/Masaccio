@@ -20,16 +20,16 @@ define([
             className: "CorrelationKeyInstance",
             classGuid : Controls.guidOf('CorrelationKeyInstance'),
             metaFields: [
-                {fname : 'Name',    ftype : 'string'},
-                {fname : 'ID',      ftype : 'string'}
+                {fname : 'KeyName',    ftype : 'string'}
+                //{fname : 'ID',      ftype : 'string'}
             ],
             metaCols: [
                 {'cname' : 'CorrelationValues', 'ctype' : 'Parameter'}
             ],
             //</editor-fold>
 
-            name : function(value) {
-                return this._genericSetter('Name', value);
+            keyName : function(value) {
+                return this._genericSetter('KeyName', value);
             },
 
             getControlManager : function() {
