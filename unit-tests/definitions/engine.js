@@ -121,5 +121,4 @@ var Definitions = {
     }
 };
 
-
 if (module) {module.exports = Definitions}

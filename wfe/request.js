@@ -42,8 +42,12 @@ define([
                 UccelloClass.super.apply(this, [cm, params]);
                 if (!params) { return }
 
-                this.state(requestState.Exposed);
-                this.ID(UUtils.guid());
+                if (!this.state()) {
+                    this.state(requestState.Exposed);
+                }
+                if (!this.ID()) {
+                    this.ID(UUtils.guid());
+                }
             },
 
             //<editor-fold desc="MetaFields & MetaCols">

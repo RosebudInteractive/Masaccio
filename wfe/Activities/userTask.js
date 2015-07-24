@@ -60,8 +60,10 @@ define(
             execute : function(callback) {
                 function logResponses() {
                     console.log('[%s] : => Узел %s ожидает ответа', (new Date()).toLocaleTimeString(), this.name());
-                    var _requestCount = this.processInstance().currentToken().getPropertiesOfNode(this.name()).requests().count();
-                    var _responseCount = this.processInstance().currentToken().getPropertiesOfNode(this.name()).responses().count();
+                    //var _requestCount = this.processInstance().currentToken().getPropertiesOfNode(this.name()).requests().count();
+                    var _requestCount = this.token().getPropertiesOfNode(this.name()).requests().count();
+                    //var _responseCount = this.processInstance().currentToken().getPropertiesOfNode(this.name()).responses().count();
+                    var _responseCount = this.token().getPropertiesOfNode(this.name()).responses().count();
                     console.log('[%s] : !! Ответов %d из %d', (new Date()).toLocaleTimeString(), _responseCount, _requestCount);
                 }
 
@@ -118,7 +120,7 @@ define(
             },
 
             close : function() {
-                if (this.processInstance().currentToken().getPropertiesOfNode(this.name()).isAllResponseReceived()){
+                if (this.token().getPropertiesOfNode(this.name()).isAllResponseReceived()){
                     UccelloClass.super.apply(this, []);
                 }
             },

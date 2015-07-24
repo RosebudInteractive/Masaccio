@@ -4,7 +4,6 @@ if (typeof define !== 'function') {
 }
 
 define([
-        UCCELLO_CONFIG.uccelloPath+'system/uobject',
         './process',
         './processDefinition',
         './flowNode',
@@ -21,7 +20,6 @@ define([
         './Messages/messageDefinition'
     ],
     function(
-        UObject,
         Process,
         Definition,
         FlowNode,
@@ -54,37 +52,24 @@ define([
             startProcessInstanceAndWait : "function",
             submitResponseAndWait : "function",
             waitForRequest : "function"
-        }
+        };
 
-        var Engine = UObject.extend({
-
-            className: "Engine",
-            classGuid: Controls.guidOf('Engine'),
-            metaFields: [],
-            metaCols: [
-                {'cname' : 'Processes', 'ctype' : 'Process'}
-            ],
-
-            /**
-             * @constructs
-             * @param cm {ControlMgr} - менеджер контролов, к которому привязан данный контрол
-             * @param params
-             */
-
-            //init: function (cm, params) {
+        var Engine = UccelloClass.extend({
             init: function (initParams) {
                 this.db = Initializer.createInternalDb(initParams.dbController);
                 this.controlManager = Initializer.createControlManager(this.db);
                 this.constructHolder = initParams.constructHolder;
                 Initializer.registerTypes(this.controlManager);
 
-                UccelloClass.super.apply(this, [this.controlManager, {}]);
+                this.db = this.controlManager;
 
                 this.notifier = new Notify();
                 this.requestStorage = new RequestStorage();
                 this.uploadedProcesses = [];
                 this.tokensArchive = [];
-                this.definitions = [];
+                this.processDefinitions = [];
+                this.messageDefinitions = [];
+                this.processIntsances = [];
                 if (initParams && initParams.router) {
                     this.router = initParams.router;
                     this.router.add('wfeInterface', function (data, done)
@@ -103,20 +88,14 @@ define([
             },
 
             clearDefinitions : function() {
-                this.definitions.length = 0;
+                this.processDefinitions.length = 0;
             },
-
-
-            processes : function() {
-                return this.getCol('Processes');
-            },
-            //</editor-fold>
 
             /*  ----- Definitions ----- */
             findDefinition: function (definitionID)
             {
-                for (var i = 0; i < this.definitions.length; i++) {
-                    var _def = this.definitions[i];
+                for (var i = 0; i < this.processDefinitions.length; i++) {
+                    var _def = this.processDefinitions[i];
                     if (_def.definitionID() == definitionID) {
                         return _def;
                     }
@@ -127,7 +106,7 @@ define([
             {
                 var _def = this.findDefinition(definiton.definitionID())
                 if (!_def) {
-                    this.definitions.push(definiton);
+                    this.processDefinitions.push(definiton);
                     console.log('[%s] : => Добавлено описание процесса [%s]', (new Date()).toLocaleTimeString(), definiton.name())
                 }
 
@@ -191,13 +170,13 @@ define([
                     console.log('[%s] : => Создание инстанса процесса %s', (new Date()).toLocaleTimeString(), definitionID);
                     var _def = this.findDefinition(definitionID);
                     if (_def) {
-                        return new Process(this.pvt.controlMgr, {}, _def)
+                        return new Process(this.controlManager, {}, _def)
                     }
                 },
 
                 runProcess : function(processInstance)
                 {
-                    this.processes()._add(processInstance);
+                    this.processIntsances.push(processInstance);
 
                     this.defineTokens(processInstance);
 
@@ -208,14 +187,16 @@ define([
                 },
 
                 findOrUploadProcess: function (processID) {
-                    for (var i = 0; i < this.processes().count(); i++) {
-                        if (this.processes().get(i).processID() == processID) {return this.processes().get(i)}
-                    };
+                    var _process = this.getProcessInstance(processID);
+                    if (_process) {
+                        return _process
+                    }
 
                     for (var i = 0; i < this.uploadedProcesses.length; i++) {
                         if (this.uploadedProcesses[i].processID == processID) {
                             var _process = this.deserializeProcess(processID, this.createComponentFunction);
-                            this.processes()._add(_process);
+                            //this.processes()._add(_process);
+                            this.processIntsances.push(_process);
                             this.uploadedProcesses.splice(i, 1);
 
                             return _process;
@@ -236,14 +217,33 @@ define([
                     processInstance.enqueueToken(_token);
                 },
 
+            getProcessIndex : function(predicate) {
+                var _index = -1;
+                this.processIntsances.some(function(element, index) {
+                    if (predicate(element)) {
+                        _index = index;
+                        return true;
+                    }
+                });
+
+                return _index;
+            },
+
+            findProcessByPredicate : function(predicate) {
+                var _index = this.getProcessIndex(predicate)
+
+                if (_index != -1) {
+                    return this.processIntsances[_index];
+                } else {
+                    return null;
+                }
+            },
+
             getProcessInstance : function(processID)
             {
-                for (var i = 0; i < this.processes().count(); i++) {
-                    var _process = this.processes().get(i);
-                    if (_process.processID() == processID) { return _process; }
-                }
-
-                return null;
+                return this.findProcessByPredicate(function(element) {
+                    return element.processID() == processID
+                })
             },
 
             waitForRequest : function(processID, tokenID, requestID, timeout, callback){
@@ -346,14 +346,9 @@ define([
             },
 
             getActiveProcess : function(processID) {
-                for (var i = 0; i < this.processes().count(); i++) {
-                    var _process = this.processes().get(i);
-                    if (_process.processID() == processID && _process.isRunning()){
-                        return _process;
-                    }
-                };
-
-                return null;
+                return this.findProcessByPredicate(function(element) {
+                    return (element.processID() == processID) && element.isRunning()
+                })
             },
 
             exposeRequest : function(request, eventParams){
@@ -374,22 +369,22 @@ define([
                             callback({result: 'ERROR', message : 'Процесс не найден'});
                         }
                     } else {
-                        var response = _request.createResponse(_request.getParent());
-                        response.fillParams(answer.response)
-
-
-                        //var _processID = response.processID();
-                        //if (this.requestStorage.isRequestExists(response.ID())) {
-
-
                         if (_process.canContinue()) {
                             _process = this.activateProcess(_processID);
                         }
 
-                        var _token = _process.getToken(response.tokenID());
-                        //_token.addResponse(response);
+                        var _token = _process.getToken(answer.tokenID);
 
                         var _receivingNode = _token.currentNode();
+
+                        _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(answer.requestID);
+                        if (!_request) {
+                            throw 'Error!'
+                        }
+
+                        var response = _request.createResponse(_request.getParent());
+                        response.fillParams(answer.response)
+
                         if (_process.isRunning()) {
                             /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
                             _receivingNode.execute(function () {
@@ -431,12 +426,13 @@ define([
 
             saveProcess : function(processID) {
                 this.serializeProcess(processID);
-                for (var i = 0; i < this.processes().count();i++) {
-                    var _process = this.processes().get(i);
-                    if (_process.processID() == processID) {
-                        this.uploadedProcesses.push({processID : processID, isFinished : _process.isFinished()});
-                        this.processes()._del(_process);
-                    }
+                var _index = this.getProcessIndex(function(element) {
+                    return element.processID() == processID
+                });
+
+                if (_index != -1) {
+                    this.uploadedProcesses.push({processID : processID, isFinished : this.processIntsances[_index].isFinished()});
+                    this.processIntsances.splice(_index, 1);
                 }
             },
 
@@ -456,7 +452,7 @@ define([
                 var _obj = fs.readFileSync(UCCELLO_CONFIG.wfe.processStorage + processID + '.txt');
                 _obj = JSON.parse(_obj);
 
-                var _process = this.pvt.db.deserialize(_obj, {}, callback);
+                var _process = this.db.deserialize(_obj, {}, callback);
                 console.log('[%s] : }} Процесс [%s] восстановлен', (new Date()).toLocaleTimeString(), processID);
                 fs.unlink(UCCELLO_CONFIG.wfe.processStorage + processID + '.txt');
 
@@ -495,41 +491,43 @@ define([
                 return _definition;
             },
 
+            //<editor-fold desc="messaging">
             newMessageDefinition : function() {
                 var _definition = new MessageDefinition(this.getControlManager(), {});
                 _definition.definitionID(UUtils.guid())
                 return _definition;
             },
 
+            addMessageDefinition : function(definition, callback) {
+
+            },
+            //</editor-fold>
+
             deleteProcess : function(processID) {
                 this.requestStorage.cancelActiveRequestsForProcess(processID);
 
-                for (var i = 0; i < this.processes().count(); i++) {
-                    var _process = this.processes().get(i);
-                    if (_process.processID() == processID) {
-                        _process.finish();
-                        //this.processes()._del(_process);
-                    }
+                var _process = this.getProcessInstance(processID);
+                if (_process) {
+                    _process.finish()
                 }
             },
 
             processExists : function(processID) {
-                for (var i = 0; i < this.processes().count(); i++) {
-                    if (this.processes().get(i).processID() == processID) {
-                        return true;
-                    }
-                }
-
-                return this.uploadedProcesses.some(function (element) {
-                    return element == processID;
-                });
+                //for (var i = 0; i < this.processes().count(); i++) {
+                //    if (this.processes().get(i).processID() == processID) {
+                //        return true;
+                //    }
+                //}
+                //
+                //return this.uploadedProcesses.some(function (element) {
+                //    return element == processID;
+                //});
             },
 
             processFinished : function(processID) {
-                for (var i = 0; i < this.processes().count(); i++) {
-                    if (this.processes().get(i).processID() == processID) {
-                        this.processes().get(i).isFinished();
-                    }
+                var _process = this.getProcessInstance(processID);
+                if (_process) {
+                    return _process.isFinished();
                 }
 
                 return this.uploadedProcesses.some(function (element) {

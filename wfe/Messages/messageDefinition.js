@@ -59,7 +59,7 @@ define([
 
             clone : function()
             {
-                var _newDefinition = new ProcessDefinition(this.pvt.controlMgr, {});
+                var _newDefinition = new MessageDefinition(this.getControlManager(), {});
 
                 _newDefinition.definitionID = this.definitionID;
                 _newDefinition.name(this.name());

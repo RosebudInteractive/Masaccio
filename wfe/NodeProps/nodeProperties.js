@@ -114,6 +114,17 @@ define(
 
                 }
                 return null;
+            },
+
+            findRequest : function(requestID) {
+                for (var i = 0; i < this.requests().count(); i++) {
+                    if (this.requests().get(i).ID() == requestID) {
+                        return this.requests().get(i)
+                    }
+
+                }
+                return null;
+
             }
 
         });
