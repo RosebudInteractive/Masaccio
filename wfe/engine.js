@@ -17,7 +17,9 @@ define([
         './controls',
         './processDefinition',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
-        './Messages/messageDefinition'
+        './Messages/messageDefinition',
+        'util',
+        './../public/logger'
     ],
     function(
         Process,
@@ -33,7 +35,9 @@ define([
         Controls,
         ProcessDefinition,
         UUtils,
-        MessageDefinition
+        MessageDefinition,
+        Util,
+        Logger
     ) {
 
         var wfeInterfaceGUID = "a75970d5-f9dc-4b1b-90c7-f70c37bbbb9b";
@@ -102,12 +106,11 @@ define([
                 }
             },
 
-            addProcessDefinition : function(definiton, callback)
-            {
-                var _def = this.findDefinition(definiton.definitionID())
+            addProcessDefinition : function(definition, callback) {
+                var _def = this.findDefinition(definition.definitionID())
                 if (!_def) {
-                    this.processDefinitions.push(definiton);
-                    console.log('[%s] : => Добавлено описание процесса [%s]', (new Date()).toLocaleTimeString(), definiton.name())
+                    this.processDefinitions.push(definition);
+                    console.log('[%s] : => Добавлено описание процесса [%s]', (new Date()).toLocaleTimeString(), definition.name())
                 }
 
                 if (callback) {
@@ -137,8 +140,7 @@ define([
                 return Controls.MegaAnswer;
             },
 
-            startProcessInstance : function(definitionID, callback)
-            {
+            startProcessInstance : function(definitionID, callback) {
                 var _result = {};
                 console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
                 var _process = this.createNewProcess(definitionID);
@@ -165,8 +167,7 @@ define([
                 return _result;
             },
 
-                createNewProcess: function (definitionID)
-                {
+                createNewProcess: function (definitionID) {
                     console.log('[%s] : => Создание инстанса процесса %s', (new Date()).toLocaleTimeString(), definitionID);
                     var _def = this.findDefinition(definitionID);
                     if (_def) {
@@ -174,8 +175,7 @@ define([
                     }
                 },
 
-                runProcess : function(processInstance)
-                {
+                runProcess : function(processInstance) {
                     this.processIntsances.push(processInstance);
 
                     this.defineTokens(processInstance);
@@ -239,8 +239,7 @@ define([
                 }
             },
 
-            getProcessInstance : function(processID)
-            {
+            getProcessInstance : function(processID) {
                 return this.findProcessByPredicate(function(element) {
                     return element.processID() == processID
                 })
@@ -499,7 +498,25 @@ define([
             },
 
             addMessageDefinition : function(definition, callback) {
+                var _answer = {}
 
+                if (this.messageDefinitions.every(function(element) {
+                        element.definitionID() != definition.definitionID()
+                    })) {
+                    this.messageDefinitions.push(definition);
+                    _answer.result = 'OK';
+                    _answer.message = Util.format('Добавлено описание сообщения [%s]', definition.name());
+                    //console.log('[%s] : => Добавлено описание сообщения [%s]', (new Date()).toLocaleTimeString(), definition.name())
+                } else {
+                    _answer.result = 'ERROR';
+                    _answer.message = Util.format('Описание сообщения [%s] уже существует', definition.definitionID());
+                }
+
+                Logger.info(_answer);
+
+                if (callback) {
+                    callback(_answer)
+                }
             },
             //</editor-fold>
 
