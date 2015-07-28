@@ -18,6 +18,10 @@ var controls = [
     {className: 'Gateway',                  component: './Gateways/gateway',                guid: '05e31d1c-7b7e-4fb8-b23d-063fee27b9f6'},
     {className: 'ExclusiveGateway',         component: './Gateways/exclusiveGateway',       guid: '8a1cfe3d-d0d5-4ee6-aa4b-667b1f8934ec'},
     {className: 'InclusiveGateway',         component: './Gateways/inclusiveGateway',       guid: 'fb2384a6-ea09-4c48-a069-864d6af845f7'},
+    /*Events*/
+    {className: 'Event',                    component: './Events/event',                    guid: '65949e5d-85bc-4e95-94a3-ba8ed8a14275'},
+    {className: 'MessageThrowEvent',        component: './Events/messageThrowEvent',        guid: '4a9b774d-99a5-486e-893f-e16c7cd7fe37'},
+    {className: 'MessageCatchEvent',        component: './Events/messageCatchEvent',        guid: '96e3f1e1-cfc6-4eff-ae16-a405c9d24ab5'},
 
     {className: 'Token',                    component: './token',                           guid: 'd09117fc-b298-42f6-84fc-c8807e83ca12'},
     {className: 'Request',                  component: './request',                         guid: '783cc459-0b03-4cbd-9960-6401a031537c'},
@@ -51,7 +55,7 @@ var register = function(constructHolder){
 
 if (module) {
     module.exports.guidOf = guidOf;
-    module.exports.register = register
+    module.exports.register = register;
     module.exports.MegaAnswer = MegaAnswer;
 }
 

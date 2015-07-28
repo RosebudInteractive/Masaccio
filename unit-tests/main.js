@@ -66,9 +66,9 @@ var _initializer = {
         this.controlManager = EngineSingleton.getInstance().getControlManager();
 
         var TestClient = require('./../test/testClient');
-        var testClient = new TestClient();
-        //EngineSingleton.getInstance().waitForRequest()
-        EngineSingleton.getInstance().notifier.registerObserver(testClient, testClient.handleNewRequest);
+        this.testClient = new TestClient();
+        var that = this;
+        EngineSingleton.getInstance().notifier.registerObserver(that.testClient, that.testClient.handleNewRequest);
     },
 
     getControlManager : function() {

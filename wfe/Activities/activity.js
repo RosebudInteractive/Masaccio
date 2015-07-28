@@ -55,7 +55,7 @@ define(
                 if (this.outgoing().count() == 0) {
                     //this.processInstance.wait();
                     setTimeout(callback(null), 0)
-                };
+                }
 
                 for (var i = 0; i < this.outgoing().count(); i++) {
                     var _sequence = this.outgoing().get(i);
@@ -72,14 +72,14 @@ define(
                             //this.processInstance.wait();
                             setTimeout(callback(null), 0)
                         }
-                    };
+                    }
                 }
             },
 
             getOutgoingNodes : function() {
                 if (!this.isAllOutgoingChecked()) {
                     throw 'Не все исходящие ветви проверены'
-                };
+                }
 
                 return this.conditionsResult.getConfirmedNodes();
             }

@@ -91,7 +91,7 @@ define([
                 return wfeInterface;
             },
 
-            clearDefinitions : function() {
+            clearProcessDefinitions : function() {
                 this.processDefinitions.length = 0;
             },
 
@@ -448,6 +448,10 @@ define([
             },
 
             deserializeProcess : function(processID, callback){
+                if (!callback) {
+                    callback = this.createComponentFunction
+                }
+
                 var _obj = fs.readFileSync(UCCELLO_CONFIG.wfe.processStorage + processID + '.txt');
                 _obj = JSON.parse(_obj);
 
@@ -517,6 +521,10 @@ define([
                 if (callback) {
                     callback(_answer)
                 }
+            },
+
+            clearMessageDefinitions : function() {
+                this.messageDefinitions.length = 0;
             },
             //</editor-fold>
 

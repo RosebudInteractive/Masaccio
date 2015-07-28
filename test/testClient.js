@@ -6,11 +6,33 @@ if (typeof define !== 'function') {
     var UccelloClass = require(PATH.Uccello + 'system/uccello-class');
 }
 
+var _timeout = 3000;
+var _responses = [];
+
+var _setTimeout = function(valueInSecond) {
+    _timeout = valueInSecond * 1000;
+};
+
+var _clearResponses = function() {
+    _responses.length = 0;
+};
+
 define(
-    ['./../wfe/request', './../wfe/engineSingleton'],
-    function(Request, EngineSingleton){
+    ['./../wfe/engineSingleton'],
+    function(EngineSingleton){
         var TestClient = UccelloClass.extend({
-            responses : [],
+
+            init : function() {
+                this.responses = []
+            },
+
+            setTimeout : function(valueInSecond) {
+                _setTimeout(valueInSecond)
+            },
+
+            clear : function() {
+                _clearResponses();
+            },
 
             createResponse : function(request) {
                 var _response = {};
@@ -22,17 +44,11 @@ define(
             },
 
             handleNewRequest : function (eventParams) {
-                if (!this.responses) {
-                    this.responses = []
-                }
-
                 if (eventParams.result != 'OK') {
                     console.log('[%s] : !! Ошибка при обработке request [%s]', (new Date()).toLocaleTimeString(), eventParams.message);
                     return
                 }
                 var requestInfo = eventParams.requestInfo;
-                //var _process = EngineSingleton.getInstance().getProcessInstance(requestInfo.processID);
-                //if (!_process) { throw 'Process ID [%s] do not exists', requestInfo.processID }
 
                 var _request = requestInfo.request; //EngineSingleton.getInstance().requestStorage.getRequest(requestInfo.requestID);
                 if (!_request) { throw 'Token ID [%s] do not exists', requestInfo.requestID }
@@ -51,15 +67,13 @@ define(
                     response : _response
                 }
 
-                //_response.parameters().get(0).value('YAHOO!');
-                this.responses.push(_answer);
+                _responses.push(_answer);
                 console.log('[%s] : <= Готовим респонс [%s]', (new Date()).toLocaleTimeString(), _answer.name);
 
-                var that = this;
                 setTimeout(function(){
                     console.log('[%s] : <= Отправляем респонс [%s] process [%s]', (new Date()).toLocaleTimeString(), _answer.name, requestInfo.processID);
                     EngineSingleton.getInstance().submitResponse(_answer);
-                }, 3000 * that.responses.length);
+                }, _timeout * _responses.length);
 
             }
         });
