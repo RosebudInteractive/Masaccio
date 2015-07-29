@@ -8,6 +8,13 @@ var ProcessDefinition = require('./processDefinition');
     var SequenceFlow = require('./sequenceFlow');
     var Parameter = require('./parameter');
     var Request = require('./request');
+    var UserScript = require('./userScript');
+    var Activity = require('./Activities/activity');
+    var UserTask = require('./Activities/userTask');
+    var ScriptTask = require('./Activities/scriptTask');
+
+var InclusiveGateway = require('./Gateways/inclusiveGateway');
+var ExclusiveGateway = require('./Gateways/exclusiveGateway');
 
 var Process = require('./process');
     var Token = require('./token');
@@ -18,10 +25,18 @@ var Initializer = {
 
     registerTypes : function(controlManager){
         new Parameter(controlManager);
+        new UserScript(controlManager);
         new SequenceFlow(controlManager);
         new FlowNode(controlManager);
         new Request(controlManager);
         new ProcessDefinition(controlManager);
+
+        new Activity(controlManager);
+        new UserTask(controlManager);
+        new ScriptTask(controlManager);
+
+        new InclusiveGateway(controlManager);
+        new ExclusiveGateway(controlManager);
 
         new NodeProps(controlManager);
         new Token(controlManager);

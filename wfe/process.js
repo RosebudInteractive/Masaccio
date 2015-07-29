@@ -58,7 +58,8 @@ define([
                 {'cname' : 'Parameters', 'ctype' : 'Parameter'},
                 {'cname' : 'Nodes', 'ctype' : 'FlowNode'},
                 {'cname' : 'Connectors', 'ctype' : 'SequenceFlow'},
-                {'cname' : 'Requests', 'ctype' : 'Request'}
+                {'cname' : 'Requests', 'ctype' : 'Request'},
+                {'cname' : 'Scripts', 'ctype' : 'UserScript'}
             ],
             //</editor-fold>
 
@@ -145,6 +146,10 @@ define([
 
             nodes : function(){
                 return this.getCol('Nodes');
+            },
+
+            scripts : function(){
+                return this.getCol('Scripts');
             },
 
             connectors : function(){

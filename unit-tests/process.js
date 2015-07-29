@@ -59,9 +59,9 @@ describe('Process', function(){
             var _scriptTask = _process.nodes().get(3);
             _scriptTask.name().should.equal('scriptTask');
             _scriptTask.should.be.an.instanceOf(ScriptTask);
-            _scriptTask.scriptName().should.equal('Test/Process/CopyDefinitionStruct/script1');
-            _scriptTask.scriptMethod().should.equal('execScript');
-            _scriptTask.scriptParams().count().should.equal(0);
+            _scriptTask.script().moduleName().should.equal('Test/Process/CopyDefinitionStruct/script1');
+            _scriptTask.script().methodName().should.equal('execScript');
+            _scriptTask.script().parameters().count().should.equal(0);
 
             _process.connectors().count().should.equal(4);
 
@@ -72,11 +72,11 @@ describe('Process', function(){
             _sqToUserTask1.source().name().should.equal('inclusiveGateway');
             _sqToUserTask1.target().name().should.equal('userTask');
             _sqToUserTask1.hasCondition().should.be.true;
-            _sqToUserTask1.scriptParams().count().should.equal(2);
-            _sqToUserTask1.scriptParams().get(0).name().should.equal('minValue');
-            _sqToUserTask1.scriptParams().get(0).value().should.equal(0);
-            _sqToUserTask1.scriptParams().get(1).name().should.equal('maxValue');
-            _sqToUserTask1.scriptParams().get(1).value().should.equal(5);
+            _sqToUserTask1.script().parameters().count().should.equal(2);
+            _sqToUserTask1.script().parameters().get(0).name().should.equal('minValue');
+            _sqToUserTask1.script().parameters().get(0).value().should.equal(0);
+            _sqToUserTask1.script().parameters().get(1).name().should.equal('maxValue');
+            _sqToUserTask1.script().parameters().get(1).value().should.equal(5);
 
             var _sqToUserTask2 = _process.connectors().get(2);
             _sqToUserTask2.source().name().should.equal('inclusiveGateway');
@@ -87,11 +87,11 @@ describe('Process', function(){
             _sqToScriptTask.source().name().should.equal('inclusiveGateway');
             _sqToScriptTask.target().name().should.equal('scriptTask');
             _sqToScriptTask.hasCondition().should.be.true;
-            _sqToScriptTask.scriptParams().count().should.equal(2);
-            _sqToScriptTask.scriptParams().get(0).name().should.equal('minValue');
-            _sqToScriptTask.scriptParams().get(0).value().should.equal(0);
-            _sqToScriptTask.scriptParams().get(1).name().should.equal('maxValue');
-            _sqToScriptTask.scriptParams().get(1).value().should.equal(5);
+            _sqToScriptTask.script().parameters().count().should.equal(2);
+            _sqToScriptTask.script().parameters().get(0).name().should.equal('minValue');
+            _sqToScriptTask.script().parameters().get(0).value().should.equal(0);
+            _sqToScriptTask.script().parameters().get(1).name().should.equal('maxValue');
+            _sqToScriptTask.script().parameters().get(1).value().should.equal(5);
         })
     })
 });

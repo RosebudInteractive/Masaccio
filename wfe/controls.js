@@ -10,6 +10,7 @@ var controls = [
     {className: 'FlowNode',                 component: './flowNode',                        guid: '199a78b0-b555-4f97-9d8f-41234ae7f06f'},
     {className: 'SequenceFlow',             component: './sequenceFlow',                    guid: 'c7a6cd70-653f-4e12-b6dc-8a6085b7fc7f'},
     {className: 'NodeProperties',           component: './NodeProps/nodeProperties',        guid: '867a7d2e-8868-48f7-8086-3d2817aec604'},
+    {className: 'UserScript',               component: './userScript',                      guid: '410b06ae-205e-4610-a1c6-d6dcc901e4ac'},
     /*Activities*/
     {className: 'Activity',                 component: './Activities/activity',             guid: '173a2e1f-909d-432d-9255-895f35335f65'},
     {className: 'UserTask',                 component: './Activities/userTask',             guid: 'e9af2d49-ef3c-4b9a-b693-36a9f7a5cd4a'},

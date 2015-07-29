@@ -96,7 +96,6 @@ var Engine = require('./wfe/engine');
 var EngineSingleton = require('./wfe/engineSingleton');
 
 var TestClient = require('./test/testClient');
-var TestDefinitions = require('./test/definitions')
 
 // objects
 var dbc = uccelloServ.getUserMgr().getController();
@@ -106,7 +105,6 @@ var cm = new ControlMgr({ controller: db.pvt.controller, dbparams: dbp});
 
 // meta
 new UObject(cm);
-
 // создаем объект
 
 var engine = new Engine(cm, { ini: { fields: { Name: 'Engine', State: 'Ok' } } });
@@ -119,9 +117,9 @@ engine.notifier.registerObserver(testClient, testClient.handleNewRequest);
 http.createServer(app).listen(1328);
 console.log('[%s] : => Сервер запущен на http://127.0.0.1:1328/masaccio', (new Date()).toLocaleTimeString());
 
-var _def1 = TestDefinitions.exclusiveGatewayTest_Definition(cm);
-var _def2 = TestDefinitions.inclusiveGatewayTest_Definition(cm);
-EngineSingleton.getInstance().addProcessDefinition(_def1);
-EngineSingleton.getInstance().addProcessDefinition(_def2);
-
-EngineSingleton.getInstance().startProcessInstance(_def2.definitionID);
+//var _def1 = TestDefinitions.exclusiveGatewayTest_Definition(cm);
+//var _def2 = TestDefinitions.inclusiveGatewayTest_Definition(cm);
+//EngineSingleton.getInstance().addProcessDefinition(_def1);
+//EngineSingleton.getInstance().addProcessDefinition(_def2);
+//
+//EngineSingleton.getInstance().startProcessInstance(_def2.definitionID);

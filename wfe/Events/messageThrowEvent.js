@@ -21,6 +21,13 @@ define([
                         type : 'ref',
                         res_elem_type : Controls.guidOf('MessageFlow')
                     }
+                },
+                {
+                    fname : 'InitScript',
+                    ftype : {
+                        type : 'ref',
+                        res_elem_type : Controls.guidOf('UserScript')
+                    }
                 }
             ],
 

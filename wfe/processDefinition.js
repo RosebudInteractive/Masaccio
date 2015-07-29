@@ -43,7 +43,8 @@ define([
                 {'cname' : 'Parameters', 'ctype' : 'Parameter'},
                 {'cname' : 'Connectors', 'ctype' : 'SequenceFlow'},
                 {'cname' : 'Nodes', 'ctype' : 'FlowNode'},
-                {'cname' : 'Requests', 'ctype' : 'Request'}
+                {'cname' : 'Requests', 'ctype' : 'Request'},
+                {'cname' : 'Scripts', 'ctype' : 'UserScript'}
 
             ],
             //</editor-fold>
@@ -72,6 +73,21 @@ define([
 
             getControlManager : function() {
                 return this.pvt.controlMgr;
+            },
+
+            scripts : function(){
+                return this.getCol('Scripts');
+            },
+
+            getOrCreateScript : function(script) {
+                for (var i = 0; i < this.scripts().count(); i++) {
+                    var _script = this.scripts().get(i);
+                    if (_script.isEqualTo()) {
+                        return _script;
+                    }
+                }
+
+
             },
 
             addParameter : function(parameterName) {

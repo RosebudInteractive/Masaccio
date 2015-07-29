@@ -19,6 +19,7 @@ define(
             metaCols: [
                 {'cname' : 'Requests', 'ctype' : 'Request'},
                 {'cname' : 'Responses', 'ctype' : 'Request'}
+                //{'cname' : 'Scripts', 'ctype' : 'UserScript'}
             ],
 
             requests : function(){
