@@ -205,6 +205,7 @@ describe('Engine', function(){
 
             it('Добавить 1 определение - OK', function(done) {
                 var _definition = EngineSingleton.getInstance().newMessageDefinition();
+                _definition.name('Test');
                 EngineSingleton.getInstance().addMessageDefinition(_definition, function(answer) {
                     answer.result.should.equal('OK');
                     done();
@@ -213,7 +214,9 @@ describe('Engine', function(){
 
             it('Добавить 2 одинаковых определения - ERROR', function(done) {
                 var _definition1 = EngineSingleton.getInstance().newMessageDefinition();
+                _definition1.name('Test1');
                 var _definition2 = EngineSingleton.getInstance().newMessageDefinition();
+                _definition2.name('Test2');
                 _definition2.definitionID(_definition1.definitionID());
                 EngineSingleton.getInstance().addMessageDefinition(_definition1);
                 EngineSingleton.getInstance().addMessageDefinition(_definition2, function(answer) {

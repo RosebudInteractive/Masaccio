@@ -10,6 +10,7 @@ define([
         './token',
         './notify',
         './requestStorage',
+        './responseStorage',
         './Gateways/gateway',
         './Gateways/exclusiveGateway',
         'fs',
@@ -18,8 +19,8 @@ define([
         './processDefinition',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
         './Messages/messageDefinition',
-        'util',
-        './../public/logger'
+        './Activities/userTask',
+        './answer'
     ],
     function(
         Process,
@@ -28,6 +29,7 @@ define([
         Token,
         Notify,
         RequestStorage,
+        ResponseStorage,
         Gateway,
         ExclusiveGateway,
         fs,
@@ -36,8 +38,8 @@ define([
         ProcessDefinition,
         UUtils,
         MessageDefinition,
-        Util,
-        Logger
+        UserTask,
+        Answer
     ) {
 
         var wfeInterfaceGUID = "a75970d5-f9dc-4b1b-90c7-f70c37bbbb9b";
@@ -55,7 +57,8 @@ define([
             newProcessDefinition : "function",
             startProcessInstanceAndWait : "function",
             submitResponseAndWait : "function",
-            waitForRequest : "function"
+            waitForRequest : "function",
+            processResponse : 'function'
         };
 
         var Engine = UccelloClass.extend({
@@ -69,6 +72,8 @@ define([
 
                 this.notifier = new Notify();
                 this.requestStorage = new RequestStorage();
+                this.responseStorage = new ResponseStorage();
+
                 this.uploadedProcesses = [];
                 this.tokensArchive = [];
                 this.processDefinitions = [];
@@ -382,7 +387,7 @@ define([
                         }
 
                         var response = _request.createResponse(_request.getParent());
-                        response.fillParams(answer.response)
+                        response.fillParams(answer.response);
 
                         if (_process.isRunning()) {
                             /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
@@ -415,6 +420,126 @@ define([
                 }
 
                 return Controls.MegaAnswer;
+            },
+
+            processResponse : function(message, timeout, callback) {
+
+                var _request = this.requestStorage.getActiveRequest(message.requestID);
+                _request.responseReceived();
+                //var _answer = {};
+                //
+                //function handleAnswer(answer) {
+                //    Logger.info(answer);
+                //
+                //    if (callback) {
+                //        callback(answer);
+                //    }
+                //}
+
+                if (!_request) {
+                    Answer.error('Реквест [%s] не найден среди активных', [message.requestID]).handle(callback);
+                    return Controls.MegaAnswer;
+                }
+
+                var _process = this.findOrUploadProcess(message.processID);
+                if (!_process) {
+                    Answer.error('Процесс [%s] не найден', [message.processID]).handle(callback);
+                    return Controls.MegaAnswer;
+                }
+
+                var _token = _process.getToken(message.tokenID);
+                var _receivingNode = _token.currentNode();
+
+                _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(message.requestID);
+                if (!_request) {
+                    throw 'System Error!'
+                }
+
+                var response = _request.createResponse(_request.getParent());
+                response.fillParams(message.response);
+
+                if ((_receivingNode instanceof UserTask) && (_receivingNode.hasScript())) {
+                    this.responseStorage.addResponseCallback(response, timeout, callback)
+                }
+
+                if (_process.canContinue()) {
+                    if (_process.isRunning()) {
+                        /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
+                        _receivingNode.execute(function () {
+                            _token.execute();
+                        });
+                    } else {
+                        if (!_process.isTokenInQueue(_token)) {
+                            _process.enqueueToken(_token)
+                        }
+
+                        _receivingNode.execute();
+                    }
+                }
+
+                return Controls.MegaAnswer;
+
+                //var _request1 = this.requestStorage.getRequest(message.requestID);
+                //if (_request1 && _request1.isActive()) {
+                //    var _processID = message.processID;
+                //    var _process = this.findOrUploadProcess(_processID);
+                //
+                //    if (!_process) {
+                //        if (callback) {
+                //            console.log('[%s] : ER Процесс [%s] не найден', (new Date()).toLocaleTimeString(), _processID);
+                //            callback({result: 'ERROR', message : 'Процесс не найден'});
+                //        }
+                //    } else {
+                //        if (_process.canContinue()) {
+                //            _process = this.activateProcess(_processID);
+                //        }
+                //
+                //        var _token = _process.getToken(message.tokenID);
+                //
+                //        var _receivingNode = _token.currentNode();
+                //        if ((_receivingNode instanceof UserTask) && (_receivingNode.hasScript())) {
+                //            this.responseStorage.addResponseCallback(re)
+                //        }
+                //
+                //
+                //
+                //        _request1 = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(message.requestID);
+                //        if (!_request1) {
+                //            throw 'Error!'
+                //        }
+                //
+                //        var response = _request1.createResponse(_request1.getParent());
+                //        response.fillParams(message.response)
+                //
+                //        if (_process.isRunning()) {
+                //            /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
+                //            _receivingNode.execute(function () {
+                //                _token.execute();
+                //            });
+                //        } else {
+                //            if (!_process.isTokenInQueue(_token)) {
+                //                _process.enqueueToken(_token)
+                //            }
+                //
+                //            _receivingNode.execute();
+                //        }
+                //        setTimeout(function () {
+                //            /* Todo : результат в callback */
+                //            if (callback) {
+                //                callback({result: 'OK'})
+                //            }
+                //
+                //            _token.execute();
+                //        }, 0);
+                //    }
+                //} else {
+                //    setTimeout(function () {
+                //        /* Todo : результат в callback */
+                //        if (callback) {
+                //            callback({result: 'ERROR'})
+                //        }
+                //    }, 0);
+                //}
             },
 
             submitResponseAndWait : function(response, requestName, timeout, callback) {
@@ -502,24 +627,13 @@ define([
             },
 
             addMessageDefinition : function(definition, callback) {
-                var _answer = {}
-
                 if (this.messageDefinitions.every(function(element) {
                         element.definitionID() != definition.definitionID()
                     })) {
                     this.messageDefinitions.push(definition);
-                    _answer.result = 'OK';
-                    _answer.message = Util.format('Добавлено описание сообщения [%s]', definition.name());
-                    //console.log('[%s] : => Добавлено описание сообщения [%s]', (new Date()).toLocaleTimeString(), definition.name())
+                    Answer.success('Добавлено описание сообщения [%s]', definition.name()).handle(callback);
                 } else {
-                    _answer.result = 'ERROR';
-                    _answer.message = Util.format('Описание сообщения [%s] уже существует', definition.definitionID());
-                }
-
-                Logger.info(_answer);
-
-                if (callback) {
-                    callback(_answer)
+                    Answer.error('Описание сообщения [%s] уже существует', definition.definitionID()).handle(callback);
                 }
             },
 

@@ -17,7 +17,8 @@ define([
         './../public/utils',
         './parameter',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
-        './controls'
+        './controls',
+        './userScript'
     ],
     function(
         UObject,
@@ -25,7 +26,8 @@ define([
         Utils,
         Parameter,
         UUtils,
-        Controls
+        Controls,
+        UserScript
     ){
         var SequenceFlow = UObject.extend({
 
@@ -50,21 +52,29 @@ define([
                         res_elem_type : Controls.guidOf('FlowNode')
                     }
                 },
-                {fname : 'ScriptName',      ftype : 'string'},
-                {fname : 'ScriptMethod',    ftype : 'string'}
+                {
+                    fname: 'Script',
+                    ftype: {
+                        type: 'ref',
+                        res_elem_type: Controls.guidOf('UserScript')
+                    }
+                }
+                //{fname : 'ScriptName',      ftype : 'string'},
+                //{fname : 'ScriptMethod',    ftype : 'string'}
             ],
-            metaCols: [
-                {'cname' : 'Parameters', 'ctype' : 'Parameter'}
-            ],
+            //metaCols: [
+            //    {'cname' : 'Parameters', 'ctype' : 'Parameter'}
+            //],
 
             init: function(cm, params){
                 //if (!params) { throw 'не указан params SequenceFlow'};
                 UccelloClass.super.apply(this, [cm, params]);
-                if (!params) { return };
+                if (!params) { return }
+
                 if (!this.id()) {
                     this.id(UUtils.guid());
                     this.isDefault(false);
-                };
+                }
             },
 
             clone : function(root, params){
@@ -77,11 +87,13 @@ define([
                     _sequence.id(this.id());
                     _sequence.state(this.state());
                     _sequence.isDefault(this.isDefault());
-                    _sequence.scriptName(this.scriptName());
-                    _sequence.scriptMethod(this.scriptMethod());
-                    Utils.copyCollection(this.scriptParams(), _sequence.scriptParams());
                     _sequence.source(root.findNode(this.source()));
                     _sequence.target(root.findNode(this.target()));
+
+                    if (this.hasCondition()) {
+                        var _script = this.script().asSimpleObject();
+                        _sequence.script(_sequence.getRoot().getOrCreateScript(_script));
+                    }
                 }
 
                 return _sequence;
@@ -115,19 +127,22 @@ define([
                 return this._genericSetter("IsDefault",value);
             },
 
-            scriptName: function(value) {
-                return this._genericSetter("ScriptName",value);
+            script: function(value) {
+                return this._genericSetter('Script', value);
             },
+            //scriptName: function(value) {
+            //    return this._genericSetter("ScriptName",value);
+            //},
+            //
+            //scriptMethod: function(value) {
+            //    return this._genericSetter("ScriptMethod",value);
+            //},
+            //
+            //scriptParams : function(){
+            //    return this.getCol('Parameters');
+            //},
 
-            scriptMethod: function(value) {
-                return this._genericSetter("ScriptMethod",value);
-            },
-
-            scriptParams : function(){
-                return this.getCol('Parameters');
-            },
-
-            connect : function(from, to, expession) {
+            connect : function(from, to, script) {
                 this.source(from);
                 this.target(to);
 
@@ -135,52 +150,44 @@ define([
                 this.source().addOutgoing(this);
                 this.target().addIncoming(this);
 
-                if (expession) {
-                    this.setUserScript(expession);
+                if (script) {
+                    this.setUserScript(script);
                 }
             },
+
 
             setUserScript : function(script) {
-                if (script.hasOwnProperty('moduleName')) {
-                    this.scriptName(script.moduleName);
-                };
-
-                if (script.hasOwnProperty('methodName')) {
-                    this.scriptMethod(script.methodName);
-                };
-
-                if (script.hasOwnProperty('methodParams')) {
-                    for (param in script.methodParams) {
-                        var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'Parameters'});
-                        _param.name(param);
-                        _param.value(script.methodParams[param]);
-                    }
-                }
+                this.script(this.getRoot().getOrCreateScript(script));
             },
+
+            //setUserScript : function(script) {
+            //    if (script.hasOwnProperty('moduleName')) {
+            //        this.scriptName(script.moduleName);
+            //    };
+            //
+            //    if (script.hasOwnProperty('methodName')) {
+            //        this.scriptMethod(script.methodName);
+            //    };
+            //
+            //    if (script.hasOwnProperty('methodParams')) {
+            //        for (param in script.methodParams) {
+            //            var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'Parameters'});
+            //            _param.name(param);
+            //            _param.value(script.methodParams[param]);
+            //        }
+            //    }
+            //},
 
             getUserScript : function() {
                 if (this.hasCondition()) {
-                    var _result = {};
-                    _result.moduleName = (this.scriptName());
-                    _result.methodName = (this.scriptMethod());
-
-                    if (this.scriptParams().count() > 0) {
-                        _result.methodParams = {};
-
-                        for (var i = 0; i < this.scriptParams().count(); i++) {
-                            var _param = this.scriptParams().get(i);
-                            _result.methodParams[_param.name()] = _param.value()
-                        }
-                    }
-
-                    return _result;
+                    return this.script().asSimpleObject();
                 } else {
                     return null
-                };
+                }
             },
 
             hasCondition : function() {
-                return ((this.scriptName()) && (this.scriptMethod())) ? true : false;
+                return (this.script() ? true : false);
             },
 
              checkConditionSatisfied : function(scriptObject) {

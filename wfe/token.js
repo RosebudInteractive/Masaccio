@@ -77,6 +77,10 @@ define([
                 return this.processInstance().getControlManager();
             },
 
+            getRoot : function() {
+                return this.getParent().getRoot();
+            },
+
             parameters : function() {
                 return this.getCol('Parameters');
             },

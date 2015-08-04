@@ -2,10 +2,10 @@ var Logger = {};
 
 Logger.info = function(message) {
   if (typeof message === 'string') {
-      console.log('[%s] : => Добавлено описание сообщения [%s]', (new Date()).toLocaleTimeString(), message);
+      console.log('[%s] : => %s', (new Date()).toLocaleTimeString(), message);
   } else {
       if ((typeof message === 'object') && (message.hasOwnProperty('message'))) {
-          console.log('[%s] : => Добавлено описание сообщения [%s]', (new Date()).toLocaleTimeString(), message.message);
+          console.log('[%s] : => %s', (new Date()).toLocaleTimeString(), message.message);
       }
       else {
           throw 'undefined message type'

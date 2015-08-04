@@ -69,23 +69,25 @@ define([
             },
 
             isEqualTo : function(scriptObject) {
-                if ((scriptObject.moduleName) && (scriptObject.methodName())) {
-                    var _equal = (this.moduleName() == scriptObject.moduleName) && (this.methodName() == scriptObject.methodName);
-                    if (_equal) {
-                        if (this.parameters().count() > 0) {
-                            if (scriptObject.methodParams) {
-                                _equal = this.parameters().count() == scriptObject.methodParams.length
-                            }
-                        } else {
-                            return true;
-                        }
+                //if ((scriptObject.moduleName) && (scriptObject.methodName())) {
+                //    var _equal = (this.moduleName() == scriptObject.moduleName) && (this.methodName() == scriptObject.methodName);
+                //    if (_equal) {
+                //        if (this.parameters().count() > 0) {
+                //            if (scriptObject.methodParams) {
+                //                _equal = this.parameters().count() == scriptObject.methodParams.length
+                //            }
+                //        } else {
+                //            return true;
+                //        }
+                //
+                //    } else {
+                //        return false;
+                //    }
+                //} else {
+                //    return false;
+                //}
 
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
+                return false;
             },
 
             clone : function(cm, params) {
@@ -105,6 +107,23 @@ define([
                 for (var i = 0; i < source.parameters().count(); i++) {
                     source.parameters().get(i).clone(this.getParent().getControlManager(), {parent  : this, colName : 'ScriptParams'});
                 }
+            },
+
+            asSimpleObject : function() {
+                var _result = {};
+                _result.moduleName = (this.moduleName());
+                _result.methodName = (this.methodName());
+
+                if (this.parameters().count() > 0) {
+                    _result.methodParams = {};
+
+                    for (var i = 0; i < this.parameters().count(); i++) {
+                        var _param = this.parameters().get(i);
+                        _result.methodParams[_param.name()] = _param.value()
+                    }
+                }
+
+                return _result;
             }
 
         });

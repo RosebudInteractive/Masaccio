@@ -16,7 +16,8 @@ define([
         './Activities/scriptTask',
         './Gateways/exclusiveGateway',
         './Gateways/inclusiveGateway',
-        './sequenceFlow'
+        './sequenceFlow',
+        './userScript'
     ],
     function(
         UObject,
@@ -28,7 +29,8 @@ define([
         ScriptTask,
         ExclusiveGateway,
         InclusiveGateway,
-        SequenceFlow
+        SequenceFlow,
+        UserScript
     ){
         var ProcessDefinition = UObject.extend({
 
@@ -79,6 +81,10 @@ define([
                 return this.getCol('Scripts');
             },
 
+            getRoot : function() {
+                return this;
+            },
+
             getOrCreateScript : function(script) {
                 for (var i = 0; i < this.scripts().count(); i++) {
                     var _script = this.scripts().get(i);
@@ -87,7 +93,7 @@ define([
                     }
                 }
 
-
+                return new UserScript(this.getControlManager(), {parent : this, colName : 'Scripts'})
             },
 
             addParameter : function(parameterName) {

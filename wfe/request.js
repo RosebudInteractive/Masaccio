@@ -10,7 +10,8 @@ var requestState = {
     Exposed : 0,
     Acquire : 1,
     Canceled : 2,
-    ResponseReceived : 3
+    ResponseReceived : 3,
+    Done : 4
 };
 
 define([
@@ -120,10 +121,12 @@ define([
             },
 
             fillParams : function(paramsObject) {
-                for (var property in paramsObject) {
-                    var _param = this.findParameter(property);
+                for (var _prop in paramsObject) {
+                    if (!paramsObject.hasOwnProperty(_prop)) continue;
+
+                    var _param = this.findParameter(_prop);
                     if (_param) {
-                        _param.value(paramsObject[property])
+                        _param.value(paramsObject[_prop])
                     }
                 }
             },

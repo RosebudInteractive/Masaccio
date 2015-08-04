@@ -38,10 +38,9 @@ define([
                     }
                 }
             ],
-            metaCols: [
-                {'cname' : 'Scripts', 'ctype' : 'UserScript'}
-                //{'cname' : 'ScriptParams', 'ctype' : 'Parameter'}
-            ],
+            //metaCols: [
+            //    {'cname' : 'Scripts', 'ctype' : 'UserScript'}
+            //],
 
             init: function(cm, params, script){
                 UccelloClass.super.apply(this, [cm, params]);
@@ -53,72 +52,42 @@ define([
                 }
             },
 
-            scripts : function() {
-                return this.getCol('Scripts');
+            getRoot : function() {
+                return this.getParent().getRoot();
             },
-
-            //scriptName: function(value) {
-            //    return this._genericSetter("ScriptName",value);
+            //scripts : function() {
+            //    return this.getCol('Scripts');
             //},
 
             script: function(value) {
-                return this._genericSetter("Script",value);
+                return this._genericSetter('Script', value);
             },
 
-            //scriptMethod: function(value) {
-            //    return this._genericSetter("ScriptMethod",value);
-            //},
-            //
-            //scriptParams : function(){
-            //    return this.getCol('ScriptParams');
-            //},
-
             setUserScript : function(script) {
-                if (!this.script()) {
-                    this.script(new UserScript(this.getControlManager(), {parent : this, colName : 'Scripts'}))
-                }
+                this.script(this.getRoot().getOrCreateScript(script));
 
-                this.script().parse(script);
-
-                //
-                //if (script.hasOwnProperty('moduleName')) {
-                //    this.scriptName(script.moduleName);
-                //};
-                //
-                //if (script.hasOwnProperty('methodName')) {
-                //    this.scriptMethod(script.methodName);
-                //};
-                //
-                //if (script.hasOwnProperty('methodParams')) {
-                //    for (param in script.methodParams) {
-                //        var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'Scripts'});
-                //        _param.name(param);
-                //        _param.value(script.methodParams[param]);
-                //    }
+                //if (!this.script()) {
+                //    this.script(new UserScript(this.getControlManager(), {parent : this.getParent(), colName : 'Scripts'}))
                 //}
+                //
+                //this.script().parse(script);
             },
 
             createInstance : function(cm, params){
                 return new ScriptTask(cm, params);
             },
 
-            assign : function(source, controlManager){
-                UccelloClass.super.apply(this, [source, controlManager]);
+            assign : function(source){
+                UccelloClass.super.apply(this, [source]);
 
-                //this.scriptName(source.scriptName());
-                //this.scriptMethod(source.scriptMethod());
-                //Utils.copyCollection(source.scriptParams(), this.scriptParams());
-                if (source.script()) {
-                    var _script = source.script().clone(this.getControlManager(), {parent : this, colName : 'Scripts'});
-                    this.script(_script);
+                if (source.hasScript()) {
+                    var _script = source.script().asSimpleObject();
+                    this.script(this.getRoot().getOrCreateScript(_script));
                 }
             },
 
             createScriptObject : function(callback) {
                 var _scriptObject = new ScriptObject(this.processInstance());
-                //_scriptObject.moduleName = this.scriptName();
-                //_scriptObject.methodName = this.scriptMethod();
-                //_scriptObject.methodParams = this.scriptParams();
 
                 _scriptObject.moduleName = this.script().moduleName();
                 _scriptObject.methodName = this.script().methodName();
@@ -131,7 +100,7 @@ define([
                         subject.processInstance().activate();
                         callback();
                     }
-                )
+                );
 
                 return _scriptObject;
             },
@@ -147,7 +116,7 @@ define([
             },
 
             hasScript : function() {
-                return (this.script())//Method() && this.scriptName());
+                return (this.script() ? true : false);
             }
         });
 

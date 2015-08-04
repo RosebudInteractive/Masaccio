@@ -22,7 +22,8 @@ define([
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
         './sequenceFlow',
         './engineSingleton',
-        './controls'
+        './controls',
+        './userScript'
     ],
     function(
         UObject,
@@ -30,7 +31,8 @@ define([
         UUtils,
         SequenceFlow,
         EngineSingleton,
-        Controls
+        Controls,
+        UserScript
     ){
         var Process = UObject.extend({
 
@@ -246,6 +248,10 @@ define([
                 return this
             },
 
+            getRoot : function() {
+                return this;
+            },
+
             canContinue : function() {
                 return (this.state() != processStates.WaitingScriptAnswer)
             },
@@ -304,6 +310,17 @@ define([
                         return _node;
                     }
                 }
+            },
+
+            getOrCreateScript : function(script) {
+                for (var i = 0; i < this.scripts().count(); i++) {
+                    var _script = this.scripts().get(i);
+                    if (_script.isEqualTo()) {
+                        return _script;
+                    }
+                }
+
+                return new UserScript(this.getControlManager(), {parent : this, colName : 'Scripts'})
             },
 
             findConnector : function(connector) {

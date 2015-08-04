@@ -6,10 +6,25 @@ if (typeof define !== 'function') {
     var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
+var _instance;
+
+var getItemIndexByPredicate = function(predicate){
+    var _index = -1;
+    _instance.requests.some(function(element, index) {
+        if (predicate && predicate(element)) {
+            _index = index;
+            return true;
+        }
+    });
+
+    return _index
+};
+
 define(
     [],
     function() {
-        return UccelloClass.extend({
+        if (!_instance) {
+            _instance = UccelloClass.extend({
                 init: function () {
                     this.requests = [];
                 },
@@ -28,8 +43,28 @@ define(
                     }
                 },
 
+                getActiveRequest: function (requestID) {
+                    var _index = getItemIndexByPredicate(function(element) {
+                        (element.ID() == requestID) && element.isActive()
+                    });
+
+                    if (_index > -1) {
+                        return this.requests[_index]
+                    } else {
+                        return null
+                    }
+                },
+
                 isRequestExists: function (requestID) {
                     return (this.getRequest(requestID) ? true : false);
+                },
+
+                isActiveRequestExists : function(requestID) {
+                    var _index = getItemIndexByPredicate(function(element) {
+                        (element.ID() == requestID) && element.isActive()
+                    });
+
+                    return _index > -1;
                 },
 
                 getProcessRequests: function (processID) {
@@ -51,8 +86,10 @@ define(
                         }
                     })
                 }
-            }
-        );
+            })
+        }
+
+        return _instance;
     }
 
 )
