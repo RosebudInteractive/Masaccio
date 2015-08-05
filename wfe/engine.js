@@ -426,15 +426,6 @@ define([
 
                 var _request = this.requestStorage.getActiveRequest(message.requestID);
                 _request.responseReceived();
-                //var _answer = {};
-                //
-                //function handleAnswer(answer) {
-                //    Logger.info(answer);
-                //
-                //    if (callback) {
-                //        callback(answer);
-                //    }
-                //}
 
                 if (!_request) {
                     Answer.error('Реквест [%s] не найден среди активных', [message.requestID]).handle(callback);
@@ -454,6 +445,8 @@ define([
                 if (!_request) {
                     throw 'System Error!'
                 }
+
+                _request.responseReceived();
 
                 var response = _request.createResponse(_request.getParent());
                 response.fillParams(message.response);

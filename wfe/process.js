@@ -313,14 +313,17 @@ define([
             },
 
             getOrCreateScript : function(script) {
+                var _script;
                 for (var i = 0; i < this.scripts().count(); i++) {
-                    var _script = this.scripts().get(i);
+                    _script = this.scripts().get(i);
                     if (_script.isEqualTo()) {
                         return _script;
                     }
                 }
 
-                return new UserScript(this.getControlManager(), {parent : this, colName : 'Scripts'})
+                _script = new UserScript(this.getControlManager(), {parent : this, colName : 'Scripts'});
+                _script.parse(script);
+                return _script;
             },
 
             findConnector : function(connector) {

@@ -235,9 +235,9 @@ define([
 
             createSequenceScriptObject : function(sequence, resultCallback) {
                 var _scriptObject = new ScriptObject(this.processInstance());
-                _scriptObject.moduleName = sequence.scriptName();
-                _scriptObject.methodName = sequence.scriptMethod();
-                _scriptObject.methodParams = sequence.scriptParams();
+                _scriptObject.moduleName = sequence.script().moduleName();
+                _scriptObject.methodName = sequence.script().methodName();
+                _scriptObject.methodParams = sequence.script().parameters();
 
                 var that = this;
                 _scriptObject.setCallback(
