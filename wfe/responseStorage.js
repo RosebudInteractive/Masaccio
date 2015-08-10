@@ -24,7 +24,7 @@ define(
                 addResponseCallback: function (response, timeout, callback) {
                     if (!this.isResponseExists(response.ID())) {
                         var _item = {responseID : response.ID(), callback : callback, state : State.NEW}
-                        this.requests.push(_item);
+                        this.storage.push(_item);
 
                         var that = this;
                         _item.timer = setInterval(function () {

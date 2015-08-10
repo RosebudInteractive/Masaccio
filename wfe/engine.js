@@ -251,6 +251,8 @@ define([
             },
 
             waitForRequest : function(processID, tokenID, requestID, timeout, callback){
+                var _isNeedNotify = this.requestStorage.isActiveRequestExistsByName(requestID);
+
                 this.notifier.registerObserverOnRequest(
                     {
                         processID: processID,
@@ -258,7 +260,11 @@ define([
                         requestName: requestID
                     },
                     timeout,
-                    callback)
+                    callback);
+
+                if (_isNeedNotify) {
+                    this.notifier.notify(this.requestStorage.getRequestParamsByName(requestID))
+                }
                 return Controls.MegaAnswer;
             },
 
@@ -356,7 +362,7 @@ define([
             },
 
             exposeRequest : function(request, eventParams){
-                this.requestStorage.addRequest(request);
+                this.requestStorage.addRequest(request, eventParams);
                 console.log('[%s] : => Выставлен request [%s]', (new Date()).toLocaleTimeString(), request.name());
                 this.notifier.notify(eventParams);
             },
@@ -594,7 +600,7 @@ define([
 
             getRequests : function(processGuid) {
                 if (!processGuid) {
-                    return this.requestStorage.requests
+                    return this.requestStorage.storage
                 } else {
                     return this.requestStorage.getProcessRequests(processGuid)
                 }

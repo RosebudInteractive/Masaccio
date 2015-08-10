@@ -8,17 +8,27 @@ if (typeof define !== 'function') {
 
 var _instance;
 
-var getItemIndexByPredicate = function(predicate){
-    var _index = -1;
-    _instance.requests.some(function(element, index) {
-        if (predicate && predicate(element)) {
-            _index = index;
-            return true;
-        }
-    });
-
-    return _index
-};
+//var getItemIndexByPredicate = function(predicate){
+//    var _index = -1;
+//    _instance.storage.some(function(element, index) {
+//        if (predicate && predicate(element)) {
+//            _index = index;
+//            return true;
+//        }
+//    });
+//
+//    return _index
+//};
+//
+//var getItemByPredicate = function(predicate) {
+//    var _index = getItemIndexByPredicate(predicate);
+//
+//    if (_index > -1) {
+//        return this.storage[_index]
+//    } else {
+//        return null
+//    }
+//};
 
 define(
     [],
@@ -26,32 +36,52 @@ define(
         if (!_instance) {
             _instance = UccelloClass.extend({
                 init: function () {
-                    this.requests = [];
+                    this.storage = [];
                 },
 
-                addRequest: function (request) {
+                getItemIndexByPredicate : function(predicate) {
+                    var _index = -1;
+                    this.storage.some(function (element, index) {
+                        if (predicate && predicate(element)) {
+                            _index = index;
+                            return true;
+                        }
+                    });
+
+                    return _index
+                },
+
+                getItemByPredicate : function(predicate) {
+                    var _index = this.getItemIndexByPredicate(predicate);
+
+                    if (_index > -1) {
+                        return this.storage[_index]
+                    } else {
+                        return null
+                    }
+                },
+
+                addRequest: function (request, eventParams) {
                     if (!this.isRequestExists(request.ID())) {
-                        this.requests.push(request)
+                        this.storage.push({request : request, params : eventParams})
                     }
                 },
 
                 getRequest: function (requestID) {
-                    for (var i = 0; i < this.requests.length; i++) {
-                        if (this.requests[i].ID() == requestID) {
-                            return this.requests[i]
+                    for (var i = 0; i < this.storage.length; i++) {
+                        if (this.storage[i].request.ID() == requestID) {
+                            return this.storage[i].request
                         }
                     }
                 },
 
                 getActiveRequest: function (requestID) {
-                    var _index = getItemIndexByPredicate(function(element) {
-                        (element.ID() == requestID) && element.isActive()
+                    var _item = this.getItemByPredicate(function(element) {
+                        return (element.request.ID() == requestID) && element.request.isActive()
                     });
 
-                    if (_index > -1) {
-                        return this.requests[_index]
-                    } else {
-                        return null
+                    if (_item) {
+                        return _item.request
                     }
                 },
 
@@ -60,8 +90,16 @@ define(
                 },
 
                 isActiveRequestExists : function(requestID) {
-                    var _index = getItemIndexByPredicate(function(element) {
-                        (element.ID() == requestID) && element.isActive()
+                    var _index = this.getItemIndexByPredicate(function(element) {
+                        return (element.request.ID() == requestID) && element.request.isActive()
+                    });
+
+                    return _index > -1;
+                },
+
+                isActiveRequestExistsByName : function(requestName) {
+                    var _index = this.getItemIndexByPredicate(function(element) {
+                        return (element.request.name() == requestName) && element.request.isActive()
                     });
 
                     return _index > -1;
@@ -69,13 +107,22 @@ define(
 
                 getProcessRequests: function (processID) {
                     var _requests = [];
-                    this.requests.forEach(function (item) {
-                        if (item.processID() == processID) {
-                            _requests.push(item);
+                    this.storage.forEach(function (item) {
+                        if (item.request.processID() == processID) {
+                            _requests.push(item.request);
                         }
                     });
 
                     return _requests;
+                },
+
+                getRequestParamsByName : function(requestName) {
+                    var _item = this.getItemByPredicate(function(element) {
+                        return (element.request.name() == requestName)
+                    });
+                    if (_item) {
+                        return _item.params
+                    }
                 },
 
                 cancelActiveRequestsForProcess: function (processID) {
