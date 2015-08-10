@@ -542,15 +542,17 @@ define([
             },
 
             saveProcess : function(processID) {
-                this.serializeProcess(processID);
-                var _index = this.getProcessIndex(function(element) {
-                    return element.processID() == processID
-                });
+                console.log('[%s] : {{ А ничего пока не выгружаем', (new Date()).toLocaleTimeString())
 
-                if (_index != -1) {
-                    this.uploadedProcesses.push({processID : processID, isFinished : this.processIntsances[_index].isFinished()});
-                    this.processIntsances.splice(_index, 1);
-                }
+                //this.serializeProcess(processID);
+                //var _index = this.getProcessIndex(function(element) {
+                //    return element.processID() == processID
+                //});
+                //
+                //if (_index != -1) {
+                //    this.uploadedProcesses.push({processID : processID, isFinished : this.processIntsances[_index].isFinished()});
+                //    this.processIntsances.splice(_index, 1);
+                //}
             },
 
             serializeProcess : function(processID) {

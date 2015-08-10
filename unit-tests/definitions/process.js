@@ -37,7 +37,7 @@ var Definitions = {
 
         _definition.addParameter('param1').value(3);
 
-        var _start = _definition.addActivity('start')
+        var _start = _definition.addActivity('start');
         var _gateway = _definition.addInclusiveGateway('inclusiveGateway');
 
         var _userTask = _definition.addUserTask('userTask');
@@ -57,8 +57,58 @@ var Definitions = {
         _definition.connect(_gateway, _scriptTask, _script3);
 
         return _definition;
+    },
+
+    testDefinitionWithLoop : function() {
+
+        /*
+                              +---------------+
+                              |               |
+         +---------+   +------v-----+   +-----+-----+   +----------+
+         | _start  +---> _userTask  +---> _gateway  +---> _finish  |
+         +---------+   +------------+   +-----------+   +----------+
+         */
+
+        var _definition = EngineSingleton.getInstance().newProcessDefinition();
+        _definition.definitionID('219612b1-259c-4af6-8bba-959db2526ad7');
+        _definition.name('Тестовый процесс с петлей');
+
+        // Добавим параметр процесса, который будем потом изменять и контролировать
+        _definition.addParameter('param1').value(0);
+
+        // Добавляем узлы
+        var _start = _definition.addActivity('start');
+        var _userTask = _definition.addUserTask('userTask', {
+            moduleName : 'Test/Process/CopyDefinitionStruct/script1',
+            methodName : 'execScript'
+        });
+        // UserTask-У добавим реквест с параметром
+        _userTask.addRequest('request1').addParameter('request_param1');
+
+        var _finish = _definition.addActivity('finish');
+        var _gateway = _definition.addInclusiveGateway('inclusiveGateway');
+
+        // Соединим узлы
+        // Первые два без условий
+        _definition.connect(_start, _userTask);
+        _definition.connect(_userTask, _gateway);
+
+        // gateway с условиями
+        _definition.connect(_gateway, _userTask, {
+            moduleName : 'Test/Process/CopyDefinitionStruct/sequence',
+            methodName : 'execScript',
+            methodParams : {minValue : 0, maxValue : 2}
+        });
+
+        _definition.connect(_gateway, _finish, {
+            moduleName : 'Test/Process/CopyDefinitionStruct/sequence',
+            methodName : 'execScript',
+            methodParams : {minValue : 2, maxValue : 5}}
+        );
+
+        return _definition;
     }
-}
+};
 
 
 if (module) {module.exports = Definitions}

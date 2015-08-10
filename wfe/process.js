@@ -97,7 +97,7 @@ define([
 
                     if ((_source) && (_target)) {
                         var _connector = new SequenceFlow(this.getControlManager(), {parent  : this, colName : 'Connectors'});
-                        _connector.name(_defConnector.name())
+                        _connector.name(_defConnector.name());
                         _connector.connect(_source, _target, _script)
                     }
                 }

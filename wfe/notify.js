@@ -33,22 +33,21 @@ define([],
 
             notify: function (eventParams) {
                 this.observers.forEach(function (item, i, arr) {
-                    if (!item.requestParams) {
-                        item.callback({result: 'OK', requestInfo: eventParams});
-                        if (item.timer) {
-                            clearInterval(item.timer);
-                            arr.splice(i, 1);
-                        }
-                    } else {
-                        if ((item.requestParams.processID == eventParams.processID) &&
-                            (item.requestParams.tokenID == eventParams.tokenID) &&
-                            (item.requestParams.requestName == eventParams.requestName)) {
-
+                    if (item.requestParams) {
+                        var _isProcessEqual = item.requestParams.processID == eventParams.processID;
+                        var _isTokenEqual = (!item.requestParams.tokenID) || ((item.requestParams.tokenID) && (item.requestParams.tokenID == eventParams.tokenID));
+                        var _isRequestNameEqual = item.requestParams.requestName == eventParams.requestName;
+                        if (_isProcessEqual && _isTokenEqual && _isRequestNameEqual) {
                             if (item.timer) {
                                 clearInterval(item.timer)
                             }
-                            ;
                             item.callback({result: 'OK', requestInfo: eventParams});
+                            arr.splice(i, 1);
+                        }
+                    } else {
+                        item.callback({result: 'OK', requestInfo: eventParams});
+                        if (item.timer) {
+                            clearInterval(item.timer);
                             arr.splice(i, 1);
                         }
                     }

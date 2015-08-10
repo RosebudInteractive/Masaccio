@@ -123,6 +123,10 @@ define([
                         this.currentNode().calcOutgoingNodes(function(result) {
                             EngineSingleton.getInstance().activateProcess(that.processInstance().processID());
                             EngineSingleton.getInstance().startOutgoingNodes(that);
+                            //var _process = EngineSingleton.getInstance().findOrUploadProcess(that.processInstance().processID());
+                            //EngineSingleton.getInstance().activateProcess(_process.processID());
+                            //var _token = _process.getToken(that.tokenID());
+                            //EngineSingleton.getInstance().startOutgoingNodes(that);
                         });
 
                         break;
@@ -178,8 +182,10 @@ define([
             executeNode : function() {
                 var that = this;
                 this.currentNode().execute(function() {
-                    EngineSingleton.getInstance().activateProcess(that.processInstance().processID());
-                    EngineSingleton.getInstance().switchTokens(that);
+                    var _process = EngineSingleton.getInstance().findOrUploadProcess(that.processInstance().processID());
+                    EngineSingleton.getInstance().activateProcess(_process.processID());
+                    var _token = _process.getToken(that.tokenID());
+                    EngineSingleton.getInstance().switchTokens(_token);
                 });
                 if (this.hasNewRequest() && this.currentNode().isWaitingRequest()) {
                     var _nodeProps = this.getPropertiesOfNode(this.currentNode().name());

@@ -7,8 +7,6 @@ if (typeof define !== 'function') {
     var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
-/* Todo : возможно необходимо промежуточное наследование Activity -> Task -> UserTask */
-
 define(
     ['./scriptTask', './../request', './../flowNode', './../controls', './activity'],
     function(ScriptTask, Request, FlowNode, Controls, Activity){
@@ -19,7 +17,6 @@ define(
             metaCols: [
                 {'cname' : 'Requests', 'ctype' : 'Request'},
                 {'cname' : 'Responses', 'ctype' : 'Request'}
-                //{'cname' : 'Scripts', 'ctype' : 'UserScript'}
             ],
 
             requests : function(){
@@ -32,6 +29,17 @@ define(
 
             createInstance : function(cm, params){
                 return new UserTask(cm, params);
+            },
+
+            getUnhandledResponse : function() {
+                var _responses = this.token().getPropertiesOfNode(this.name()).responses();
+                for (var i = 0; i < _responses.count(); i++) {
+                    if (_responses.get(i).state() != Request.state.Done) {
+                        return _responses.get(i)
+                    }
+                }
+
+                return null;
             },
 
             copyCollectionDefinitions : function(source, process) {
@@ -58,12 +66,14 @@ define(
                 }
             },
 
+            hasUnhandledResponse: function () {
+                return this.getUnhandledResponse() ? true : false;
+            },
+
             execute : function(callback) {
                 function logResponses() {
                     console.log('[%s] : => Узел %s ожидает ответа', (new Date()).toLocaleTimeString(), this.name());
-                    //var _requestCount = this.processInstance().currentToken().getPropertiesOfNode(this.name()).requests().count();
                     var _requestCount = this.token().getPropertiesOfNode(this.name()).requests().count();
-                    //var _responseCount = this.processInstance().currentToken().getPropertiesOfNode(this.name()).responses().count();
                     var _responseCount = this.token().getPropertiesOfNode(this.name()).responses().count();
                     console.log('[%s] : !! Ответов %d из %d', (new Date()).toLocaleTimeString(), _responseCount, _requestCount);
                 }
@@ -82,7 +92,6 @@ define(
                 else if (this.state() == FlowNode.state.WaitingRequest) {
                     logResponses.call(this);
 
-                    //if (this.processInstance().currentToken().getPropertiesOfNode(this.name()).isAllResponseReceived()){
                     if (this.token().getPropertiesOfNode(this.name()).isAllResponseReceived()){
                         this.state(FlowNode.state.ExecutionComplete);
                         if (this.processInstance().isWaitingScriptAnswer()){
@@ -94,16 +103,23 @@ define(
                     } else {
                         this.state(FlowNode.state.WaitingRequest)
                     }
+
+                    if (this.hasScript() && this.hasUnhandledResponse()) {
+                        var _state = this.state();
+                        UccelloClass.super.apply(this, [callback]);
+                        this.state(_state);
+                        return;
+                    }
                 }
                 else {
                     console.log('[%s] : => Узел отработал %s', (new Date()).toLocaleTimeString(), this.name());
                     this.state(FlowNode.state.ExecutionComplete)
                 }
 
-                if ((this.state() == FlowNode.state.ExecutionComplete) && this.hasScript()) {
-                    UccelloClass.super.apply(this, [callback]);
-                    return;
-                }
+                //if ((this.state() == FlowNode.state.ExecutionComplete) && this.hasScript()) {
+                //    UccelloClass.super.apply(this, [callback]);
+                //    return;
+                //}
 
 
                 this.callExecuteCallBack(callback);
@@ -111,6 +127,15 @@ define(
 
             cancel : function() {
 
+            },
+
+            createScriptObject : function(callback) {
+                var _scriptObject = UccelloClass.super.apply(this, [callback]);
+                var _response = this.getUnhandledResponse();
+                _response.state(Request.state.Done);
+                _scriptObject.responses = _response;
+
+                return _scriptObject;
             },
 
             addRequest : function(name) {

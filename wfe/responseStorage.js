@@ -14,8 +14,8 @@ var State = {
 Object.freeze(State);
 
 define(
-    [],
-    function() {
+    ['./answer'],
+    function(Answer) {
         return UccelloClass.extend({
                 init: function () {
                     this.responses = [];
@@ -23,7 +23,16 @@ define(
 
                 addResponseCallback: function (response, timeout, callback) {
                     if (!this.isResponseExists(response.ID())) {
-                        this.requests.push({responseID : response.ID(), callback : callback, state : State.NEW});
+                        var _item = {responseID : response.ID(), callback : callback, state : State.NEW}
+                        this.requests.push(_item);
+
+                        var that = this;
+                        _item.timer = setInterval(function () {
+                            clearInterval(_item.timer);
+
+                            callback(Answer.error('Превышен интервал ожидания'));
+                            _item.state = State.EXECUTED
+                        }, timeout)
                     }
                 },
 
@@ -59,8 +68,10 @@ define(
                 executeResponseCallback : function(responseID, result) {
                     var _item = this.getResponse(responseID);
                     if (_item) {
-                        _item.callback(result);
-                        _item.state = State.EXECUTED;
+                        if (_item.state == State.NEW) {
+                            _item.callback(result);
+                            _item.state = State.EXECUTED;
+                        }
                     } else {
                         throw 'Err';
                     }

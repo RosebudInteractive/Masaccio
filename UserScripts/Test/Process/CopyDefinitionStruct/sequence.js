@@ -19,7 +19,7 @@ define(
                     var _param = this.scriptObject.processFacade.findParameter('param1')
                     var _result;
                     if (_param) {
-                        _result = (_param.value() > params.minValue) && (_param.value() < params.maxValue);
+                        _result = (_param.value() > params.minValue) && (_param.value() <= params.maxValue);
                     } else {
                         _result = false;
                     }

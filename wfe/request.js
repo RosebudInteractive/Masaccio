@@ -107,6 +107,7 @@ define([
                 _response.processID(this.processID());
                 _response.tokenID(this.tokenID());
                 Utils.copyCollection(this.parameters(), _response.parameters());
+                _response.state(requestState.ResponseReceived);
 
                 return _response;
             },

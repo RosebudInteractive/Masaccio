@@ -9,7 +9,7 @@ if (typeof define !== 'function') {
 var sequenceState = {
     Unchecked : 0,
     Checked : 1
-}
+};
 
 define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
@@ -59,15 +59,9 @@ define([
                         res_elem_type: Controls.guidOf('UserScript')
                     }
                 }
-                //{fname : 'ScriptName',      ftype : 'string'},
-                //{fname : 'ScriptMethod',    ftype : 'string'}
             ],
-            //metaCols: [
-            //    {'cname' : 'Parameters', 'ctype' : 'Parameter'}
-            //],
 
             init: function(cm, params){
-                //if (!params) { throw 'не указан params SequenceFlow'};
                 UccelloClass.super.apply(this, [cm, params]);
                 if (!params) { return }
 
@@ -130,17 +124,6 @@ define([
             script: function(value) {
                 return this._genericSetter('Script', value);
             },
-            //scriptName: function(value) {
-            //    return this._genericSetter("ScriptName",value);
-            //},
-            //
-            //scriptMethod: function(value) {
-            //    return this._genericSetter("ScriptMethod",value);
-            //},
-            //
-            //scriptParams : function(){
-            //    return this.getCol('Parameters');
-            //},
 
             connect : function(from, to, script) {
                 this.source(from);
@@ -159,24 +142,6 @@ define([
             setUserScript : function(script) {
                 this.script(this.getRoot().getOrCreateScript(script));
             },
-
-            //setUserScript : function(script) {
-            //    if (script.hasOwnProperty('moduleName')) {
-            //        this.scriptName(script.moduleName);
-            //    };
-            //
-            //    if (script.hasOwnProperty('methodName')) {
-            //        this.scriptMethod(script.methodName);
-            //    };
-            //
-            //    if (script.hasOwnProperty('methodParams')) {
-            //        for (param in script.methodParams) {
-            //            var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'Parameters'});
-            //            _param.name(param);
-            //            _param.value(script.methodParams[param]);
-            //        }
-            //    }
-            //},
 
             getUserScript : function() {
                 if (this.hasCondition()) {

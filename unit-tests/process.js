@@ -13,6 +13,8 @@ var InclusiveGateway = require(PATH.engine + 'Gateways/inclusiveGateway');
 var UserTask = require(PATH.engine + 'Activities/userTask');
 var ScriptTask = require(PATH.engine + 'Activities/scriptTask');
 
+var EngineSingleton = require(PATH.engine + 'engineSingleton');
+
 
 describe('Process', function(){
     describe('#createProcess', function(){
@@ -93,6 +95,30 @@ describe('Process', function(){
             _sqToScriptTask.script().parameters().get(1).name().should.equal('maxValue');
             _sqToScriptTask.script().parameters().get(1).value().should.equal(5);
         })
-    })
+    });
+
+    describe('#loopProcess', function() {
+        it('Запустить процесс и отработать петлю', function (done) {
+            var _def = Definition.testDefinitionWithLoop();
+            EngineSingleton.getInstance().addProcessDefinition(_def);
+            var _processID = EngineSingleton.getInstance().startProcessInstance(_def.definitionID()).processID;
+            var _process;
+
+            var _interval = setInterval(function () {
+                _process = EngineSingleton.getInstance().getProcessInstance(_processID);
+                if (EngineSingleton.getInstance().processFinished(_processID)) {
+                    clearInterval(_interval);
+                    var _value = _process.findParameter('param1').value();
+                    _value.should.equal(3);
+                    EngineSingleton.getInstance().deleteProcess(_processID);
+
+                    done()
+                } else {
+                    console.log('[%s] Еще работает', (new Date()).toLocaleTimeString())
+                }
+
+            }, 1000)
+        })}
+    )
 });
 

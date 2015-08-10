@@ -14,7 +14,7 @@ define([
         './../../public/utils',
         './../parameter',
         './../controls',
-        './../userScript'
+        './../engineSingleton'
     ],
     function(
         Activity,
@@ -23,7 +23,7 @@ define([
         Utils,
         Parameter,
         Controls,
-        UserScript
+        EngineSingleton
     ){
         var ScriptTask = Activity.extend({
 
@@ -95,9 +95,14 @@ define([
                 _scriptObject.subject = this;
 
                 _scriptObject.setCallback(
-                    function(subject){
+                    function(subject, result){
                         subject.state(FlowNode.state.ExecutionComplete);
                         subject.processInstance().activate();
+
+                        if ((_scriptObject.response) && (result)) {
+                            EngineSingleton.getInstance().responseStorage.executeResponseCallback(_scriptObject.response.ID(), result);
+                        }
+
                         callback();
                     }
                 );
