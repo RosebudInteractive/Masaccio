@@ -160,6 +160,12 @@ define([
                 return _node;
             },
 
+            addExclusiveGateway : function(gatewayName) {
+                var _node = new ExclusiveGateway(this.getControlManager(), {parent  : this, colName : 'Nodes'});
+                if (gatewayName) {_node.name(gatewayName)}
+                return _node;
+            },
+
             connect : function(source, target, script) {
                 var _sequence = new SequenceFlow(this.getControlManager(), {parent  : this, colName : 'Connectors'});
                 _sequence.connect(source, target, script);

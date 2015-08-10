@@ -86,7 +86,7 @@ var Definitions = {
         _userTask.addRequest('request1').addParameter('request_param1');
 
         var _finish = _definition.addActivity('finish');
-        var _gateway = _definition.addInclusiveGateway('inclusiveGateway');
+        var _gateway = _definition.addExclusiveGateway('inclusiveGateway');
 
         // Соединим узлы
         // Первые два без условий
