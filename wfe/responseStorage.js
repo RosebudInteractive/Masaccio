@@ -69,7 +69,8 @@ define(
                     var _item = this.getResponse(responseID);
                     if (_item) {
                         if (_item.state == State.NEW) {
-                            _item.callback(Answer.success(result));
+                            clearInterval(_item.timer);
+                            _item.callback({result : 'OK', responseResult : result});
                             _item.state = State.EXECUTED;
                         }
                     } else {

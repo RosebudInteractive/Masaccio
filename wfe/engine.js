@@ -457,6 +457,7 @@ define([
                 var response = _request.createResponse(_request.getParent());
                 response.fillParams(message.response);
 
+                //this.responseStorage.addResponseCallback(response, timeout, callback);
                 if ((_receivingNode instanceof UserTask) && (_receivingNode.hasScript())) {
                     this.responseStorage.addResponseCallback(response, timeout, callback)
                 }
@@ -472,7 +473,9 @@ define([
                             _process.enqueueToken(_token)
                         }
 
-                        _receivingNode.execute();
+                        _receivingNode.execute(function () {
+                            _token.execute();
+                        });
                     }
                 }
 
