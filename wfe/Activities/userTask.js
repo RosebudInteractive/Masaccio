@@ -133,7 +133,7 @@ define(
                 var _scriptObject = UccelloClass.super.apply(this, [callback]);
                 var _response = this.getUnhandledResponse();
                 _response.state(Request.state.Done);
-                _scriptObject.responses = _response;
+                _scriptObject.response = _response;
 
                 return _scriptObject;
             },
