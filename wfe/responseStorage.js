@@ -27,12 +27,14 @@ define(
                         this.responses.push(_item);
 
                         //var that = this;
-                        _item.timer = setInterval(function () {
-                            clearInterval(_item.timer);
+                        if (timeout) {
+                            _item.timer = setInterval(function () {
+                                clearInterval(_item.timer);
 
-                            callback(Answer.error('Превышен интервал ожидания'));
-                            _item.state = State.EXECUTED
-                        }, timeout)
+                                callback(Answer.error('Превышен интервал ожидания'));
+                                _item.state = State.EXECUTED
+                            }, timeout)
+                        }
                     }
                 },
 
@@ -69,7 +71,9 @@ define(
                     var _item = this.getResponse(responseID);
                     if (_item) {
                         if (_item.state == State.NEW) {
-                            clearInterval(_item.timer);
+                            if (_item.timer) {
+                                clearInterval(_item.timer);
+                            }
                             _item.callback({result : 'OK', responseResult : result});
                             _item.state = State.EXECUTED;
                         }

@@ -135,6 +135,7 @@ define([
                     var that = this;
                     setTimeout(function() {
                         that.runProcess(_process);
+                        console.log('[%s] : => процесс processID [%s] запущен', (new Date()).toLocaleTimeString(), _process.processID());
                     }, 0);
 
                 } else {
@@ -395,6 +396,8 @@ define([
                         var response = _request.createResponse(_request.getParent());
                         response.fillParams(answer.response);
 
+                        this.responseStorage.addResponseCallback(response, 0, callback);
+
                         if (_process.isRunning()) {
                             /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
                             _receivingNode.execute(function () {
@@ -407,14 +410,14 @@ define([
 
                             _receivingNode.execute();
                         }
-                        setTimeout(function () {
-                            /* Todo : результат в callback */
-                            if (callback) {
-                                callback({result: 'OK'})
-                            }
-
-                            _token.execute();
-                        }, 0);
+                        //setTimeout(function () {
+                        //    /* Todo : результат в callback */
+                        //    if (callback) {
+                        //        callback({result: 'OK'})
+                        //    }
+                        //
+                        //    _token.execute();
+                        //}, 0);
                     }
                 } else {
                     setTimeout(function () {
@@ -546,7 +549,8 @@ define([
 
             submitResponseAndWait : function(response, requestName, timeout, callback) {
                 this.waitForRequest(response.processID, response.tokenID, requestName, timeout, callback);
-                this.submitResponse(response);
+                this.submitResponse(response, callback);
+
                 return Controls.MegaAnswer;
             },
 

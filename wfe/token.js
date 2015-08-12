@@ -183,9 +183,11 @@ define([
                 var that = this;
                 this.currentNode().execute(function() {
                     var _process = EngineSingleton.getInstance().findOrUploadProcess(that.processInstance().processID());
-                    EngineSingleton.getInstance().activateProcess(_process.processID());
-                    var _token = _process.getToken(that.tokenID());
-                    EngineSingleton.getInstance().switchTokens(_token);
+                    if (_process.canContinue()) {
+                        EngineSingleton.getInstance().activateProcess(_process.processID());
+                        var _token = _process.getToken(that.tokenID());
+                        EngineSingleton.getInstance().switchTokens(_token);
+                    }
                 });
                 if (this.hasNewRequest() && this.currentNode().isWaitingRequest()) {
                     var _nodeProps = this.getPropertiesOfNode(this.currentNode().name());

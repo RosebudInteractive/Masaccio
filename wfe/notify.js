@@ -22,13 +22,16 @@ define([],
                 var _item = {requestParams: requestParams, callback: callback, timeout: timeOut};
                 this.observers.push(_item);
 
-                var that = this;
-                _item.timer = setInterval(function () {
-                    clearInterval(_item.timer);
-                    callback({result: 'ERROR', message: 'Превышен интервал ожидания'});
-                    var _index = that.observers.indexOf(_item);
-                    that.observers.splice(_index, 1);
-                }, timeOut)
+                if (timeOut) {
+                    var that = this;
+
+                    _item.timer = setInterval(function () {
+                        clearInterval(_item.timer);
+                        callback({result: 'ERROR', message: 'Превышен интервал ожидания'});
+                        var _index = that.observers.indexOf(_item);
+                        that.observers.splice(_index, 1);
+                    }, timeOut)
+                }
             },
 
             notify: function (eventParams) {
