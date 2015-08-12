@@ -97,9 +97,9 @@ define(
                     return _index > -1;
                 },
 
-                isActiveRequestExistsByName : function(requestName) {
+                isActiveRequestExistsByName : function(requestName, processID) {
                     var _index = this.getItemIndexByPredicate(function(element) {
-                        return (element.request.name() == requestName) && element.request.isActive()
+                        return (element.request.name() == requestName) && (element.request.processID() == processID) && element.request.isActive()
                     });
 
                     return _index > -1;
@@ -116,9 +116,9 @@ define(
                     return _requests;
                 },
 
-                getRequestParamsByName : function(requestName) {
+                getRequestParamsByName : function(requestName, processID) {
                     var _item = this.getItemByPredicate(function(element) {
-                        return (element.request.name() == requestName)
+                        return (element.request.name() == requestName) && (element.request.processID() == processID)
                     });
                     if (_item) {
                         return _item.params

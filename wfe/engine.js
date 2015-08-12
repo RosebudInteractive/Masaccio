@@ -251,20 +251,20 @@ define([
                 })
             },
 
-            waitForRequest : function(processID, tokenID, requestID, timeout, callback){
-                var _isNeedNotify = this.requestStorage.isActiveRequestExistsByName(requestID);
+            waitForRequest : function(processID, tokenID, requestName, timeout, callback){
+                var _isNeedNotify = this.requestStorage.isActiveRequestExistsByName(requestName, processID);
 
                 this.notifier.registerObserverOnRequest(
                     {
                         processID: processID,
                         tokenID: tokenID,
-                        requestName: requestID
+                        requestName: requestName
                     },
                     timeout,
                     callback);
 
                 if (_isNeedNotify) {
-                    this.notifier.notify(this.requestStorage.getRequestParamsByName(requestID))
+                    this.notifier.notify(this.requestStorage.getRequestParamsByName(requestName, processID))
                 }
                 return Controls.MegaAnswer;
             },
