@@ -34,6 +34,9 @@ define([
 
             init: function(cm, params) {
                 UccelloClass.super.apply(this, [cm, params]);
+                if (!params) {
+                    return
+                }
 
                 if ((!this.ID()) || (this.ID() == '')) {
                     this.ID(UUtils.guid());

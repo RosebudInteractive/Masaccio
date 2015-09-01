@@ -8,12 +8,40 @@ if (typeof define !== 'function') {
 
 define([
         './../flowNode',
-        './../controls'],
-    function(FlowNode, Controls){
+        './../controls',
+        './../scriptObject'
+    ],
+    function(
+        FlowNode,
+        Controls,
+        ScriptObject
+    ){
         var Event = FlowNode.extend({
 
             className: "Event",
             classGuid: Controls.guidOf('Event'),
+
+            metaFields: [
+                {
+                    fname: 'Script',
+                    ftype: {
+                        type: 'ref',
+                        res_elem_type: Controls.guidOf('UserScript')
+                    }
+                }
+            ],
+
+            script: function(value) {
+                return this._genericSetter('Script', value);
+            },
+
+            setUserScript : function(script) {
+                this.script(this.getRoot().getOrCreateScript(script));
+            },
+
+            hasScript : function() {
+                return (this.script() ? true : false);
+            },
 
             calcOutgoingNodes: function (callback) {
                 if (this.outgoing().count() == 0) {
@@ -32,7 +60,6 @@ define([
                         this.conditionsResult.addResult(_sequence, true);
                         _sequence.check();
                         if (this.isAllOutgoingChecked()) {
-                            //this.processInstance.wait();
                             setTimeout(callback(null), 0)
                         }
                     }
@@ -45,6 +72,21 @@ define([
                 }
 
                 return this.conditionsResult.getConfirmedNodes();
+            },
+
+            createScriptObject : function() {
+                if (!this.hasScript()) {
+                    return null
+                }
+
+                var _scriptObject = new ScriptObject(this.processInstance());
+
+                _scriptObject.moduleName = this.script().moduleName();
+                _scriptObject.methodName = this.script().methodName();
+                _scriptObject.methodParams = this.script().parameters();
+                _scriptObject.subject = this;
+
+                return _scriptObject;
             }
 
         });

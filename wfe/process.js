@@ -61,7 +61,12 @@ define([
                 {'cname' : 'Nodes', 'ctype' : 'FlowNode'},
                 {'cname' : 'Connectors', 'ctype' : 'SequenceFlow'},
                 {'cname' : 'Requests', 'ctype' : 'Request'},
-                {'cname' : 'Scripts', 'ctype' : 'UserScript'}
+                {'cname' : 'Scripts', 'ctype' : 'UserScript'},
+
+                {'cname' : 'CorrelationKeys', 'ctype' : 'CorrelationKey'},
+                {'cname' : 'CorrelationKeyInstances', 'ctype' : 'CorrelationKeyInstance'},
+                {'cname' : 'MessageDefinitions', 'ctype' : 'MessageDefinition'},
+                {'cname' : 'MessageInstances', 'ctype' : 'MessageInstance'}
             ],
             //</editor-fold>
 
@@ -307,6 +312,15 @@ define([
                 for (var i = 0; i < this.nodes().count(); i++) {
                     var _node = this.nodes().get(i);
                     if ((_node instanceof node.constructor) && (_node.name() == node.name() && _node.id() == node.id())){
+                        return _node;
+                    }
+                }
+            },
+
+            findNodeByName : function(nodeName) {
+                for (var i = 0; i < this.nodes().count(); i++) {
+                    var _node = this.nodes().get(i);
+                    if (_node.name() == node.name()){
                         return _node;
                     }
                 }

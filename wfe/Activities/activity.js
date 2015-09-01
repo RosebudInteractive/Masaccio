@@ -21,8 +21,8 @@ var ActivityState = {
 }
 
 define(
-    ['./../flowNode', './../controls'],
-    function(FlowNode, Controls){
+    ['./../flowNode', './../controls', './../../public/logger'],
+    function(FlowNode, Controls, Logger){
         var Activity = FlowNode.extend({
 
             className: "Activity",
@@ -43,7 +43,7 @@ define(
             execute : function(callback) {
                 UccelloClass.super.apply(this, [callback]);
                 this.state(FlowNode.state.ExecutionComplete);
-                console.log('[%s] : => Выполняется узел [%s]', (new Date()).toLocaleTimeString(), this.name())
+                Logger.info('Выполняется узел [%s]', this.name());
                 this.callExecuteCallBack(callback)
             },
 

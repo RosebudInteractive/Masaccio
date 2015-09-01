@@ -9,18 +9,19 @@ define([
         './flowNode',
         './token',
         './notify',
-        './requestStorage',
-        './responseStorage',
+        './EngineTools/requestStorage',
+        './EngineTools/responseStorage',
         './Gateways/gateway',
         './Gateways/exclusiveGateway',
         'fs',
-        './engineInitializer',
+        './EngineTools/engineInitializer',
         './controls',
         './processDefinition',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
         './Messages/messageDefinition',
         './Activities/userTask',
-        './answer'
+        './answer',
+        './EngineTools/subprocessCallback'
     ],
     function(
         Process,
@@ -39,7 +40,8 @@ define([
         UUtils,
         MessageDefinition,
         UserTask,
-        Answer
+        Answer,
+        SubProcessCallback
     ) {
 
         var wfeInterfaceGUID = "a75970d5-f9dc-4b1b-90c7-f70c37bbbb9b";
@@ -73,6 +75,7 @@ define([
                 this.notifier = new Notify();
                 this.requestStorage = new RequestStorage();
                 this.responseStorage = new ResponseStorage();
+                this.subprocesses = new SubProcessCallback();
 
                 this.uploadedProcesses = [];
                 this.tokensArchive = [];
@@ -153,9 +156,7 @@ define([
 
                 if (_process) {
                     console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), _process.processID());
-                    this.runProcess(_process, function (result) {
-                        //console.log(result + ' [%s]', _process.processID)
-                    });
+                    this.runProcess(_process);
 
                     _result.result = 'OK';
                     _result.processID = _process.processID();
@@ -636,7 +637,7 @@ define([
 
             addMessageDefinition : function(definition, callback) {
                 if (this.messageDefinitions.every(function(element) {
-                        element.definitionID() != definition.definitionID()
+                        return element.definitionID() != definition.definitionID()
                     })) {
                     this.messageDefinitions.push(definition);
                     Answer.success('Добавлено описание сообщения [%s]', definition.name()).handle(callback);
@@ -659,18 +660,6 @@ define([
                 }
             },
 
-            processExists : function(processID) {
-                //for (var i = 0; i < this.processes().count(); i++) {
-                //    if (this.processes().get(i).processID() == processID) {
-                //        return true;
-                //    }
-                //}
-                //
-                //return this.uploadedProcesses.some(function (element) {
-                //    return element == processID;
-                //});
-            },
-
             processFinished : function(processID) {
                 var _process = this.getProcessInstance(processID);
                 if (_process) {
@@ -680,6 +669,31 @@ define([
                 return this.uploadedProcesses.some(function (element) {
                     return ((element.processID == processID) && element.isFinished);
                 });
+            },
+
+            startSubProcess : function(definitionID, startCallback, finishCallback) {
+                var _process = this.createNewProcess(definitionID);
+
+                if (_process) {
+                    this.subprocesses.register(_process.processID(), startCallback, finishCallback);
+                    this.runProcess(_process);
+                } else {
+                    return Answer.error('Описание процесса [%s] не найден', definitionID)
+                }
+            },
+
+            notifyAboutStart : function(subprocessID){
+                var _process = this.findOrUploadProcess(subprocessID);
+                if (_process) {
+                    this.subprocesses.execStartCallback(subprocessID)
+                }
+            },
+
+            notifyAboutFinish : function(subprocessID) {
+                var _process = this.findOrUploadProcess(subprocessID);
+                if (_process) {
+                    this.subprocesses.execEndCallback(subprocessID)
+                }
             }
         });
 

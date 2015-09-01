@@ -14,7 +14,7 @@ var State = {
 Object.freeze(State);
 
 define(
-    ['./answer'],
+    ['./../answer'],
     function(Answer) {
         return UccelloClass.extend({
                 init: function () {

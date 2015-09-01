@@ -14,10 +14,14 @@ define([
         './Activities/activity',
         './Activities/userTask',
         './Activities/scriptTask',
+        './Activities/callActivity',
         './Gateways/exclusiveGateway',
         './Gateways/inclusiveGateway',
         './sequenceFlow',
-        './userScript'
+        './userScript',
+        './answer',
+        './Events/Start/startEvent',
+        './Events/End/endEvent'
     ],
     function(
         UObject,
@@ -27,10 +31,14 @@ define([
         Activity,
         UserTask,
         ScriptTask,
+        CallActivity,
         ExclusiveGateway,
         InclusiveGateway,
         SequenceFlow,
-        UserScript
+        UserScript,
+        Answer,
+        StartEvent,
+        EndEvent
     ){
         var ProcessDefinition = UObject.extend({
 
@@ -166,14 +174,37 @@ define([
                 return _node;
             },
 
+            addCallActivity : function(activityName, definitionID) {
+                var _node = new CallActivity(this.getControlManager(), {parent  : this, colName : 'Nodes'});
+                if (activityName) {_node.name(activityName)}
+                if (definitionID) {_node.definitionID(definitionID)}
+                return _node;
+            },
+
+            addStartEvent : function(eventName) {
+                var _node = new StartEvent(this.getControlManager(), {parent  : this, colName : 'Nodes'});
+                if (eventName) {_node.name(eventName)}
+                return _node;
+            },
+
+            addEndEvent : function(eventName) {
+                var _node = new EndEvent(this.getControlManager(), {parent  : this, colName : 'Nodes'});
+                if (eventName) {_node.name(eventName)}
+                return _node;
+            },
+
             connect : function(source, target, script) {
                 var _sequence = new SequenceFlow(this.getControlManager(), {parent  : this, colName : 'Connectors'});
                 _sequence.connect(source, target, script);
                 return _sequence;
+            },
+
+            validate : function() {
+                return Answer.success();
             }
 
         });
 
         return ProcessDefinition;
     }
-)
+);

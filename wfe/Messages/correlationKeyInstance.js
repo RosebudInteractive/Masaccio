@@ -9,10 +9,12 @@ if (typeof define !== 'function') {
 define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
         './../controls'
+        //'crytpo'
     ],
     function(
         UObject,
-        Controls
+        Controls,
+        Crypto
     ){
         var CorrelationKeyInstance = UObject.extend({
 
@@ -21,7 +23,6 @@ define([
             classGuid : Controls.guidOf('CorrelationKeyInstance'),
             metaFields: [
                 {fname : 'KeyName',    ftype : 'string'}
-                //{fname : 'ID',      ftype : 'string'}
             ],
             metaCols: [
                 {'cname' : 'CorrelationValues', 'ctype' : 'Parameter'}
@@ -30,6 +31,10 @@ define([
 
             keyName : function(value) {
                 return this._genericSetter('KeyName', value);
+            },
+
+            correlationValues : function() {
+                return this.getCol('CorrelationValues');
             },
 
             getControlManager : function() {
@@ -42,6 +47,15 @@ define([
 
             isEqualTo : function(parameter) {
                 return true;
+            },
+
+            calculateHash : function() {
+                var _stringValue = '';
+                for (var i = 0; this.correlationValues().count(); i++) {
+                    _stringValue.concat(this.correlationValues().get(i).value());
+                }
+
+                //return Crypto.createHash('md5').update(_stringValue).digest('hex');
             }
         });
 

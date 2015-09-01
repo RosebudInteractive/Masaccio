@@ -36,6 +36,10 @@ define(
                 _newParam.name(this.name());
                 _newParam.value(this.value());
                 return _newParam;
+            },
+
+            addNewCopyTo : function(parent) {
+                return this.clone(parent.getControlManager(), {parent : parent, colName : 'Parameters'})
             }
 
         });

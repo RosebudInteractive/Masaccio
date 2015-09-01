@@ -97,25 +97,25 @@ define([
                     case FlowNode.state.Initialized : {
                         _processInstance.currentToken(this);
 
-                        this.doOnInitialized()
+                        this.doOnInitialized();
 
                         this.currentNode().state(FlowNode.state.Executing);
                         return this.execute();
-                    };
+                    }
 
                     case (FlowNode.state.Executing) : {
                         this.executeNode();
                         EngineSingleton.getInstance().switchTokens(this);
                         break;
                         //return this.execute();
-                    };
+                    }
 
                     case (FlowNode.state.WaitingRequest) || (FlowNode.state.WaitingTokens) : {
                         /* Todo : возможно нужен callback*/
                         EngineSingleton.getInstance().deactivateProcess(this.processInstance());
                         /* Todo : Сохранение и выгрузка из памяти процесса */
                         return 'Процесс ожидает ответ';
-                    };
+                    }
 
                     case (FlowNode.state.ExecutionComplete) : {
                         var that = this;
@@ -130,13 +130,13 @@ define([
                         });
 
                         break;
-                    };
+                    }
 
                     case (FlowNode.state.WaitingUserScriptAnswer) : {
                         EngineSingleton.getInstance().deactivateProcess(this.processInstance());
                         EngineSingleton.getInstance().switchTokens(this)
                         break;
-                    };
+                    }
 
                     case (FlowNode.state.UserScriptComplete) : {
                         if (this.hasNextNode()) {
@@ -163,7 +163,7 @@ define([
                         }
                     }
 
-                    default : { return "Неизвестный статус узла" };
+                    default : { return "Неизвестный статус узла" }
                 }
             },
 
@@ -195,6 +195,8 @@ define([
                         this.exposeRequests(_nodeProps);
                     }
                 }
+
+                // SendMessage
             },
 
             exposeRequests : function (nodeProps) {
@@ -290,6 +292,14 @@ define([
                 _param.value(null);
 
                 return _param;
+            },
+
+            addSentMessage : function(message) {
+                /* Todo : пока заглушка*/
+            },
+
+            addMessageRequest : function(messageRequest) {
+
             }
         });
 

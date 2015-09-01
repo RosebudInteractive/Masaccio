@@ -16,7 +16,8 @@ var flowNodeState = {
         WaitingUserScriptAnswer : 5,
         ExecutionComplete : 6,
         UserScriptComplete : 7,
-        Closed : 8
+        WaitingSubProcess : 8,
+        Closed : 9
     };
 
 define([
@@ -124,6 +125,10 @@ define([
                 return this.pvt.parent;
             },
 
+            getRoot : function() {
+                return this.getParent().getRoot();
+            },
+
             assignConnections: function (source) {
                 for (var i = 0; i < source.incoming().count(); i++) {
                     this.incoming()._add(source.incoming().get(i).clone(this, {parent  : this, colName : 'Connectors'} ))
@@ -135,6 +140,15 @@ define([
 
             findNode : function(node) {
                 return this.getParent().findNode(node);
+            },
+
+            findParameter : function(parameterName) {
+                for (var i = 0; i < this.parameters().count(); i++) {
+                    if (this.parameters().get(i).name() == parameterName) {
+                        return this.parameters().get(i)
+                    }
+                }
+                return null;
             },
 
             findConnector : function(connector) {

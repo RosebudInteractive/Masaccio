@@ -3,7 +3,6 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    //var Class = require('class.extend');
     var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
@@ -38,9 +37,6 @@ define([
                     }
                 }
             ],
-            //metaCols: [
-            //    {'cname' : 'Scripts', 'ctype' : 'UserScript'}
-            //],
 
             init: function(cm, params, script){
                 UccelloClass.super.apply(this, [cm, params]);
@@ -52,25 +48,12 @@ define([
                 }
             },
 
-            getRoot : function() {
-                return this.getParent().getRoot();
-            },
-            //scripts : function() {
-            //    return this.getCol('Scripts');
-            //},
-
             script: function(value) {
                 return this._genericSetter('Script', value);
             },
 
             setUserScript : function(script) {
                 this.script(this.getRoot().getOrCreateScript(script));
-
-                //if (!this.script()) {
-                //    this.script(new UserScript(this.getControlManager(), {parent : this.getParent(), colName : 'Scripts'}))
-                //}
-                //
-                //this.script().parse(script);
             },
 
             createInstance : function(cm, params){
@@ -127,4 +110,4 @@ define([
 
         return ScriptTask;
     }
-)
+);

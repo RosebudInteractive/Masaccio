@@ -39,6 +39,8 @@ define([
             init: function(cm, params) {
                 UccelloClass.super.apply(this, [cm, params]);
 
+                if (!params) { return }
+
                 if ((!this.ID()) || (this.ID() == '')) {
                     this.ID(UUtils.guid());
                 }
@@ -98,7 +100,7 @@ define([
                 var _processInstance = this.getParent();
 
                 var _instance = new CorrelationKeyInstance(this.getControlManager(), {parent : _processInstance, colName : 'CorrelationKeyInstances'});
-                _instance.keyName(this.name())
+                _instance.keyName(this.name());
                 for (var i = 0; i < this.properties().count(); i++) {
                     var _expressions = this.properties().get(i).getExpressionsForMessage(messageDefinitionName);
 

@@ -90,7 +90,7 @@ describe('Engine', function(){
 
         describe('#inclusiveGateway_with_reqeusts_&_script', function () {
             it('Выставить реквесты и все остальное', function (done) {
-                var _def = Definition.forTestInclusiveGatewayProcess()
+                var _def = Definition.forTestInclusiveGatewayProcess();
                 EngineSingleton.getInstance().addProcessDefinition(_def);
                 var _processID = EngineSingleton.getInstance().startProcessInstance(_def.definitionID()).processID;
                 var _process;

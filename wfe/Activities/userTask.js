@@ -71,10 +71,12 @@ define(
             },
 
             execute : function(callback) {
+                var that = this;
+
                 function logResponses() {
-                    console.log('[%s] : => Узел %s ожидает ответа', (new Date()).toLocaleTimeString(), this.name());
-                    var _requestCount = this.token().getPropertiesOfNode(this.name()).requests().count();
-                    var _responseCount = this.token().getPropertiesOfNode(this.name()).responses().count();
+                    console.log('[%s] : => Узел %s ожидает ответа', (new Date()).toLocaleTimeString(), that.name());
+                    var _requestCount = that.token().getPropertiesOfNode(that.name()).requests().count();
+                    var _responseCount = that.token().getPropertiesOfNode(that.name()).responses().count();
                     console.log('[%s] : !! Ответов %d из %d', (new Date()).toLocaleTimeString(), _responseCount, _requestCount);
                 }
 
@@ -115,12 +117,6 @@ define(
                     console.log('[%s] : => Узел отработал %s', (new Date()).toLocaleTimeString(), this.name());
                     this.state(FlowNode.state.ExecutionComplete)
                 }
-
-                //if ((this.state() == FlowNode.state.ExecutionComplete) && this.hasScript()) {
-                //    UccelloClass.super.apply(this, [callback]);
-                //    return;
-                //}
-
 
                 this.callExecuteCallBack(callback);
             },

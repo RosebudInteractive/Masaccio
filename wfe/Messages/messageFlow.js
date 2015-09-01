@@ -20,8 +20,21 @@ define([
             className: 'MessageFlow',
             classGuid: Controls.guidOf('MessageFlow'),
             metaFields: [
-                {fname: 'CorrelationKey', ftype: 'CorrelationKey'},
-                {fname: 'MessageDefinition', ftype: 'MessageDefinition'},
+                {
+                    fname: 'MessageDefinition',
+                    ftype: {
+                        type: 'ref',
+                        res_elem_type: Controls.guidOf('MessageDefinition')
+                    }
+                },
+                {
+                    fname: 'CorrelationKey',
+                    ftype: {
+                        type: 'ref',
+                        res_elem_type: Controls.guidOf('CorrelationKey')
+                    }
+                },
+
                 {fname: 'SourceProcessName', ftype: 'string'},
                 {fname: 'SourceNodeName', ftype: 'string'},
                 {fname: 'TargetProcessName', ftype: 'string'},
