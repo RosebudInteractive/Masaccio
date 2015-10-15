@@ -72,8 +72,8 @@ define([
                     if (exprParams.hasOwnProperty('nodeName')) {
                         _expr.nodeName(exprParams.nodeName);
                     }
-                    if (exprParams.hasOwnProperty('nodeParameterName')) {
-                        _expr.nodeParameterName(exprParams.nodeParameterName);
+                    if (exprParams.hasOwnProperty('parameterName')) {
+                        _expr.parameterName(exprParams.parameterName);
                     }
                     return _expr;
                 }
@@ -81,7 +81,7 @@ define([
 
             addNewCopyTo : function(parent)
             {
-                var _newProperty = new CorrelationProperty(parent.getControlManager(), {parent : parent, colName : 'CorrelationProperties'});
+                var _newProperty = new CorrelationProperty(parent.getControlManager(), {parent : parent, colName : 'Properties'});
 
                 _newProperty.name(this.name());
                 for (var i = 0; i < this.expressions().count(); i++) {

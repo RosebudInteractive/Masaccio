@@ -4,17 +4,18 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
     var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
+    //var Crypto = require('crypto');
 }
 
 define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
-        './../controls'
-        //'crytpo'
+        './../controls',
+        'md5'
     ],
     function(
         UObject,
         Controls,
-        Crypto
+        MD5
     ){
         var CorrelationKeyInstance = UObject.extend({
 
@@ -51,11 +52,28 @@ define([
 
             calculateHash : function() {
                 var _stringValue = '';
-                for (var i = 0; this.correlationValues().count(); i++) {
-                    _stringValue.concat(this.correlationValues().get(i).value());
+                for (var i = 0; i < this.correlationValues().count(); i++) {
+                    _stringValue = _stringValue + this.correlationValues().get(i).value();//concat(this.correlationValues().get(i).value());
                 }
 
-                //return Crypto.createHash('md5').update(_stringValue).digest('hex');
+                return MD5(_stringValue);
+            },
+
+            equals : function(otherInstance) {
+                var _hash = this.calculateHash();
+                var _otherHash = otherInstance.calculateHash();
+
+                return _hash == _otherHash;
+            },
+
+            getProperty : function(name) {
+                for (var i = 0; i < this.correlationValues().count(); i++) {
+                    if (this.correlationValues().get(i).name() == name) {
+                        return this.correlationValues().get(i);
+                    }
+                }
+
+                return null;
             }
         });
 

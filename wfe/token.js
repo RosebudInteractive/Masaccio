@@ -47,13 +47,15 @@ define([
             metaCols: [
                 {'cname' : 'Parameters', 'ctype' : 'Parameter'},
                 {'cname' : 'NodesProps', 'ctype' : 'NodeProperties'},
-                {'cname' : 'NodeInstances', 'ctype' : 'FlowNode'}
+                {'cname' : 'NodeInstances', 'ctype' : 'FlowNode'},
+                {'cname' : 'SentMessages', 'ctype' : 'MessageInstance'},
+                {'cname' : 'RequestedMessages', 'ctype' : 'MessageInstance'}
             ],
             //</editor-fold>
 
             init: function(cm, params){
                 UccelloClass.super.apply(this, [cm, params]);
-                if (!params) { return };
+                if (!params) { return }
             },
 
             //<editor-fold desc="MetaFields & MetaCols">
@@ -85,8 +87,20 @@ define([
                 return this.getCol('Parameters');
             },
 
+            sentMessages : function() {
+                return this.getCol('SentMessages');
+            },
+
+            requestedMessages : function() {
+                return this.getCol('RequestedMessages');
+            },
+
             nodesProps : function() {
                 return this.getCol('NodesProps');
+            },
+
+            nodeInstances : function(){
+                return this.getCol('NodeInstances');
             },
             //</editor-fold>
 
@@ -107,7 +121,6 @@ define([
                         this.executeNode();
                         EngineSingleton.getInstance().switchTokens(this);
                         break;
-                        //return this.execute();
                     }
 
                     case (FlowNode.state.WaitingRequest) || (FlowNode.state.WaitingTokens) : {
@@ -123,10 +136,6 @@ define([
                         this.currentNode().calcOutgoingNodes(function(result) {
                             EngineSingleton.getInstance().activateProcess(that.processInstance().processID());
                             EngineSingleton.getInstance().startOutgoingNodes(that);
-                            //var _process = EngineSingleton.getInstance().findOrUploadProcess(that.processInstance().processID());
-                            //EngineSingleton.getInstance().activateProcess(_process.processID());
-                            //var _token = _process.getToken(that.tokenID());
-                            //EngineSingleton.getInstance().startOutgoingNodes(that);
                         });
 
                         break;
@@ -187,8 +196,12 @@ define([
                         EngineSingleton.getInstance().activateProcess(_process.processID());
                         var _token = _process.getToken(that.tokenID());
                         EngineSingleton.getInstance().switchTokens(_token);
+
+                    } else {
+                        EngineSingleton.getInstance().switchTokens(that);
                     }
                 });
+
                 if (this.hasNewRequest() && this.currentNode().isWaitingRequest()) {
                     var _nodeProps = this.getPropertiesOfNode(this.currentNode().name());
                     if (_nodeProps) {
@@ -196,7 +209,29 @@ define([
                     }
                 }
 
-                // SendMessage
+                if (this.hasNewMessageInstances()) {
+                    for (var i = this.sentMessages().count() - 1; i >= 0; i--){
+                        var _message = this.sentMessages().get(i);
+                        EngineSingleton.getInstance().messageCache.addMessageInstance(_message);
+                        this.sentMessages()._del(_message);
+                    }
+                }
+
+                if (this.hasNewMessageRequest()) {
+                    for (var i = this.requestedMessages().count() - 1; i >= 0; i--){
+                        var _request = this.requestedMessages().get(i);
+                        EngineSingleton.getInstance().messageCache.addMessageRequest(_request);
+                        this.requestedMessages()._del(_request);
+                    }
+                }
+            },
+
+            hasNewMessageInstances : function() {
+                return this.sentMessages().count() > 0;
+            },
+
+            hasNewMessageRequest : function() {
+                return this.requestedMessages().count() > 0;
             },
 
             exposeRequests : function (nodeProps) {
@@ -258,16 +293,16 @@ define([
 
                 this.copyNodeParams = function (properties) {
                     for (var i = 0; i < this.currentNode().parameters().count(); i++) {
-                        this.currentNode().parameters().clone(this.getControlManager(), {parent  : properties, colName : 'Parameters'})
+                        this.currentNode().parameters().get(i).clone(this.getControlManager(), {parent  : properties, colName : 'Parameters'})
                     }
-                }
+                };
 
                 if (!this.isContainsCurrentNodeParams()) {
                     var _nodeProps = new NodeProps(this.getControlManager(), {parent  : this, colName : 'NodesProps'});
                     _nodeProps.name(this.currentNode().name());
                     this.copyNodeParams(_nodeProps);
                     //this.nodesProps()._add(_nodeProps)
-                };
+                }
 
                 this.clearNodeResponses(this.currentNode().name());
             },
@@ -295,16 +330,34 @@ define([
             },
 
             addSentMessage : function(message) {
-                /* Todo : пока заглушка*/
+                this.sentMessages()._add(message);
             },
 
             addMessageRequest : function(messageRequest) {
+                this.requestedMessages()._add(messageRequest)
+            },
 
+            findNodeInstanceByID : function(nodeID) {
+                for (var i = 0; i < this.nodeInstances().count(); i++) {
+                    var _node = this.nodeInstances().get(i);
+                    if (_node.id() == nodeID){
+                        return _node;
+                    }
+                }
+            },
+
+            findNodeInstanceByName : function(nodeName) {
+                for (var i = 0; i < this.nodeInstances().count(); i++) {
+                    var _node = this.nodeInstances().get(i);
+                    if (_node.name() == nodeName){
+                        return _node;
+                    }
+                }
             }
         });
 
         return Token;
     }
-)
+);
 
 module.exports.state = tokenState;

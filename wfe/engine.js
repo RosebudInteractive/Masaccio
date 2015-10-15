@@ -19,9 +19,11 @@ define([
         './processDefinition',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
         './Messages/messageDefinition',
+        './Messages/messageInstance',
         './Activities/userTask',
         './answer',
-        './EngineTools/subprocessCallback'
+        './EngineTools/subprocessCallback',
+        './EngineTools/messageCache'
     ],
     function(
         Process,
@@ -39,9 +41,11 @@ define([
         ProcessDefinition,
         UUtils,
         MessageDefinition,
+        MessageInstance,
         UserTask,
         Answer,
-        SubProcessCallback
+        SubProcessCallback,
+        MessageCache
     ) {
 
         var wfeInterfaceGUID = "a75970d5-f9dc-4b1b-90c7-f70c37bbbb9b";
@@ -76,12 +80,14 @@ define([
                 this.requestStorage = new RequestStorage();
                 this.responseStorage = new ResponseStorage();
                 this.subprocesses = new SubProcessCallback();
+                this.messageCache = new MessageCache();
 
                 this.uploadedProcesses = [];
                 this.tokensArchive = [];
                 this.processDefinitions = [];
                 this.messageDefinitions = [];
                 this.processIntsances = [];
+                this.messageInstances = [];
                 if (initParams && initParams.router) {
                     this.router = initParams.router;
                     this.router.add('wfeInterface', function (data, done)
@@ -104,8 +110,7 @@ define([
             },
 
             /*  ----- Definitions ----- */
-            findDefinition: function (definitionID)
-            {
+            findDefinition: function (definitionID) {
                 for (var i = 0; i < this.processDefinitions.length; i++) {
                     var _def = this.processDefinitions[i];
                     if (_def.definitionID() == definitionID) {
@@ -155,23 +160,18 @@ define([
                 var _process = this.createNewProcess(definitionID);
 
                 if (_process) {
-                    console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), _process.processID());
-                    this.runProcess(_process);
+                    var that = this;
+                    setTimeout(function() {
+                        that.runProcess(_process);
+                        var _answer = Answer.success('Процесс processID [%s] запущен',  _process.processID());
+                        _answer.processID = _process.processID();
+                        _answer.tokenID = _process.currentToken().tokenID();
+                        _answer.handle(callback);
+                    }, 0);
 
-                    _result.result = 'OK';
-                    _result.processID = _process.processID();
-                    _result.tokenID = _process.currentToken().tokenID();
                 } else {
-                    _result.result = 'ERROR';
-                    _result.message = 'не удалось создать процесс';
-                    console.log('[%s] : => %s', (new Date()).toLocaleTimeString(), _result.message);
-                };
-
-                if (callback) {
-                    setTimeout( function() {callback(_result)}, 0);
-                };
-
-                return _result;
+                    Answer.error('Не удалось создать процесс [%s]', [definitionID]).handle(callback);
+                }
             },
 
                 createNewProcess: function (definitionID) {
@@ -411,14 +411,6 @@ define([
 
                             _receivingNode.execute();
                         }
-                        //setTimeout(function () {
-                        //    /* Todo : результат в callback */
-                        //    if (callback) {
-                        //        callback({result: 'OK'})
-                        //    }
-                        //
-                        //    _token.execute();
-                        //}, 0);
                     }
                 } else {
                     setTimeout(function () {
@@ -484,68 +476,6 @@ define([
                 }
 
                 return Controls.MegaAnswer;
-
-                //var _request1 = this.requestStorage.getRequest(message.requestID);
-                //if (_request1 && _request1.isActive()) {
-                //    var _processID = message.processID;
-                //    var _process = this.findOrUploadProcess(_processID);
-                //
-                //    if (!_process) {
-                //        if (callback) {
-                //            console.log('[%s] : ER Процесс [%s] не найден', (new Date()).toLocaleTimeString(), _processID);
-                //            callback({result: 'ERROR', message : 'Процесс не найден'});
-                //        }
-                //    } else {
-                //        if (_process.canContinue()) {
-                //            _process = this.activateProcess(_processID);
-                //        }
-                //
-                //        var _token = _process.getToken(message.tokenID);
-                //
-                //        var _receivingNode = _token.currentNode();
-                //        if ((_receivingNode instanceof UserTask) && (_receivingNode.hasScript())) {
-                //            this.responseStorage.addResponseCallback(re)
-                //        }
-                //
-                //
-                //
-                //        _request1 = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(message.requestID);
-                //        if (!_request1) {
-                //            throw 'Error!'
-                //        }
-                //
-                //        var response = _request1.createResponse(_request1.getParent());
-                //        response.fillParams(message.response)
-                //
-                //        if (_process.isRunning()) {
-                //            /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
-                //            _receivingNode.execute(function () {
-                //                _token.execute();
-                //            });
-                //        } else {
-                //            if (!_process.isTokenInQueue(_token)) {
-                //                _process.enqueueToken(_token)
-                //            }
-                //
-                //            _receivingNode.execute();
-                //        }
-                //        setTimeout(function () {
-                //            /* Todo : результат в callback */
-                //            if (callback) {
-                //                callback({result: 'OK'})
-                //            }
-                //
-                //            _token.execute();
-                //        }, 0);
-                //    }
-                //} else {
-                //    setTimeout(function () {
-                //        /* Todo : результат в callback */
-                //        if (callback) {
-                //            callback({result: 'ERROR'})
-                //        }
-                //    }, 0);
-                //}
             },
 
             submitResponseAndWait : function(response, requestName, timeout, callback) {
@@ -556,17 +486,17 @@ define([
             },
 
             saveProcess : function(processID) {
-                console.log('[%s] : {{ А ничего пока не выгружаем', (new Date()).toLocaleTimeString())
+                //console.log('[%s] : {{ А ничего пока не выгружаем', (new Date()).toLocaleTimeString())
 
-                //this.serializeProcess(processID);
-                //var _index = this.getProcessIndex(function(element) {
-                //    return element.processID() == processID
-                //});
-                //
-                //if (_index != -1) {
-                //    this.uploadedProcesses.push({processID : processID, isFinished : this.processIntsances[_index].isFinished()});
-                //    this.processIntsances.splice(_index, 1);
-                //}
+                this.serializeProcess(processID);
+                var _index = this.getProcessIndex(function(element) {
+                    return element.processID() == processID
+                });
+
+                if (_index != -1) {
+                    this.uploadedProcesses.push({processID : processID, isFinished : this.processIntsances[_index].isFinished()});
+                    this.processIntsances.splice(_index, 1);
+                }
             },
 
             serializeProcess : function(processID) {
@@ -629,11 +559,27 @@ define([
             },
 
             //<editor-fold desc="messaging">
-            newMessageDefinition : function() {
+            newMessageDefinition : function(messageDefinitionName) {
                 var _definition = new MessageDefinition(this.getControlManager(), {});
-                _definition.definitionID(UUtils.guid())
+                _definition.definitionID(UUtils.guid());
+                if (messageDefinitionName) {
+                    _definition.name(messageDefinitionName)
+                }
                 return _definition;
             },
+
+            getMessageDefinition : function(definitionName) {
+                var _definition = null;
+                this.messageDefinitions.some(function(definition) {
+                    if (definition.name() == definitionName) {
+                        _definition = definition;
+                        return true;
+                    }
+                });
+
+                return _definition;
+            },
+
 
             addMessageDefinition : function(definition, callback) {
                 if (this.messageDefinitions.every(function(element) {
@@ -649,6 +595,12 @@ define([
             clearMessageDefinitions : function() {
                 this.messageDefinitions.length = 0;
             },
+
+            newMessageInstance : function() {
+                var _instance = new MessageInstance(this.getControlManager(), {});
+                this.messageInstances.push(_instance);
+                return _instance;
+            },
             //</editor-fold>
 
             deleteProcess : function(processID) {
@@ -660,7 +612,7 @@ define([
                 }
             },
 
-            processFinished : function(processID) {
+            isProcessFinished : function(processID) {
                 var _process = this.getProcessInstance(processID);
                 if (_process) {
                     return _process.isFinished();
@@ -694,6 +646,55 @@ define([
                 if (_process) {
                     this.subprocesses.execEndCallback(subprocessID)
                 }
+            },
+
+            deliverMessage : function(messageInstance, messageRequest) {
+                var _targetProcess = this.activateProcess(messageRequest.sourceProcessId());
+                var _token = _targetProcess.getToken(messageRequest.sourceTokenId());
+                var _node = _token.findNodeInstanceByID(messageRequest.sourceNodeId());
+                if (!_node) {
+                    throw "deliverMessage : Не найден узел"
+                }
+                _targetProcess.addNewReceivedMessage(messageInstance, _node);
+                messageInstance.isDelivered(true);
+
+                _node.execute(function () {
+                    _token.execute();
+                });
+            },
+
+            startProcessByMessage : function(messageInstance) {
+                var _index = -1;
+                this.processDefinitions.some(function(definition, index){
+                    if (definition.name() == messageInstance.targetProcessName()) {
+                        _index = index;
+                        return true;
+                    }
+                });
+
+                if (_index == -1) { return }
+
+                var _definition = this.processDefinitions[_index];
+                var _node = _definition.findNodeByName(messageInstance.targetNodeName());
+
+                if (!_node || !_node.canStartProcess()) { return }
+
+                var _process = new Process(this.controlManager, {}, _definition);
+                var _nodeInstance = _process.findNode(_node);
+
+                _nodeInstance.incomingInstance(messageInstance);
+
+                messageInstance.isDelivered(true);
+
+                //this.runProcess(_process);
+                var that = this;
+                var _processInstance = _process;
+                setTimeout(function() {
+                    var _nodeInstance = _process.findNode(_node);
+                    _nodeInstance.incomingInstance(messageInstance);
+
+                    that.runProcess(_processInstance);
+                }, 0)
             }
         });
 

@@ -26,6 +26,7 @@ var controls = [
     {className: 'MessageThrowEvent',        component: './Events/Intermediate/messageThrowEvent',        guid: '4a9b774d-99a5-486e-893f-e16c7cd7fe37'},
     {className: 'MessageCatchEvent',        component: './Events/Intermediate/messageCatchEvent',        guid: '96e3f1e1-cfc6-4eff-ae16-a405c9d24ab5'},
     {className: 'StartEvent',               component: './Events/Start/startEvent',         guid: 'af2ad908-748c-40c8-93f4-bd84a417f4b9'},
+    {className: 'MessageStartEvent',        component: './Events/Start/messageStartEvent',  guid: '111e7666-fa3a-42ce-96d8-130399d1b735'},
     {className: 'EndEvent',                 component: './Events/End/endEvent',             guid: '97f2e2a5-5216-49b0-b179-bf51cffb09ab'},
 
     {className: 'Token',                    component: './token',                           guid: 'd09117fc-b298-42f6-84fc-c8807e83ca12'},

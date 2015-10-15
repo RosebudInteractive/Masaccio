@@ -2,16 +2,25 @@ var Util = require('util');
 
 var Logger = {};
 
+var handleMessage = function(messageArgs){
+    var _message = '';
+    if (arguments.length > 1) {
+        _message = Util.format.apply(messageArgs, arguments);
+    } else {
+        _message = messageArgs
+    }
+    return _message
+};
+
 Logger.info = function(message) {
   if (typeof message === 'string') {
-      var _message = '';
-      if (arguments.length > 1) {
-          var _arg = Array.prototype.slice.call(arguments, 1);
-          _message = Util.format(message, _arg);
-      } else {
-          _message = message
-      }
-      console.log('[%s] : => %s', (new Date()).toLocaleTimeString(), _message);
+      //var _message = '';
+      //if (arguments.length > 1) {
+      //    _message = Util.format.apply(message, arguments);
+      //} else {
+      //    _message = message
+      //}
+      console.log('[%s] : => %s', (new Date()).toLocaleTimeString(), handleMessage.apply(message, arguments));
   } else {
       if ((typeof message === 'object') && (message.hasOwnProperty('message'))) {
           console.log('[%s] : => %s', (new Date()).toLocaleTimeString(), message.message);
@@ -20,6 +29,11 @@ Logger.info = function(message) {
           throw 'undefined message type'
       }
   }
+};
+
+Logger.scriptExecuted = function(message) {
+    var _message = handleMessage.apply(message, arguments);
+    console.log('[%s] : => Выполнен скрипт [%s]', (new Date()).toLocaleTimeString(), _message);
 };
 
 if (module) {module.exports = Logger}

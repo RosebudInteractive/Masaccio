@@ -21,7 +21,10 @@ define([
         './userScript',
         './answer',
         './Events/Start/startEvent',
-        './Events/End/endEvent'
+        './Events/End/endEvent',
+        './Messages/messageFlow',
+        './Events/eventReferences',
+        './Messages/correlationKey'
     ],
     function(
         UObject,
@@ -38,7 +41,10 @@ define([
         UserScript,
         Answer,
         StartEvent,
-        EndEvent
+        EndEvent,
+        MessageFlow,
+        EventRef,
+        CorrelationKey
     ){
         var ProcessDefinition = UObject.extend({
 
@@ -51,10 +57,16 @@ define([
             ],
             metaCols: [
                 {'cname' : 'Parameters', 'ctype' : 'Parameter'},
+                {'cname' : 'InputParameters', 'ctype' : 'Parameter'},
                 {'cname' : 'Connectors', 'ctype' : 'SequenceFlow'},
                 {'cname' : 'Nodes', 'ctype' : 'FlowNode'},
+
                 {'cname' : 'Requests', 'ctype' : 'Request'},
-                {'cname' : 'Scripts', 'ctype' : 'UserScript'}
+                {'cname' : 'Scripts', 'ctype' : 'UserScript'},
+
+                //{'cname' : 'MessageDefinitions', 'ctype' : 'MessageDefinition'},
+                {'cname' : 'MessageFlows', 'ctype' : 'MessageFlow'},
+                {'cname' : 'CorrelationKeys', 'ctype' : 'CorrelationKey'}
 
             ],
             //</editor-fold>
@@ -72,12 +84,28 @@ define([
                 return this.getCol('Parameters');
             },
 
+            inputParameters : function() {
+                return this.getCol('InputParameters');
+            },
+
             connectors : function(){
                 return this.getCol('Connectors');
             },
 
             nodes : function(){
                 return this.getCol('Nodes');
+            },
+
+            //messageDefinitions : function() {
+            //    return this.getCol('MessageDefinitions');
+            //},
+
+            messageFlows : function() {
+                return this.getCol('MessageFlows');
+            },
+
+            correlationKeys : function() {
+                return this.getCol('CorrelationKeys');
             },
             //</editor-fold>
 
@@ -201,8 +229,48 @@ define([
 
             validate : function() {
                 return Answer.success();
-            }
+            },
 
+            findNodeByName : function(nodeName) {
+                for (var i = 0; i < this.nodes().count(); i++) {
+                    var _node = this.nodes().get(i);
+                    if (_node.name() == nodeName){
+                        return _node;
+                    }
+                }
+            },
+
+            addEvent : function(eventType, eventName){
+                var _constructor = EventRef.constructor.getForType(eventType);
+                if (_constructor) {
+                    var _node = new _constructor(this.getControlManager(), {parent: this, colName: 'Nodes'});
+                    if (eventName) {
+                        _node.name(eventName)
+                    }
+                    return _node;
+                }
+            },
+
+            addMessageFlow : function() {
+                var _flow = new MessageFlow(this.getControlManager(), {parent  : this, colName : 'MessageFlows'});
+                var _correlationKey = this.addCorrelationKey();
+                _flow.correlationKey(_correlationKey);
+                return _flow;
+            },
+
+            addCorrelationKey : function(name) {
+                var _ck = new CorrelationKey(this.getControlManager(), {parent  : this, colName : 'CorrelationKeys'});
+                if (name) {
+                    _ck.name(name);
+                }
+                return _ck
+            },
+
+            addInputParameters : function(parameterName) {
+                var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'InputParameters'});
+                _param.name(parameterName);
+                return _param;
+            }
         });
 
         return ProcessDefinition;

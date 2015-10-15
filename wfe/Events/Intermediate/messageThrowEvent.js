@@ -12,8 +12,10 @@ define([
         './../../controls',
         './../../../public/logger',
         './../../../public/utils',
-        './../../Messages/messageInstance',
-        './../../process'
+        './../../process',
+        './../../processDefinition',
+        './../../engineSingleton',
+        './../../Messages/messageRetrievalExpression'
     ],
     function(
         Event,
@@ -21,8 +23,10 @@ define([
         Controls,
         Logger,
         Utils,
-        MessageInstance,
-        Process
+        Process,
+        ProcessDefinition,
+        EngineSingleton,
+        MessageRetrievalExpression
     ){
         var MessageThrowEvent = Event.extend({
 
@@ -42,12 +46,55 @@ define([
 
             ],
 
+            init: function(cm, params){
+                UccelloClass.super.apply(this, [cm, params]);
+                if (!params) { return }
+
+                if (this.getRoot() instanceof ProcessDefinition) {
+                    var _flow = this.getRoot().addMessageFlow();
+                    this.outgoingMessage(_flow);
+                }
+            },
+
             outgoingMessage: function(value) {
                 return this._genericSetter('OutgoingMessage', value);
             },
 
+            createInstance : function(cm, params){
+                return new MessageThrowEvent(cm, params);
+            },
+
             expressions : function() {
                 return this.getCol('Expressions');
+            },
+
+            createOutgoingMessage : function(messageDefinition, targetProcessName, targetNodeName) {
+                this.outgoingMessage().messageDefinition(messageDefinition);
+                this.outgoingMessage().sourceProcessName(this.getRoot().name());
+                this.outgoingMessage().sourceNodeName(this.name());
+                this.outgoingMessage().targetProcessName(targetProcessName);
+                this.outgoingMessage().targetNodeName(targetNodeName);
+            },
+
+            addExpression : function(exprParams) {
+                var _expr = new MessageRetrievalExpression(this.getControlManager(), {parent : this, colName : 'Expressions'});
+                if (!exprParams) {
+                    return _expr;
+                } else {
+                    if (exprParams.hasOwnProperty('messageName')) {
+                        _expr.messageName(exprParams.messageName);
+                    }
+                    if (exprParams.hasOwnProperty('nodeName')) {
+                        _expr.nodeName(exprParams.nodeName);
+                    }
+                    if (exprParams.hasOwnProperty('parameterName')) {
+                        _expr.parameterName(exprParams.parameterName);
+                    }
+                    if (exprParams.hasOwnProperty('messageParameterName')) {
+                        _expr.messageParameterName(exprParams.messageParameterName)
+                    }
+                    return _expr;
+                }
             },
 
             executeUserScript: function (callback) {
@@ -72,13 +119,12 @@ define([
 
 
             sendMessage: function (callback) {
-                var _correlationKey = this.outgoingMessage().correlationKey();
-                var _ckInstance = _correlationKey.createInstance(this.outgoingMessage().name());
-
                 var _messageInstance = this.createMessageInstance(this.outgoingMessage().messageDefinition());
+                var _correlationKey = this.outgoingMessage().correlationKey();
+                var _ckInstance = _correlationKey.createInstanceForMessage(this.outgoingMessage().messageDefinition().name(), _messageInstance);
                 _messageInstance.correlationKeyInstance(_ckInstance);
                 _messageInstance.sourceProcessName(this.outgoingMessage().sourceProcessName());
-                _messageInstance.sourceProcessId(this.getParent().processID());
+                _messageInstance.sourceProcessId(this.processInstance().processID());
                 _messageInstance.sourceTokenId(this.token().tokenID());
                 _messageInstance.sourceNodeName(this.outgoingMessage().sourceNodeName());
                 _messageInstance.targetProcessName(this.outgoingMessage().targetProcessName());
@@ -90,7 +136,7 @@ define([
             },
 
             getExpressionForParameter: function (parameterName) {
-                for (var i = 0; this.expressions().count() < i; i++) {
+                for (var i = 0; i < this.expressions().count(); i++) {
                     var _expr = this.expressions().get(i);
                     if ((_expr.messageParameterName() == parameterName)) {
                         return _expr;
@@ -99,40 +145,60 @@ define([
             },
 
             createMessageInstance : function(messageDefinition) {
-                if (!(this.getParent() instanceof Process)) {
+                if (!(this.getRoot() instanceof Process)) {
                     throw 'Err'
                 }
 
-                var _processInstance = this.getParent();
-                var _message = new MessageInstance(this.getControlManager(), {parent : _processInstance, colName : 'MessageInstances'});
+                //var _processInstance = this.processInstance();
 
-                for (var i = 0; messageDefinition.parameters().count() < i; i++) {
+                var _message = EngineSingleton.getInstance().newMessageInstance();
+                _message.messageDefinition(messageDefinition);
+
+                for (var i = 0; i < messageDefinition.parameters().count(); i++) {
                     var _param = messageDefinition.parameters().get(i).addNewCopyTo(_message);
-                    copyParametersWithValue(_param);
-                }
-
-                function copyParametersWithValue(targetParam) {
-                    var _expr = this.getExpressionForParameter(targetParam.name());
-                    if (_expr) {
-                        var _sourceParam;
-                        if (!_expr.nodeName()) {
-                            _sourceParam = _processInstance.findParameter(_expr.parameterName());
-                        } else {
-                            var _node = _processInstance.findNodeByName(_expr.nodeName());
-                            if (_node) {
-                                _sourceParam = _node.findParameter(_expr.parameterName());
-                            }
-                        }
-
-                        if (_sourceParam) {
-                            targetParam.value(_sourceParam.value());
-                        }
-                    }
+                    this.copyParametersWithValue(_param);
                 }
 
                 return _message;
             },
 
+            copyParametersWithValue : function(targetParam) {
+                var _expr = this.getExpressionForParameter(targetParam.name());
+                if (_expr) {
+                    var _sourceParam;
+                    if (!_expr.nodeName()) {
+                        _sourceParam = this.processInstance().findParameter(_expr.parameterName());
+                    } else {
+                        var _node = this.processInstance().findNodeByName(_expr.nodeName());
+                        if (_node) {
+                            _sourceParam = _node.findParameter(_expr.parameterName());
+                        }
+                    }
+
+                    if (_sourceParam) {
+                        targetParam.value(_sourceParam.value());
+                    }
+                }
+            },
+
+            assign : function(source){
+                UccelloClass.super.apply(this, [source]);
+
+                var _outgoingMessage = this.getRoot().getMessageFlow(source.outgoingMessage());
+                this.outgoingMessage(_outgoingMessage);
+            },
+
+            copyCollectionDefinitions : function(source, process) {
+                UccelloClass.super.apply(this, [source, process]);
+
+                //for (var i = 0; i < source.expressions().count(); i++){
+                //    this.expressions()._add(source.requests().get(i).clone(process.getControlManager(), {parent : process, colName : 'Requests'}));
+                //}
+                //
+                //for (var i = 0; i < source.responses().count(); i++){
+                //    this.responses()._add(source.responses().get(i).clone(process.getControlManager(), {parent : process, colName : 'Responses'}))
+                //}
+            },
 
             execute : function(callback) {
                 switch (this.state()) {

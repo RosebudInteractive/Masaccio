@@ -23,7 +23,9 @@ define([
         './sequenceFlow',
         './engineSingleton',
         './controls',
-        './userScript'
+        './userScript',
+        //'./Events/Intermediate/messageCatchEvent',
+        './../public/logger'
     ],
     function(
         UObject,
@@ -32,7 +34,9 @@ define([
         SequenceFlow,
         EngineSingleton,
         Controls,
-        UserScript
+        UserScript,
+        //MessageCatchEvent
+        Logger
     ){
         var Process = UObject.extend({
 
@@ -58,6 +62,7 @@ define([
                 {'cname' : 'Tokens', 'ctype' : 'Token'},
                 {'cname' : 'TokenQueue', 'ctype' : 'Token'},
                 {'cname' : 'Parameters', 'ctype' : 'Parameter'},
+                {'cname' : 'InputParameters', 'ctype' : 'Parameter'},
                 {'cname' : 'Nodes', 'ctype' : 'FlowNode'},
                 {'cname' : 'Connectors', 'ctype' : 'SequenceFlow'},
                 {'cname' : 'Requests', 'ctype' : 'Request'},
@@ -65,8 +70,10 @@ define([
 
                 {'cname' : 'CorrelationKeys', 'ctype' : 'CorrelationKey'},
                 {'cname' : 'CorrelationKeyInstances', 'ctype' : 'CorrelationKeyInstance'},
-                {'cname' : 'MessageDefinitions', 'ctype' : 'MessageDefinition'},
-                {'cname' : 'MessageInstances', 'ctype' : 'MessageInstance'}
+
+                {'cname' : 'MessageInstances', 'ctype' : 'MessageInstance'},
+                {'cname' : 'MessageFlows', 'ctype' : 'MessageFlow'},
+                {'cname' : 'MessageRequests', 'ctype' : 'MessageInstance'}
             ],
             //</editor-fold>
 
@@ -85,9 +92,23 @@ define([
                 }
             },
 
+            copyMessages: function (definition) {
+                for (var i = 0; i < definition.messageFlows().count(); i++) {
+                    definition.messageFlows().get(i).addNewCopyTo(this);
+                }
+            },
+
+            copyCorrelations: function (definition) {
+                for (var i = 0; i < definition.correlationKeys().count(); i++) {
+                    definition.correlationKeys().get(i).addNewCopyTo(this);
+                }
+            },
+
             copyDefinition: function (definition) {
                 this.definitionID(definition.definitionID());
                 this.cloneParameters(definition);
+                this.copyCorrelations(definition);
+                this.copyMessages(definition);
 
                 for (var i = 0; i < definition.nodes().count(); i++){
                     var _defNode = definition.nodes().get(i);
@@ -108,9 +129,21 @@ define([
                 }
             },
 
+            getCorrelationKey : function(correlationKey) {
+                for (var i = 0; this.correlationKeys().count(); i++) {
+                    if (correlationKey.name() == this.correlationKeys().get(i).name()) {
+                        return this.correlationKeys().get(i);
+                    }
+                }
+            },
+
             cloneParameters :  function (definition) {
                 for (var i = 0; i < definition.parameters().count(); i++) {
                     definition.parameters().get(i).clone(this.getControlManager(), {parent  : this, colName : 'Parameters'});
+                }
+
+                for (var i = 0; i < definition.inputParameters().count(); i++) {
+                    definition.inputParameters().get(i).clone(this.getControlManager(), {parent  : this, colName : 'InputParameters'});
                 }
             },
 
@@ -151,8 +184,16 @@ define([
                 return this.getCol('Parameters');
             },
 
+            inputParameters : function() {
+                return this.getCol('InputParameters');
+            },
+
             nodes : function(){
                 return this.getCol('Nodes');
+            },
+
+            messageDeclarations : function() {
+                return this.getCol('MessageDeclarations');
             },
 
             scripts : function(){
@@ -161,6 +202,14 @@ define([
 
             connectors : function(){
                 return this.getCol('Connectors');
+            },
+
+            messageFlows : function() {
+                return this.getCol('MessageFlows');
+            },
+
+            correlationKeys : function() {
+                return this.getCol('CorrelationKeys');
             },
             //</editor-fold>
 
@@ -184,9 +233,9 @@ define([
             },
 
             getToken : function(tokenID) {
-                for (var i =0; i < this.tokens().count(); i++) {
+                for (var i = 0; i < this.tokens().count(); i++) {
                     if (this.tokens().get(i).tokenID() == tokenID) {return this.tokens().get(i)}
-                };
+                }
 
                 return null;
             },
@@ -244,7 +293,7 @@ define([
             finish : function() {
                 if (this.state() != processStates.Finished) {
                     this.state(processStates.Finished);
-                    console.log('[%s] : => Процесс [%s] закончил выполнение', (new Date()).toLocaleTimeString(), this.name());
+                    Logger.info('Процесс [%s] id [%s] закончил выполнение', this.name(), this.processID());
                 }
             },
 
@@ -258,7 +307,7 @@ define([
             },
 
             canContinue : function() {
-                return (this.state() != processStates.WaitingScriptAnswer)
+                return (this.state() != processStates.WaitingScriptAnswer) && (this.state() != processStates.Finished)
             },
 
             activate : function() {
@@ -295,6 +344,16 @@ define([
                 return null;
             },
 
+            findInputParameter : function(parameterName) {
+                for (var i = 0; i < this.inputParameters().count(); i++) {
+                    if (this.inputParameters().get(i).name() == parameterName) {
+                        return this.inputParameters().get(i)
+                    }
+
+                }
+                return null;
+            },
+
             wait : function(){
                 this.state(processStates.Waiting)
                 var that = this;
@@ -320,7 +379,16 @@ define([
             findNodeByName : function(nodeName) {
                 for (var i = 0; i < this.nodes().count(); i++) {
                     var _node = this.nodes().get(i);
-                    if (_node.name() == node.name()){
+                    if (_node.name() == nodeName){
+                        return _node;
+                    }
+                }
+            },
+
+            findNodeByID : function(nodeID) {
+                for (var i = 0; i < this.nodes().count(); i++) {
+                    var _node = this.nodes().get(i);
+                    if (_node.id() == nodeID){
                         return _node;
                     }
                 }
@@ -347,11 +415,25 @@ define([
                         return _connector;
                     }
                 }
+            },
+
+            addNewReceivedMessage : function(messageInstance, targetNode){
+                if (typeof targetNode.incomingInstance == 'function'){
+                    targetNode.incomingInstance(messageInstance);
+                }
+            },
+
+            getMessageFlow : function(messageFlow) {
+                for (var i = 0; i < this.messageFlows().count(); i++) {
+                    if (this.messageFlows().get(i).id() == messageFlow.id()) {
+                        return this.messageFlows().get(i);
+                    }
+                }
             }
         });
 
         return Process;
     }
-)
+);
 
 module.exports.state = processStates;

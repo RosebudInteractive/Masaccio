@@ -17,7 +17,7 @@ beforeEach(function() {
     Main.Config.testClient.clear();
 });
 
-describe('CallActivity', function(){
+xdescribe('CallActivity', function(){
    describe('#Execute', function(){
        it('Должен отработать процесс с запуском подпроцесса', function(done){
            EngineSingleton.getInstance().addProcessDefinition(Definition.SubProcess.simpleSubprocess());
@@ -29,7 +29,7 @@ describe('CallActivity', function(){
 
            var _interval = setInterval(function () {
                _process = EngineSingleton.getInstance().getProcessInstance(_processID);
-               if (EngineSingleton.getInstance().processFinished(_processID)) {
+               if (EngineSingleton.getInstance().isProcessFinished(_processID)) {
                    clearInterval(_interval);
                    EngineSingleton.getInstance().deleteProcess(_processID);
 

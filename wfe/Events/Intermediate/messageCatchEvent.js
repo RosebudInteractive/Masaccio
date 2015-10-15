@@ -9,12 +9,22 @@ if (typeof define !== 'function') {
 define([
         './../event',
         './../../flowNode',
-        './../../controls'
+        './../../controls',
+        './../../../public/logger',
+        './../../../public/utils',
+        './../../process',
+        './../../processDefinition',
+        './../../engineSingleton'
     ],
     function(
         Event,
         FlowNode,
-        Controls
+        Controls,
+        Logger,
+        Utils,
+        Process,
+        ProcessDefinition,
+        EngineSingleton
     ){
         var MessageCatchEvent = Event.extend({
 
@@ -30,29 +40,52 @@ define([
                     }
                 },
                 {
-                    fname: 'InitScript',
-                    ftype: {
-                        type: 'ref',
-                        res_elem_type: Controls.guidOf('UserScript')
+                    fname : 'IncomingInstance',
+                    ftype : {
+                        type : 'ref',
+                        external: true,
+                        res_type: Controls.guidOf('MessageInstance'),
+                        res_elem_type: Controls.guidOf('MessageInstance')
                     }
                 }
             ],
+
+            init: function(cm, params){
+                UccelloClass.super.apply(this, [cm, params]);
+                if (!params) { return }
+
+                if (this.getRoot() instanceof ProcessDefinition) {
+                    var _flow = this.getRoot().addMessageFlow();
+                    this.incomingMessage(_flow);
+                }
+            },
+
+            createIncomingMessage : function(messageDefinition, sourceProcessName, sourceNodeName) {
+                this.incomingMessage().messageDefinition(messageDefinition);
+                this.incomingMessage().sourceProcessName(sourceProcessName);
+                this.incomingMessage().sourceNodeName(sourceNodeName);
+                this.incomingMessage().targetProcessName(this.getRoot().name());
+                this.incomingMessage().targetNodeName(this.name());
+            },
+
+            createInstance : function(cm, params){
+                return new MessageCatchEvent(cm, params);
+            },
+
+            assign : function(source){
+                UccelloClass.super.apply(this, [source]);
+
+                var _incomingMessage = this.getRoot().getMessageFlow(source.incomingMessage());
+                this.incomingMessage(_incomingMessage);
+            },
 
             incomingMessage: function(value) {
                 return this._genericSetter('IncomingMessage', value);
             },
 
-            //initScript: function(value) {
-            //    return this._genericSetter('InitScript', value);
-            //},
-            //
-            //setInitScript : function(script) {
-            //    this.script(this.getRoot().getOrCreateScript(script));
-            //},
-            //
-            //hasInitScript : function() {
-            //    return (this.initScript() ? true : false);
-            //},
+            incomingInstance: function(value) {
+                return this._genericSetter('IncomingInstance', value);
+            },
 
             executeUserScript: function (callback) {
                 this.processInstance().enqueueCurrentToken();
@@ -74,19 +107,20 @@ define([
                 Utils.execScript(_scriptObject);
             },
 
-
             requestMessage: function (callback) {
-                var _correlationKey = this.incomingMessage().correlationKey();
-                var _ckInstance = _correlationKey.createInstance(this.incomingMessage().name());
+                var _messageRequest = this.createMessageRequest(this.incomingMessage().messageDefinition());
 
-                var _messageRequest = this.createMessageRequest(this.outgoingMessage().messageDefinition());
-                _messageRequest.correlationKeyInstance(_ckInstance);
-                _messageRequest.sourceProcessName(this.outgoingMessage().sourceProcessName());
-                _messageRequest.sourceProcessId(this.getParent().processID());
+                _messageRequest.sourceProcessName(this.incomingMessage().sourceProcessName());
+                _messageRequest.sourceProcessId(this.processInstance().processID());
                 _messageRequest.sourceTokenId(this.token().tokenID());
-                _messageRequest.sourceNodeName(this.outgoingMessage().sourceNodeName());
-                _messageRequest.targetProcessName(this.outgoingMessage().targetProcessName());
-                _messageRequest.targetNodeName(this.outgoingMessage().targetNodeName());
+                _messageRequest.sourceNodeId(this.id());
+                _messageRequest.sourceNodeName(this.incomingMessage().sourceNodeName());
+                _messageRequest.targetProcessName(this.incomingMessage().targetProcessName());
+                _messageRequest.targetNodeName(this.incomingMessage().targetNodeName());
+
+                var _correlationKey = this.incomingMessage().correlationKey();
+                var _ckInstance = _correlationKey.createInstanceForMessage(this.incomingMessage().messageDefinition().name(), _messageRequest);
+                _messageRequest.correlationKeyInstance(_ckInstance);
 
                 this.token().addMessageRequest(_messageRequest);
                 this.state(FlowNode.state.WaitingRequest);
@@ -94,7 +128,7 @@ define([
             },
 
             getExpressionForParameter: function (parameterName) {
-                for (var i = 0; this.expressions().count() < i; i++) {
+                for (var i = 0; i < this.expressions().count(); i++) {
                     var _expr = this.expressions().get(i);
                     if ((_expr.messageParameterName() == parameterName)) {
                         return _expr;
@@ -103,62 +137,37 @@ define([
             },
 
             createMessageRequest : function(messageDefinition) {
-                if (!(this.getParent() instanceof Process)) {
-                    throw 'Err'
-                }
+                var _request = EngineSingleton.getInstance().newMessageInstance();
+                _request.messageDefinition(messageDefinition);
 
-                var _processInstance = this.getParent();
-                var _message = new MessageInstance(this.getControlManager(), {parent : _processInstance, colName : 'MessageInstances'});
-
-                for (var i = 0; messageDefinition.parameters().count() < i; i++) {
-                    var _param = messageDefinition.parameters().get(i).addNewCopyTo(_message);
-                    copyParametersWithValue(_param);
-                }
-
-                function copyParametersWithValue(targetParam) {
-                    var _expr = this.getExpressionForParameter(targetParam.name());
-                    if (_expr) {
-                        var _sourceParam;
-                        if (!_expr.nodeName()) {
-                            _sourceParam = _processInstance.findParameter(_expr.parameterName());
-                        } else {
-                            var _node = _processInstance.findNodeByName(_expr.nodeName());
-                            if (_node) {
-                                _sourceParam = _node.findParameter(_expr.parameterName());
-                            }
-                        }
-
-                        if (_sourceParam) {
-                            targetParam.value(_sourceParam.value());
-                        }
-                    }
-                }
-
-                return _message;
+                return _request;
             },
 
 
             execute : function(callback) {
                 switch (this.state()) {
                     case FlowNode.state.Executing : {
-                        //if (this.hasInitScript()) {
-                        //    this.executeUserScript(callback);
-                        //} else {
-                        //    this.sendMessage(callback);
-                        //}
                         this.requestMessage(callback);
                         break;
                     }
 
                     case FlowNode.state.WaitingRequest : {
-                        //if this
-                        //Logger.info('Узел [%s] ожидает выполнения пользовательского скрипта', this.name());
-                        //this.callExecuteCallBack(callback);
-                        //break;
+                        if (this.incomingInstance()) {
+                            if (this.hasScript()) {
+                                this.executeUserScript(callback);
+                            } else {
+                                this.state(FlowNode.state.ExecutionComplete);
+                                this.callExecuteCallBack(callback);
+                            }
+                        } else {
+                            this.callExecuteCallBack(callback);
+                        }
+                        break;
                     }
 
                     case FlowNode.state.UserScriptComplete : {
-                        this.sendMessage(callback);
+                        this.state(FlowNode.state.ExecutionComplete);
+                        this.callExecuteCallBack(callback);
                         break;
                     }
 

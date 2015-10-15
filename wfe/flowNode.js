@@ -26,7 +26,8 @@ define([
         './scriptObject',
         './Gateways/conditionsResult',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
-        './controls'
+        './controls',
+        './parameter',
     ],
     function(
         UObject,
@@ -34,7 +35,8 @@ define([
         ScriptObject,
         ConditionsResult,
         UUtils,
-        Controls
+        Controls,
+        Parameter
     ){
         var FlowNode = UObject.extend({
 
@@ -290,6 +292,20 @@ define([
 
             isWaitingRequest : function() {
                 return this.state() == flowNodeState.WaitingRequest;
+            },
+
+            canStartProcess : function() {
+                return false
+            },
+
+            addParameter : function(parameterName) {
+                var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'Parameters'});
+                _param.name(parameterName);
+                return _param;
+            },
+
+            hasNewOutgoingMessage : function() {
+                return false
             }
         });
 

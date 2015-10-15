@@ -23,10 +23,15 @@ var Process = require('./../process');
 var MessageDefinition = require('./../Messages/messageDefinition');
 //D:\JS\Masaccio\wfe\Messages\messageDefinition.js
 var MessageInstance = require('./../Messages/messageInstance');
+    var MessageFlow = require('./../Messages/messageFlow');
     var CorrelationKey = require('./../Messages/correlationKey');
     var CorrelationKeyInstance = require('./../Messages/correlationKeyInstance');
     var CorrelationProperty = require('./../Messages/correlationProperty');
     var RetrievalExpression = require('./../Messages/retrievalExpression');
+    var MessageRetrievalExpression = require('./../Messages/messageRetrievalExpression');
+
+var Event = require('./../Events/event');
+    var StartMessageEvent = require('./../Events/Start/messageStartEvent');
 
 var Initializer = {
     dbp : {name: "Engine", kind: "master", guid: 'fb9653ea-4fc3-aee0-7a31-172a91aa196b'},
@@ -34,22 +39,28 @@ var Initializer = {
     registerTypes : function(controlManager){
         new Parameter(controlManager);
         new UserScript(controlManager);
-        new SequenceFlow(controlManager);
-        new FlowNode(controlManager);
-        new Request(controlManager);
 
         new RetrievalExpression(controlManager);
+        new MessageRetrievalExpression(controlManager);
         new CorrelationProperty(controlManager);
         new CorrelationKey(controlManager);
         new CorrelationKeyInstance(controlManager);
         new MessageDefinition(controlManager);
         new MessageInstance(controlManager);
+        new MessageFlow(controlManager);
+
+        new SequenceFlow(controlManager);
+        new FlowNode(controlManager);
+        new Request(controlManager);
 
         new ProcessDefinition(controlManager);
 
         new Activity(controlManager);
         new UserTask(controlManager);
         new ScriptTask(controlManager);
+
+        //new Event(controlManager);
+        //new StartMessageEvent(controlManager);
 
         new InclusiveGateway(controlManager);
         new ExclusiveGateway(controlManager);

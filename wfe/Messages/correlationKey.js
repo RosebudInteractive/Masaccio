@@ -93,13 +93,13 @@ define([
                 return this.pvt.parent;
             },
 
-            createInstance : function(messageDefinitionName) {
-                if (!(this.getParent() instanceof Process)) {
-                    throw 'Err'
-                }
+            createInstanceForMessage : function(messageDefinitionName, messageInstance) {
+                //if (!(this.getParent() instanceof Process)) {
+                //    throw 'Err'
+                //}
                 var _processInstance = this.getParent();
 
-                var _instance = new CorrelationKeyInstance(this.getControlManager(), {parent : _processInstance, colName : 'CorrelationKeyInstances'});
+                var _instance = new CorrelationKeyInstance(this.getControlManager(), {parent : messageInstance, colName : 'CorrelationKeyInstances'});
                 _instance.keyName(this.name());
                 for (var i = 0; i < this.properties().count(); i++) {
                     var _expressions = this.properties().get(i).getExpressionsForMessage(messageDefinitionName);
@@ -109,7 +109,8 @@ define([
                         if (!element.nodeName()) {
                             _param = _processInstance.findParameter(element.parameterName());
                         } else {
-                            _param = _processInstance.currentToken().findParameter(element.parameterName());
+                            /* Todo : у кого брать значения параметров для вычиления ключа? и что делать если инстанса узла еще нет?*/
+                            _param = _processInstance.currentToken().findNodeInstanceByName(element.nodeName()).findParameter(element.parameterName());
                         }
 
                         if (_param) {
@@ -117,6 +118,8 @@ define([
                         }
                     });
                 }
+
+                messageInstance.correlationKeyInstance(_instance);
 
                 return _instance;
             }

@@ -8,6 +8,7 @@ if (typeof define !== 'function') {
 
 var _timeout = 3000;
 var _responses = [];
+var _customizeResponse = null;
 
 var _setTimeout = function(valueInSecond) {
     _timeout = valueInSecond * 1000;
@@ -23,7 +24,8 @@ define(
         var TestClient = UccelloClass.extend({
 
             init : function() {
-                this.responses = []
+                this.responses = [];
+                this.customizeResponse = null;
             },
 
             setTimeout : function(valueInSecond) {
@@ -32,6 +34,11 @@ define(
 
             clear : function() {
                 _clearResponses();
+                _customizeResponse = null;
+            },
+
+            setResponseCustomizer : function(callback) {
+                _customizeResponse = callback;
             },
 
             createResponse : function(request) {
@@ -54,10 +61,13 @@ define(
                 if (!_request) { throw 'Token ID [%s] do not exists', requestInfo.requestID }
 
                 var _response = {};
-                for (var param in _request) {
-                    _response[param] = _request[param];
-                };
-
+                if (!_customizeResponse) {
+                    for (var param in _request) {
+                        _response[param] = _request[param];
+                    }
+                } else {
+                    _customizeResponse(_response);
+                }
 
                 var _answer = {
                     name : requestInfo.requestName,
