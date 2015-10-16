@@ -52,7 +52,7 @@ define(
                 var _direction = gatewayDirection.Unspecified;
                 if (this.incoming().count() > 1) {
                     _direction = gatewayDirection.Converging
-                };
+                }
                 if (this.outgoing().count() > 1) {
                     if (_direction == gatewayDirection.Converging) {_direction = gatewayDirection.Mixed}
                     else (_direction = gatewayDirection.Diverging)
@@ -64,7 +64,7 @@ define(
             calcOutgoingNodes : function(callback) {
                 if (this.getDirection() == Gateway.direction.Converging) {
                     return [this.outgoing().get(0).target()]
-                };
+                }
 
                 for (var i  = 0; i < this.outgoing().count(); i++) {
                     var _sequence = this.outgoing().get(i);
@@ -77,18 +77,18 @@ define(
                         _sequence.checkConditionSatisfied(_scriptObject);
                     }
                     else {
-                        if (_sequence.isDefault) {
+                        if (_sequence.isDefault()) {
                             throw "Не задано условие для исходящего коннектора по умолчанию!"
-                        };
+                        }
                         this.conditionsResult.addResult(_sequence, true);
                         _sequence.check();
                     }
-                };
+                }
             },
 
             setDefaultFlow : function(sequence){
                 this.defaultFlow(sequence);
-                sequence.isDefault = true;
+                sequence.isDefault(true);
             }
         });
 
