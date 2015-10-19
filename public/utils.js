@@ -79,6 +79,12 @@ Utils.execScript = function(scriptObject) {
             }, 0)
         }
     }
-}
+};
+
+Utils.createRefTo = function(object, params) {
+    var ObjectRef = require('./../wfe/objectRef');
+    var _ref = new ObjectRef(object.pvt.controlMgr, params);
+    _ref.object(object);
+};
 
 if (module) { module.exports = Utils}

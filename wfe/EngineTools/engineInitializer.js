@@ -3,7 +3,10 @@
  */
 var ControlMgr = require(UCCELLO_CONFIG.uccelloPath + 'controls/controlMgr');
 
+//var UObject = require(UCCELLO_CONFIG.uccelloPath+'system/uobject');
+
 var ProcessDefinition = require('./../processDefinition');
+    var ObjectRef = require('./../objectRef');
     var FlowNode = require('./../flowNode');
     var SequenceFlow = require('./../sequenceFlow');
     var Parameter = require('./../parameter');
@@ -21,7 +24,6 @@ var Process = require('./../process');
     var NodeProps = require('./../NodeProps/nodeProperties');
 
 var MessageDefinition = require('./../Messages/messageDefinition');
-//D:\JS\Masaccio\wfe\Messages\messageDefinition.js
 var MessageInstance = require('./../Messages/messageInstance');
     var MessageFlow = require('./../Messages/messageFlow');
     var CorrelationKey = require('./../Messages/correlationKey');
@@ -37,6 +39,9 @@ var Initializer = {
     dbp : {name: "Engine", kind: "master", guid: 'fb9653ea-4fc3-aee0-7a31-172a91aa196b'},
 
     registerTypes : function(controlManager){
+        //new UObject(controlManager);
+        new ObjectRef(controlManager);
+
         new Parameter(controlManager);
         new UserScript(controlManager);
 
@@ -50,6 +55,7 @@ var Initializer = {
         new MessageFlow(controlManager);
 
         new SequenceFlow(controlManager);
+
         new FlowNode(controlManager);
         new Request(controlManager);
 

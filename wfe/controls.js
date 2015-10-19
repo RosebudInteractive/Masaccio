@@ -31,7 +31,6 @@ var controls = [
 
     {className: 'Token',                    component: './token',                           guid: 'd09117fc-b298-42f6-84fc-c8807e83ca12'},
     {className: 'Request',                  component: './request',                         guid: '783cc459-0b03-4cbd-9960-6401a031537c'},
-    //{className: 'RequestStorage',           component: './requestStorage',                  guid: 'd59ea34f-a525-4551-b8e8-8d182e32571c'},
     {className: 'Parameter',                component: './parameter',                       guid: '9232bbd5-e2f8-466a-877f-5bc6576b5d02'},
 
     {className: 'MessageFlow',              component: './Messages/messageFlow',            guid: 'c10a9573-1274-4008-9353-d6c466fb0e35'},
@@ -42,7 +41,8 @@ var controls = [
     {className: 'CorrelationProperty',      component: './Messages/correlationProperty',    guid: '8794c286-a10b-442a-abb1-27dc2f54409d'},
     {className: 'RetrievalExpression',      component: './Messages/retrievalExpression',    guid: '36136243-425c-439d-a782-eed5c1e7bee8'},
 
-    {className: 'MessageRetrievalExpression',   component: './Messages/messageRetrievalExpression',    guid: '4d02d5e9-4df5-44dc-8eed-7008e114b812'}
+    {className: 'MessageRetrievalExpression',   component: './Messages/messageRetrievalExpression',    guid: '4d02d5e9-4df5-44dc-8eed-7008e114b812'},
+    {className: 'ObjectRef',                component: './objectRef',                  guid: 'd59ea34f-a525-4551-b8e8-8d182e32571c'}
 ];
 
 var guidOf = function(className) {

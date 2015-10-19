@@ -58,7 +58,7 @@ define(
                 }
 
                 for (var i = 0; i < this.outgoing().count(); i++) {
-                    var _sequence = this.outgoing().get(i);
+                    var _sequence = this.outgoing().get(i).object();
                     if (_sequence.hasCondition()) {
                         var _scriptObject = this.createSequenceScriptObject(_sequence, callback);
 

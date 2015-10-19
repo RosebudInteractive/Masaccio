@@ -355,12 +355,14 @@ define([
             },
 
             wait : function(){
-                this.state(processStates.Waiting)
-                var that = this;
-                this.idleTimer = setInterval(function() {
-                    clearInterval(that.idleTimer);
-                    EngineSingleton.getInstance().saveProcess(that.processID());
-                }, UCCELLO_CONFIG.wfe.idleTimeout)
+                this.state(processStates.Waiting);
+                if (UCCELLO_CONFIG.wfe.idleTimeout != Infinity) {
+                    var that = this;
+                    this.idleTimer = setInterval(function () {
+                        clearInterval(that.idleTimer);
+                        EngineSingleton.getInstance().saveProcess(that.processID());
+                    }, UCCELLO_CONFIG.wfe.idleTimeout)
+                }
             },
 
             waitScriptAnswer : function(){

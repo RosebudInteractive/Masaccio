@@ -166,6 +166,14 @@ define([
 
             getControlManager : function() {
                 return this.getParent().getControlManager();
+            },
+
+            newIncomingLink : function(parent) {
+                return Utils.createRefTo(this, {parent : parent, colName : 'Incoming'})
+            },
+
+            newOutgoingLink : function(parent) {
+                return Utils.createRefTo(this, {parent : parent, colName : 'Outgoing'})
             }
         });
 

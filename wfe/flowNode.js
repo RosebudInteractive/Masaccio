@@ -28,6 +28,8 @@ define([
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
         './controls',
         './parameter',
+        './objectRef'
+        //'./../public/utils'
     ],
     function(
         UObject,
@@ -36,7 +38,9 @@ define([
         ConditionsResult,
         UUtils,
         Controls,
-        Parameter
+        Parameter,
+        ObjectRef
+        //Utils
     ){
         var FlowNode = UObject.extend({
 
@@ -48,8 +52,8 @@ define([
                 {fname : 'ID',    ftype : 'string'}
             ],
             metaCols: [
-                {'cname' : 'Incoming', 'ctype' : 'SequenceFlow'},
-                {'cname' : 'Outgoing', 'ctype' : 'SequenceFlow'},
+                {'cname' : 'Incoming', 'ctype' : 'ObjectRef'},
+                {'cname' : 'Outgoing', 'ctype' : 'ObjectRef'},
                 {'cname' : 'Connectors', 'ctype' : 'SequenceFlow'},
                 {'cname' : 'Parameters', 'ctype' : 'Parameter'}
             ],
@@ -133,10 +137,16 @@ define([
 
             assignConnections: function (source) {
                 for (var i = 0; i < source.incoming().count(); i++) {
-                    this.incoming()._add(source.incoming().get(i).clone(this, {parent  : this, colName : 'Connectors'} ))
+                    var _inConnector = source.incoming().get(i).object().clone(this, {parent  : this, colName : 'Connectors'});
+                    _inConnector.newIncomingLink(this);
+                    //Utils.createRefTo(_inConnector, {parent  : this, colName : 'Incoming'});
+                    //this.incoming()._add()
                 }
                 for (var i = 0; i < source.outgoing().count(); i++) {
-                    this.outgoing()._add(source.outgoing().get(i).clone(this, {parent  : this, colName : 'Connectors'}))
+                    var _outConnector = source.outgoing().get(i).object().clone(this, {parent  : this, colName : 'Connectors'});
+                    _outConnector.newOutgoingLink(this);
+                    //ObjectRef.createRefTo(_outConnector, {parent  : this, colName : 'Outgoing'});
+                    //this.outgoing()._add()
                 }
             },
 
@@ -219,7 +229,7 @@ define([
 
             execute : function() {
                 for (var i = 0; i < this.outgoing().count(); i++){
-                    this.outgoing().get(i).state(SequenceFlow.state.Unchecked);
+                    this.outgoing().get(i).object().state(SequenceFlow.state.Unchecked);
                 }
 
                 this.processInstance().enqueueCurrentToken();
@@ -236,12 +246,12 @@ define([
 
 
             addOutgoing : function(sequence) {
-                this.outgoing()._add(sequence);
+                sequence.newOutgoingLink(this); //this.outgoing()._add(sequence);
             },
 
             isAllOutgoingChecked : function() {
                 for (var i = 0; i < this.outgoing().count(); i++) {
-                    if (this.outgoing().get(i).state() != SequenceFlow.state.Checked){
+                    if (this.outgoing().get(i).object().state() != SequenceFlow.state.Checked){
                         return false;
                     }
                 }
@@ -282,7 +292,7 @@ define([
             },
 
             addIncoming : function(sequence) {
-                this.incoming()._add(sequence);
+                sequence.newIncomingLink(this);//this.incoming()._add(sequence);
             },
 
             waitUserScriptAnswer : function(){

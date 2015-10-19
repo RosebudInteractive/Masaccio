@@ -16,6 +16,7 @@ copyFile(
 
 Main.Config.initServer();
 
+/*
 var _engine = EngineSingleton.getInstance();
 _engine.uploadedProcesses.push({processID : 'testProcess1', isFinished : false});
 var _process = _engine.findOrUploadProcess('testProcess1');
@@ -24,4 +25,4 @@ var _ID = _process.processID();
 _engine.saveProcess(_ID);
 _process = _engine.findOrUploadProcess(_ID);
 
-console.log(_process.currentToken().tokenID());
+console.log(_process.currentToken().tokenID());*/
