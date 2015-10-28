@@ -71,7 +71,7 @@ define([
                 return this._genericSetter("CurrentNode",value);
             },
 
-            processInstance: function(value) {
+            processInstance: function() {
                 return this.pvt.parent;
             },
 
@@ -170,6 +170,8 @@ define([
                         } else {
                             EngineSingleton.getInstance().switchTokens(this);
                         }
+
+                        break;
                     }
 
                     default : { return "Неизвестный статус узла" }
@@ -185,7 +187,7 @@ define([
             },
 
             hasNewRequest: function () {
-                return true;
+                return this.currentNode().hasNewRequests();
             },
 
             executeNode : function() {
@@ -264,7 +266,7 @@ define([
 
             clearNodeResponses: function (nodeName) {
                 var _nodeProps = this.getPropertiesOfNode(nodeName);
-                if (!_nodeProps) {
+                if (_nodeProps) {
                     _nodeProps.clearResponses()
                 }
             },

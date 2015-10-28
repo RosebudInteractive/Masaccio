@@ -316,6 +316,10 @@ define([
 
             hasNewOutgoingMessage : function() {
                 return false
+            },
+
+            hasNewRequests : function() {
+                return false
             }
         });
 

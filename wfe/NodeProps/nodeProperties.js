@@ -72,7 +72,8 @@ define(
 
             clearResponses : function() {
                 for (var i = this.responses().count() - 1; i >= 0; i--){
-                    this.responses()._del(i);
+                    var _response = this.responses().get(i);
+                    this.responses()._del(_response);
                 }
             },
 

@@ -8,28 +8,6 @@ if (typeof define !== 'function') {
 
 var _instance;
 
-//var getItemIndexByPredicate = function(predicate){
-//    var _index = -1;
-//    _instance.storage.some(function(element, index) {
-//        if (predicate && predicate(element)) {
-//            _index = index;
-//            return true;
-//        }
-//    });
-//
-//    return _index
-//};
-//
-//var getItemByPredicate = function(predicate) {
-//    var _index = getItemIndexByPredicate(predicate);
-//
-//    if (_index > -1) {
-//        return this.storage[_index]
-//    } else {
-//        return null
-//    }
-//};
-
 define(
     [],
     function() {
@@ -118,7 +96,7 @@ define(
 
                 getRequestParamsByName : function(requestName, processID) {
                     var _item = this.getItemByPredicate(function(element) {
-                        return (element.request.name() == requestName) && (element.request.processID() == processID)
+                        return (element.request.name() == requestName) && (element.request.processID() == processID) && element.request.isActive()
                     });
                     if (_item) {
                         return _item.params

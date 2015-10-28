@@ -364,7 +364,9 @@ define([
             },
 
             exposeRequest : function(request, eventParams){
-                this.requestStorage.addRequest(request, eventParams);
+                var _request = request.clone(this.controlManager, {});
+                _request.ID(request.ID());
+                this.requestStorage.addRequest(_request, eventParams);
                 console.log('[%s] : => Выставлен request [%s]', (new Date()).toLocaleTimeString(), request.name());
                 this.notifier.notify(eventParams);
             },
@@ -425,13 +427,13 @@ define([
             },
 
             processResponse : function(message, timeout, callback) {
-
                 var _request = this.requestStorage.getActiveRequest(message.requestID);
-                _request.responseReceived();
 
                 if (!_request) {
                     Answer.error('Реквест [%s] не найден среди активных', [message.requestID]).handle(callback);
-                    return Controls.MegaAnswer;
+                    //return Controls.MegaAnswer;
+                } else {
+                    _request.responseReceived();
                 }
 
                 var _process = this.findOrUploadProcess(message.processID);
@@ -453,7 +455,6 @@ define([
                 var response = _request.createResponse(_request.getParent());
                 response.fillParams(message.response);
 
-                //this.responseStorage.addResponseCallback(response, timeout, callback);
                 if ((_receivingNode instanceof UserTask) && (_receivingNode.hasScript())) {
                     this.responseStorage.addResponseCallback(response, timeout, callback)
                 }

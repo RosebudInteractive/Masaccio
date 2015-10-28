@@ -165,6 +165,17 @@ define(
                 else {
                     return Activity.state.Executing
                 }
+            },
+
+
+            hasNewRequests : function() {
+                for (var i = 0; i < this.requests().count(); i++) {
+                    if (this.requests().get(i).isActive()) {
+                        return true
+                    }
+                }
+
+                return false
             }
         });
 
