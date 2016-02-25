@@ -1,6 +1,8 @@
 /**
  * Created by staloverov on 08.04.2015.
  */
+'use strict';
+
 
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
@@ -17,39 +19,40 @@ define([
         FlowNode,
         Controls
     ){
-        var ExclusiveGateway = Gateway.extend({
+        return class ExclusiveGateway extends Gateway {
+        //var ExclusiveGateway = Gateway.extend({
 
-            className: "ExclusiveGateway",
-            classGuid: Controls.guidOf('ExclusiveGateway'),
-            metaCols: [],
+            get className() {return "ExclusiveGateway"}
+            get classGuid() {return Controls.guidOf('ExclusiveGateway')}
+            //metaCols: [],
 
-            createInstance : function(cm, params){
+            createInstance(cm, params){
                 return new ExclusiveGateway(cm, params);
-            },
+            }
 
-            name: function(value) {
+            name(value) {
                 return this._genericSetter("Name",value);
-            },
+            }
 
-            state: function(value) {
+            state(value) {
                 return this._genericSetter("State",value);
-            },
+            }
 
-            execute : function(callback) {
+            execute (callback) {
                 UccelloClass.super.apply(this, [callback]);
 
                 this.state(FlowNode.state.ExecutionComplete);
                 this.callExecuteCallBack(callback)
-            },
+            }
 
-            cancel : function() {
+            cancel () {
 
-            },
+            }
 
-            getOutgoingNodes : function() {
+            getOutgoingNodes () {
                 if (!this.isAllOutgoingChecked()) {
                     throw 'Не все исходящие ветви проверены'
-                };
+                }
 
                 var _outgoingNodes = this.conditionsResult.getConfirmedNodes();
                 if (_outgoingNodes.length != 0) {
@@ -62,8 +65,8 @@ define([
                     }
                 }
             }
-        });
+        }; //);
 
-        return ExclusiveGateway;
+        //return ExclusiveGateway;
     }
-)
+);

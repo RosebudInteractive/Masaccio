@@ -504,6 +504,7 @@ define([
                 var _process = this.getProcessInstance(processID);
 
                 if (_process) {
+                    _process.clearFinishedTokens();
                     var _obj = _process.pvt.db.serialize(_process);
                     if (_obj) {
                         fs.writeFileSync(UCCELLO_CONFIG.wfe.processStorage + processID + '.txt', JSON.stringify(_obj));
@@ -533,8 +534,8 @@ define([
 
             archiveToken : function(token) {
                 var _process = this.findOrUploadProcess(token.processInstance().processID());
-                this.tokensArchive.push({processID : _process.processID(), token : token})
-                _process.tokens()._del(token);
+                this.tokensArchive.push({processID : _process.processID(), token : token});
+                //_process.tokens()._del(token);
             },
 
             getRequests : function(processGuid) {

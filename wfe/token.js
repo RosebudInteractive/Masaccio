@@ -16,7 +16,8 @@ define([
         './request',
         './engineSingleton',
         './controls',
-        './parameter'
+        './parameter',
+        './../public/utils'
     ],
     function(
         UObject,
@@ -26,7 +27,8 @@ define([
         Request,
         EngineSingleton,
         Controls,
-        Parameter
+        Parameter,
+        Utils
     ){
         var Token = UObject.extend({
 
@@ -319,6 +321,10 @@ define([
                 return this.state() != tokenState.Dead
             },
 
+            isDead : function() {
+                return this.state() == tokenState.Dead
+            },
+
             findNode : function(node) {
                 return this.getParent().findNode(node);
             },
@@ -355,6 +361,10 @@ define([
                         return _node;
                     }
                 }
+            },
+
+            newLink : function(parent, collectionName) {
+                return Utils.createRefTo(this, {parent : parent, colName : collectionName})
             }
         });
 

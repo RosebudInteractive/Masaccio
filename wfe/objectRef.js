@@ -29,11 +29,6 @@ define([
             object : function(value) {
                 return this._genericSetter('Object', value);
             }
-
-            //createRefTo : function(object, params) {
-            //    var _ref = new ObjectRef(object.pvt.controlMgr, params);
-            //    _ref.object(object);
-            //}
         });
 
         return ObjectRef;

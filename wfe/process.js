@@ -60,7 +60,7 @@ define([
             ],
             metaCols: [
                 {'cname' : 'Tokens', 'ctype' : 'Token'},
-                {'cname' : 'TokenQueue', 'ctype' : 'Token'},
+                {'cname' : 'TokenQueue', 'ctype' : 'ObjectRef'},
                 {'cname' : 'Parameters', 'ctype' : 'Parameter'},
                 {'cname' : 'InputParameters', 'ctype' : 'Parameter'},
                 {'cname' : 'Nodes', 'ctype' : 'FlowNode'},
@@ -226,7 +226,7 @@ define([
 
             isTokenInQueue : function(token) {
                 for (var i = 0; i < this.tokenQueue().count(); i++) {
-                    if (this.tokenQueue().get(i).tokenID() == token.tokenID()) return true;
+                    if (this.tokenQueue().get(i).object().tokenID() == token.tokenID()) return true;
                 };
 
                 return false;
@@ -247,11 +247,12 @@ define([
                     token.tokenID(_tokenID);
                 };
 
-                if (!this.getToken(token.tokenID())){
-                    this.tokens()._add(token);
-                }
+                //if (!this.getToken(token.tokenID())){
+                //    this.tokens()._add(token);
+                //}
 
-                this.tokenQueue()._add(token);
+                token.newLink(this, 'TokenQueue');
+                //this.tokenQueue()._add(token);
             },
 
             enqueueCurrentToken : function() {
@@ -262,9 +263,9 @@ define([
 
             dequeueToken : function() {
                 if (this.tokenQueue().count() != 0) {
-                    var _token = this.tokenQueue().get(0);
-                    this.tokenQueue()._del(_token);
-                    return _token;
+                    var _tokenRef = this.tokenQueue().get(0);
+                    this.tokenQueue()._del(_tokenRef);
+                    return _tokenRef.object();
                 }
                 else {return null};
             },
@@ -429,6 +430,15 @@ define([
                 for (var i = 0; i < this.messageFlows().count(); i++) {
                     if (this.messageFlows().get(i).id() == messageFlow.id()) {
                         return this.messageFlows().get(i);
+                    }
+                }
+            },
+
+            clearFinishedTokens : function() {
+                for (var i = this.tokens().count() - 1; i >= 0; i--) {
+                    var _token = this.tokens().get(i);
+                    if (_token.isDead()) {
+                        this.tokens()._del(_token);
                     }
                 }
             }
