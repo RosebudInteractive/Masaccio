@@ -5,19 +5,15 @@
 
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    //var Class = require('class.extend');
-    //var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define(
     ['./gateway', './../flowNode', './../controls'],
     function(Gateway, FlowNode, Controls){
         return class InclusiveGateway extends Gateway {
-        //var InclusiveGateway = Gateway.extend({
 
             get className() {return "InclusiveGateway"}
             get classGuid() { return Controls.guidOf('InclusiveGateway')}
-            //metaCols: [],
 
             createInstance (cm, params){
                 return new InclusiveGateway(cm, params);
@@ -69,8 +65,6 @@ define(
                 }
             }
 
-        };//);
-
-        //return InclusiveGateway;
+        };
     }
-)
+);

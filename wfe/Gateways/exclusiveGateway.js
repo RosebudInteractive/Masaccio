@@ -6,7 +6,6 @@
 
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define([
@@ -20,11 +19,9 @@ define([
         Controls
     ){
         return class ExclusiveGateway extends Gateway {
-        //var ExclusiveGateway = Gateway.extend({
 
             get className() {return "ExclusiveGateway"}
             get classGuid() {return Controls.guidOf('ExclusiveGateway')}
-            //metaCols: [],
 
             createInstance(cm, params){
                 return new ExclusiveGateway(cm, params);
@@ -39,7 +36,7 @@ define([
             }
 
             execute (callback) {
-                UccelloClass.super.apply(this, [callback]);
+                super.execute(callback);
 
                 this.state(FlowNode.state.ExecutionComplete);
                 this.callExecuteCallBack(callback)
@@ -65,8 +62,6 @@ define([
                     }
                 }
             }
-        }; //);
-
-        //return ExclusiveGateway;
+        };
     }
 );
