@@ -3,11 +3,11 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
+        UCCELLO_CONFIG.uccelloPath + 'resman/dataTypes/resource',
         '../public/utils',
         './parameter',
         './controls',
@@ -28,6 +28,7 @@ define([
     ],
     function(
         UObject,
+        Resource,
         Utils,
         Parameter,
         Controls,
@@ -46,13 +47,13 @@ define([
         EventRef,
         CorrelationKey
     ){
-        var ProcessDefinition = UObject.extend({
+        var ProcessDefinition = Resource.extend({
 
             //<editor-fold desc="Class description">
             className: "ProcessDefinition",
             classGuid : Controls.guidOf('ProcessDefinition'),
             metaFields: [
-                {fname : "Name", ftype : "string"},
+                //{fname : "ResName", ftype : "string"},
                 {fname : 'DefinitionID', ftype : 'string'}
             ],
             metaCols: [
@@ -64,16 +65,17 @@ define([
                 {'cname' : 'Requests', 'ctype' : 'Request'},
                 {'cname' : 'Scripts', 'ctype' : 'UserScript'},
 
-                //{'cname' : 'MessageDefinitions', 'ctype' : 'MessageDefinition'},
                 {'cname' : 'MessageFlows', 'ctype' : 'MessageFlow'},
                 {'cname' : 'CorrelationKeys', 'ctype' : 'CorrelationKey'}
 
             ],
+
+            elemNamePrefix: "Field",
             //</editor-fold>
 
             //<editor-fold desc="MetaFields & MetaCols">
             name: function(value) {
-                return this._genericSetter("Name",value);
+                return this._genericSetter("ResName",value);
             },
 
             definitionID: function(value) {
@@ -142,8 +144,7 @@ define([
                 return _param;
             },
 
-            clone : function()
-            {
+            clone : function(){
                 var _newDefinition = new ProcessDefinition(this.pvt.controlMgr, {});
 
                 _newDefinition.definitionID(this.definitionID());

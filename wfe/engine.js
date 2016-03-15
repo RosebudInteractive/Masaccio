@@ -72,6 +72,7 @@ define([
                 this.db = Initializer.createInternalDb(initParams.dbController);
                 this.controlManager = Initializer.createControlManager(this.db);
                 this.constructHolder = initParams.constructHolder;
+                this.resman = initParams.resman;
                 Initializer.registerTypes(this.controlManager);
 
                 this.db = this.controlManager;
@@ -111,12 +112,9 @@ define([
 
             /*  ----- Definitions ----- */
             findDefinition: function (definitionID) {
-                for (var i = 0; i < this.processDefinitions.length; i++) {
-                    var _def = this.processDefinitions[i];
-                    if (_def.definitionID() == definitionID) {
-                        return _def;
-                    }
-                }
+                return this.processDefinitions.find(function(definition) {
+                   return definition.definitionID() == definitionID
+                });
             },
 
             addProcessDefinition : function(definition, callback) {
@@ -135,21 +133,21 @@ define([
 
             startProcessInstanceAndWait : function(definitionID, requestName, timeout, callback) {
                 console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
-                var _process = this.createNewProcess(definitionID);
+                var that = this;
 
-                if (_process) {
-                    console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), _process.processID());
-                    this.waitForRequest(_process.processID(), 1, requestName, timeout, callback);
-                    var that = this;
-                    setTimeout(function() {
-                        that.runProcess(_process);
-                        console.log('[%s] : => процесс processID [%s] запущен', (new Date()).toLocaleTimeString(), _process.processID());
-                    }, 0);
-
-                } else {
-                    console.log('[%s] : => %s', (new Date()).toLocaleTimeString(), _result.message);
-                    callback({result : 'ERROR', message : 'Не удалось создать процесс'});
-                }
+                this.createNewProcess1(definitionID).then(
+                    function(process) {
+                        console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), process.processID());
+                        that.waitForRequest(process.processID(), 1, requestName, timeout, callback);
+                        setTimeout(function () {
+                            that.runProcess(process);
+                            console.log('[%s] : => процесс processID [%s] запущен', (new Date()).toLocaleTimeString(), process.processID());
+                        }, 0);
+                    },
+                    function(reason) {
+                        callback({result : 'ERROR', message : 'Не удалось создать процесс'});
+                    }
+                );
 
                 return Controls.MegaAnswer;
             },
@@ -171,6 +169,31 @@ define([
 
                 } else {
                     Answer.error('Не удалось создать процесс [%s]', [definitionID]).handle(callback);
+                }
+            },
+
+            createNewProcess1 : function(definitionName) {
+                var that = this;
+                return new Promise(promiseBody);
+
+                function promiseBody(resolve, reject){
+                    var _def = that.processDefinitions.find(function(definition){
+                        return definition.name() == definitionName
+                    });
+
+                    if (!_def) {
+                        that.resman.loadRes([{resName : definitionName, resType : '08b97860-179a-4292-a48d-bfb9535115d3'}], function(result){
+                            if ((result.result) && (result.result == 'ERROR')) {
+                                reject(new Error(result.message))
+                            } else {
+                                var _defResource = result.datas[0];
+                                _def = that.deserializeProcessDefinition(_defResource);
+                                resolve(new Process(that.controlManager, {}, _def));
+                            }
+                        })
+                    } else {
+                        resolve(new Process(that.controlManager, {}, _def))
+                    }
                 }
             },
 
@@ -526,6 +549,16 @@ define([
                 fs.unlink(UCCELLO_CONFIG.wfe.processStorage + processID + '.txt');
 
                 return _process;
+            },
+
+            deserializeProcessDefinition : function(resource){
+                var _callback = this.createComponentFunction
+
+                var _definition = this.db.deserialize(resource, {}, _callback);
+                this.processDefinitions.push(_definition);
+                console.log('[%s] : }} Добавлено описание процесса [%s]', (new Date()).toLocaleTimeString(),  _definition.name());
+
+                return _definition;
             },
 
             getControlManager : function() {

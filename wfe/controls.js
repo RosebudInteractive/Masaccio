@@ -5,7 +5,7 @@ var MegaAnswer = 'XXX';
 
 var controls = [
     {className: 'Engine',                   component: './engine',                          guid: '387e8d92-e2ca-4a94-9732-b4a479ff8bb8'},
-    {className: 'ProcessDefinition',        component: './processDefinition',               guid: 'acd97fff-93f9-47ed-84bb-e24ffdf28fc5'},
+    {className: 'ProcessDefinition',        component: './processDefinition',               guid: UCCELLO_CONFIG.classGuids.ProcessDefinition},//'acd97fff-93f9-47ed-84bb-e24ffdf28fc5'},
     {className: 'Process',                  component: './process',                         guid: '74441683-a11f-4b59-9e04-0aefcc5bc18a'},
     {className: 'FlowNode',                 component: './flowNode',                        guid: '199a78b0-b555-4f97-9d8f-41234ae7f06f'},
     {className: 'SequenceFlow',             component: './sequenceFlow',                    guid: 'c7a6cd70-653f-4e12-b6dc-8a6085b7fc7f'},

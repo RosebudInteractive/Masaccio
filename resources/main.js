@@ -5,28 +5,21 @@ var _parentDir = __dirname;
 var _uccelloDir = _parentDir + '/../../Uccello/';
 var _enginePath = _parentDir + '/../wfe/';
 var _dbPath = _parentDir + '/../../ProtoOne/data/';
-var _definitionsPath = _parentDir + '/definitions/';
 
 var _path = {
     engine : _enginePath,
-    definitions : _definitionsPath,
     Uccello : _uccelloDir,
-    Masaccio : _parentDir + '/../',
     DbPath : _dbPath
 };
+
+var EngineSingleton = require(_path.engine + 'engineSingleton');
 
 var _initializer = {
     getConfig : function(){
         return {
-            wfe : {
-                processStorage  : _path.Masaccio + 'data/',
-                scriptsPath     : _path.Masaccio + 'UserScripts/',
-                idleTimeout     : 3000
-            },
-
-            controlsPath    : _path.Masaccio,
             dataPath        : _path.DbPath,
             uccelloPath     : _path.Uccello,
+            savePath        : _path.DbPath + 'processDefinitions/',
             webSocketServer : {port: 8082}
         };
     },
@@ -61,8 +54,8 @@ var _initializer = {
 
         var dbc = uccelloServ.getUserMgr().getController();
 
-        var EngineSingleton = require(_path.engine + 'engineSingleton');
-        EngineSingleton.initInstance({dbController : dbc, constructHolder : this.constructHolder, resman : this.resman});
+
+        EngineSingleton.initInstance({dbController : dbc, constructHolder : this.constructHolder});
         this.controlManager = EngineSingleton.getInstance().getControlManager();
 
         var TestClient = require('./../test/testClient');
@@ -89,6 +82,12 @@ var UccelloConfig = require(_path.Uccello + 'config/config');
 UCCELLO_CONFIG = new UccelloConfig(_initializer.getConfig());
 DEBUG = true;
 PATH = _path;
+
+_initializer.initServer();
+var Builder = require('./builder');
+var _builder = new Builder(EngineSingleton.getInstance());
+_builder.saveDefintions();
+
 
 if (module) {
     module.exports.Path = _path;
