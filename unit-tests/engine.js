@@ -89,12 +89,15 @@ describe('Engine', function(){
                                 var _value = _process.findParameter('count').value();
                                 _value.should.equal(7);
 
-                                EngineSingleton.getInstance().saveProcess(result.processID);
-                                EngineSingleton.getInstance().findOrUploadProcess(result.processID);
+                                EngineSingleton.getInstance().saveProcess(result.processID).then(
+                                    function(){
+                                        EngineSingleton.getInstance().findOrUploadProcess(result.processID);
+                                        EngineSingleton.getInstance().deleteProcess(result.processID);
+                                        done()
+                                    },
+                                    function(error){throw error}
+                                );
 
-                                EngineSingleton.getInstance().deleteProcess(result.processID);
-
-                                done()
                             } else {
                                 console.log('[%s] Еще работает', (new Date()).toLocaleTimeString())
                             }

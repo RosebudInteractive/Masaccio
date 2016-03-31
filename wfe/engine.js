@@ -13,7 +13,6 @@ define([
         './EngineTools/responseStorage',
         './Gateways/gateway',
         './Gateways/exclusiveGateway',
-        'fs',
         './EngineTools/engineInitializer',
         './controls',
         './processDefinition',
@@ -23,7 +22,8 @@ define([
         './Activities/userTask',
         './answer',
         './EngineTools/subprocessCallback',
-        './EngineTools/messageCache'
+        './EngineTools/messageCache',
+        './EngineTools/fileAdapter'
     ],
     function(
         Process,
@@ -35,7 +35,6 @@ define([
         ResponseStorage,
         Gateway,
         ExclusiveGateway,
-        fs,
         Initializer,
         Controls,
         ProcessDefinition,
@@ -45,7 +44,8 @@ define([
         UserTask,
         Answer,
         SubProcessCallback,
-        MessageCache
+        MessageCache,
+        FileAdapter
     ) {
 
         var wfeInterfaceGUID = "a75970d5-f9dc-4b1b-90c7-f70c37bbbb9b";
@@ -76,6 +76,7 @@ define([
                 Initializer.registerTypes(this.controlManager);
 
                 this.db = this.controlManager;
+                this.adapter = new FileAdapter();
 
                 this.notifier = new Notify();
                 this.requestStorage = new RequestStorage();
@@ -89,6 +90,7 @@ define([
                 this.messageDefinitions = [];
                 this.processIntsances = [];
                 this.messageInstances = [];
+
                 if (initParams && initParams.router) {
                     this.router = initParams.router;
                     this.router.add('wfeInterface', function (data, done)
@@ -247,20 +249,8 @@ define([
                     processInstance.enqueueToken(_token);
                 },
 
-            getProcessIndex : function(predicate) {
-                var _index = -1;
-                this.processIntsances.some(function(element, index) {
-                    if (predicate(element)) {
-                        _index = index;
-                        return true;
-                    }
-                });
-
-                return _index;
-            },
-
             findProcessByPredicate : function(predicate) {
-                var _index = this.getProcessIndex(predicate)
+                var _index = this.processIntsances.findIndex(predicate);
 
                 if (_index != -1) {
                     return this.processIntsances[_index];
@@ -270,9 +260,9 @@ define([
             },
 
             getProcessInstance : function(processID) {
-                return this.findProcessByPredicate(function(element) {
-                    return element.processID() == processID
-                })
+                return this.processIntsances.find(function(instance){
+                    return instance.processID() == processID
+                });
             },
 
             waitForRequest : function(processID, tokenID, requestName, timeout, callback){
@@ -381,8 +371,8 @@ define([
             },
 
             getActiveProcess : function(processID) {
-                return this.findProcessByPredicate(function(element) {
-                    return (element.processID() == processID) && element.isRunning()
+                return this.processIntsances.find(function(instance) {
+                    return (instance.processID() == processID) && instance.isRunning()
                 })
             },
 
@@ -407,7 +397,7 @@ define([
                         }
                     } else {
                         if (_process.canContinue()) {
-                            _process = this.activateProcess(_processID);
+                            _process.activate();
                         }
 
                         var _token = _process.getToken(answer.tokenID);
@@ -510,45 +500,36 @@ define([
             },
 
             saveProcess : function(processID) {
-                //console.log('[%s] : {{ А ничего пока не выгружаем', (new Date()).toLocaleTimeString())
+                var that = this;
 
-                this.serializeProcess(processID);
-                var _index = this.getProcessIndex(function(element) {
-                    return element.processID() == processID
+                return new Promise(function(resolve, reject){
+                    var _process = that.getProcessInstance(processID);
+
+                    if (_process) {
+                        that.adapter.serialize(_process).then(
+                            function() {
+                                var _index = that.processIntsances.findIndex(function(instance) {
+                                    return instance.processID() == processID
+                                });
+
+                                if (_index != -1) {
+                                    that.uploadedProcesses.push({processID : processID, isFinished : that.processIntsances[_index].isFinished()});
+                                    that.processIntsances.splice(_index, 1);
+                                    resolve()
+                                } else {
+                                    reject(new Error('Can not upload serialized process [' + processID + ']'))
+                                }
+                            },
+                            reject)
+                    } else {
+                        reject(new Error('Can not find process [' + processID + ']'))
+                    }
                 });
 
-                if (_index != -1) {
-                    this.uploadedProcesses.push({processID : processID, isFinished : this.processIntsances[_index].isFinished()});
-                    this.processIntsances.splice(_index, 1);
-                }
-            },
-
-            serializeProcess : function(processID) {
-                var _process = this.getProcessInstance(processID);
-
-                if (_process) {
-                    _process.clearFinishedTokens();
-                    var _obj = _process.pvt.db.serialize(_process);
-                    if (_obj) {
-                        fs.writeFileSync(UCCELLO_CONFIG.wfe.processStorage + processID + '.txt', JSON.stringify(_obj));
-                        console.log('[%s] : {{ Процесс [%s] выгружен из памяти', (new Date()).toLocaleTimeString(), processID)
-                    }
-                }
             },
 
             deserializeProcess : function(processID, callback){
-                if (!callback) {
-                    callback = this.createComponentFunction
-                }
-
-                var _obj = fs.readFileSync(UCCELLO_CONFIG.wfe.processStorage + processID + '.txt');
-                _obj = JSON.parse(_obj);
-
-                var _process = this.db.deserialize(_obj, {}, callback);
-                console.log('[%s] : }} Процесс [%s] восстановлен', (new Date()).toLocaleTimeString(), processID);
-                fs.unlink(UCCELLO_CONFIG.wfe.processStorage + processID + '.txt');
-
-                return _process;
+                return this.adapter.deserialize(processID, callback);
             },
 
             deserializeProcessDefinition : function(resource){
@@ -568,7 +549,6 @@ define([
             archiveToken : function(token) {
                 var _process = this.findOrUploadProcess(token.processInstance().processID());
                 this.tokensArchive.push({processID : _process.processID(), token : token});
-                //_process.tokens()._del(token);
             },
 
             getRequests : function(processGuid) {
