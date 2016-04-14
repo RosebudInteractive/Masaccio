@@ -2,7 +2,7 @@
  * Created by staloverov on 27.07.2015.
  */
 var Main = require("./main");
-var EngineSingleton = require(PATH.engine + 'engineSingleton');
+//var EngineSingleton = require(PATH.engine + 'engineSingleton');
 var fs = require('fs');
 
 function copyFile(source, target) {
@@ -14,7 +14,7 @@ copyFile(
     UCCELLO_CONFIG.wfe.processStorage + 'testProcess1.txt'
 );
 
-Main.Config.initServer();
+//Main.Config.initServer();
 
 /*
 var _engine = EngineSingleton.getInstance();

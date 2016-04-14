@@ -3,12 +3,21 @@
  */
 var Main = require('./../main');
 var EngineSingleton = require(PATH.engine + 'engineSingleton');
+var fs = require('fs');
 
 var Definitions = {
+    names : {
+        forSimpleProcessWithOneActivity : 'Simple Process With One Activity',
+        forTestNodeStateWithTwoTokens : 'Test Node State With Two Tokens',
+        forTestWaitRequest : 'For_Test_WaitRequest',
+        forTestInclusiveGatewayProcess : 'Test Inclusive Gateway Process'
+    },
+
     simpleProcessWithOneActivity : function() {
         var _definition = EngineSingleton.getInstance().newProcessDefinition();
-        _definition.definitionID('68c621d9-3168-4655-98e6-36ed7700efe4')
-        _definition.name('Тестовый процесс - простейший процесс с одним узлом Activity');
+        _definition.definitionID('68c621d9-3168-4655-98e6-36ed7700efe4');
+        //_definition.name('Тестовый процесс - простейший процесс с одним узлом Activity');
+        _definition.name(this.names.forSimpleProcessWithOneActivity);
         _definition.addActivity('start');
 
         return _definition;
@@ -23,6 +32,8 @@ var Definitions = {
          */
 
         var _definition =  EngineSingleton.getInstance().newProcessDefinition();
+        _definition.definitionID('39625f2b-9882-4fd4-9096-4848929e542c');
+        _definition.name(this.names.forTestWaitRequest);
         _definition.addParameter('count').value(1);
         var _start = _definition.addActivity('start');
         var _userTask = _definition.addUserTask('userTask', {
@@ -49,7 +60,8 @@ var Definitions = {
 
         var _definition = EngineSingleton.getInstance().newProcessDefinition();
         _definition.definitionID("bcfb9471-2364-4dd8-a12e-166245f35f5f")
-        _definition.name('Тестовый процесс - Проверка прохождения узлов несколькими токенами');
+        //_definition.name('Тестовый процесс - Проверка прохождения узлов несколькими токенами');
+        _definition.name(this.names.forTestNodeStateWithTwoTokens);
         _definition.addParameter('count').value(0);
 
         var _start = _definition.addActivity('start');
@@ -91,7 +103,8 @@ var Definitions = {
 
         var _definition = EngineSingleton.getInstance().newProcessDefinition();
         _definition.definitionID("3289be23-3e15-4be2-957e-62e1c8516376");
-        _definition.name('Определение тестового процесса с использованием inclusiveGateway');
+        //_definition.name('Определение тестового процесса с использованием inclusiveGateway');
+        _definition.name(this.names.forTestInclusiveGatewayProcess);
 
         var _activity1 = _definition.addActivity('testActivity1');
         var _userTask = _definition.addUserTask('UserTask1');

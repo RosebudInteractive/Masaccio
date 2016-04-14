@@ -23,7 +23,8 @@ define([
         './answer',
         './EngineTools/subprocessCallback',
         './EngineTools/messageCache',
-        './EngineTools/fileAdapter'
+        './EngineTools/fileAdapter',
+        './EngineTools/dbAdapter'
     ],
     function(
         Process,
@@ -45,7 +46,8 @@ define([
         Answer,
         SubProcessCallback,
         MessageCache,
-        FileAdapter
+        FileAdapter,
+        DbAdapter
     ) {
 
         var wfeInterfaceGUID = "a75970d5-f9dc-4b1b-90c7-f70c37bbbb9b";
@@ -69,14 +71,14 @@ define([
 
         var Engine = UccelloClass.extend({
             init: function (initParams) {
-                this.db = Initializer.createInternalDb(initParams.dbController);
-                this.controlManager = Initializer.createControlManager(this.db);
+                //this.db = Initializer.createInternalDb(initParams.dbController);
+                this.controlManager = Initializer.createControlManager(initParams);
                 this.constructHolder = initParams.constructHolder;
                 this.resman = initParams.resman;
                 Initializer.registerTypes(this.controlManager);
 
                 this.db = this.controlManager;
-                this.adapter = new FileAdapter();
+                this.adapter = new DbAdapter();
 
                 this.notifier = new Notify();
                 this.requestStorage = new RequestStorage();
@@ -155,23 +157,20 @@ define([
             },
 
             startProcessInstance : function(definitionID, callback) {
-                var _result = {};
                 console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
-                var _process = this.createNewProcess(definitionID);
-
-                if (_process) {
-                    var that = this;
-                    setTimeout(function() {
-                        that.runProcess(_process);
-                        var _answer = Answer.success('Процесс processID [%s] запущен',  _process.processID());
-                        _answer.processID = _process.processID();
-                        _answer.tokenID = _process.currentToken().tokenID();
+                var that = this;
+                this.createNewProcess1(definitionID).then(
+                    function(process) {
+                        that.runProcess(process);
+                        var _answer = Answer.success('Процесс processID [%s] запущен',  process.processID());
+                        _answer.processID = process.processID();
+                        _answer.tokenID = process.currentToken().tokenID();
                         _answer.handle(callback);
-                    }, 0);
-
-                } else {
-                    Answer.error('Не удалось создать процесс [%s]', [definitionID]).handle(callback);
-                }
+                    },
+                    function(reason){
+                        Answer.error('Не удалось создать процесс [%s]', [definitionID]).handle(callback);
+                    }
+                );
             },
 
             createNewProcess1 : function(definitionName) {
@@ -188,9 +187,10 @@ define([
                             if ((result.result) && (result.result == 'ERROR')) {
                                 reject(new Error(result.message))
                             } else {
-                                var _defResource = result.datas[0];
-                                _def = that.deserializeProcessDefinition(_defResource);
-                                resolve(new Process(that.controlManager, {}, _def));
+                                var _defResource = result.datas[0].resource;
+                                //_def = that.deserializeProcessDefinition(_defResource);
+                                var _process = new Process(that.controlManager, {definitionResourceID : result.datas[0].id}, _defResource);
+                                resolve(_process);
                             }
                         })
                     } else {
@@ -219,23 +219,31 @@ define([
                 },
 
                 findOrUploadProcess: function (processID) {
-                    var _process = this.getProcessInstance(processID);
-                    if (_process) {
-                        return _process
-                    }
+                    var that = this;
 
-                    for (var i = 0; i < this.uploadedProcesses.length; i++) {
-                        if (this.uploadedProcesses[i].processID == processID) {
-                            var _process = this.deserializeProcess(processID, this.createComponentFunction);
-                            //this.processes()._add(_process);
-                            this.processIntsances.push(_process);
-                            this.uploadedProcesses.splice(i, 1);
+                    return new Promise(function(resolve, reject){
+                        var _process = that.getProcessInstance(processID);
+                        if (_process) {
+                            resolve(_process)
+                        } else {
+                            var _index = that.uploadedProcesses.findIndex(function(element){
+                               return element.processID == processID
+                            });
 
-                            return _process;
+                            if (_index != -1) {
+                                that.adapter.deserialize(processID).then(
+                                    function(process){
+                                        that.processIntsances.push(process);
+                                        that.uploadedProcesses.splice(_index, 1);
+                                        resolve(process)
+                                    },
+                                    reject
+                                )
+                            } else {
+                                resolve(null)
+                            }
                         }
-                    }
-
-                    return null;
+                    });
                 },
 
                 defineTokens: function (processInstance) {
@@ -250,13 +258,7 @@ define([
                 },
 
             findProcessByPredicate : function(predicate) {
-                var _index = this.processIntsances.findIndex(predicate);
-
-                if (_index != -1) {
-                    return this.processIntsances[_index];
-                } else {
-                    return null;
-                }
+                return this.processIntsances.find(predicate);
             },
 
             getProcessInstance : function(processID) {
@@ -284,14 +286,18 @@ define([
             },
 
             activateProcess : function(processID) {
-                var _process = this.findOrUploadProcess(processID);
-                if (_process) {
-                    _process.activate();
-                    return _process;
-                }
-                else {
-                    throw 'Неизвестный ID процесса'
-                }
+                var that = this;
+                return new Promise(function(resolve, reject){
+                    that.findOrUploadProcess(processID).then(
+                        function(_process) {
+                            _process.activate();
+                            resolve();
+                        },
+                        function() {
+                            reject(new Error('Неизвестный ID процесса'))
+                        }
+                    );
+                });
             },
 
             deactivateProcess: function (processInstance) {
@@ -349,7 +355,7 @@ define([
                 var _process = this.getActiveProcess(token.processInstance().processID());
                 var _token;
 
-                if (_process !== null) {
+                if (_process) {
                     var _newToken = _process.dequeueToken();
                     if (_newToken && _process.canContinue()) {
                         _token = _newToken
@@ -388,52 +394,49 @@ define([
                 var _request = this.requestStorage.getRequest(answer.requestID);
                 if (_request && _request.isActive()) {
                     var _processID = answer.processID;
-                    var _process = this.findOrUploadProcess(_processID);
 
-                    if (!_process) {
-                        if (callback) {
-                            console.log('[%s] : ER Процесс [%s] не найден', (new Date()).toLocaleTimeString(), _processID);
-                            callback({result: 'ERROR', message : 'Процесс не найден'});
-                        }
-                    } else {
-                        if (_process.canContinue()) {
-                            _process.activate();
-                        }
-
-                        var _token = _process.getToken(answer.tokenID);
-
-                        var _receivingNode = _token.currentNode();
-
-                        _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(answer.requestID);
-                        if (!_request) {
-                            throw 'Error!'
-                        }
-
-                        var response = _request.createResponse(_request.getParent());
-                        response.fillParams(answer.response);
-
-                        this.responseStorage.addResponseCallback(response, 0, callback);
-
-                        if (_process.isRunning()) {
-                            /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
-                            _receivingNode.execute(function () {
-                                _token.execute();
-                            });
-                        } else {
-                            if (!_process.isTokenInQueue(_token)) {
-                                _process.enqueueToken(_token)
+                    var that = this;
+                    this.findOrUploadProcess(_processID).then(
+                        function(_process){
+                            if (_process.canContinue()) {
+                                _process.activate();
                             }
 
-                            _receivingNode.execute();
+                            var _token = _process.getToken(answer.tokenID);
+
+                            var _receivingNode = _token.currentNode();
+
+                            _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(answer.requestID);
+                            if (!_request) {
+                                throw 'Error!'
+                            }
+
+                            var response = _request.createResponse(_request.getParent());
+                            response.fillParams(answer.response);
+
+                            that.responseStorage.addResponseCallback(response, 0, callback);
+
+                            if (_process.isRunning()) {
+                                /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
+                                _receivingNode.execute(function () {
+                                    _token.execute();
+                                });
+                            } else {
+                                if (!_process.isTokenInQueue(_token)) {
+                                    _process.enqueueToken(_token)
+                                }
+
+                                _receivingNode.execute();
+                            }
+                        },
+                        function(error){
+                            Answer.error('Процесс [%s] не найден message [%s]', [_processID, error.message]).handle(callback);
                         }
-                    }
+                    );
+
+
                 } else {
-                    setTimeout(function () {
-                        /* Todo : результат в callback */
-                        if (callback) {
-                            callback({result: 'ERROR'})
-                        }
-                    }, 0);
+                    Answer.error('Unknown error').handle(callback);
                 }
 
                 return Controls.MegaAnswer;
@@ -444,50 +447,52 @@ define([
 
                 if (!_request) {
                     Answer.error('Реквест [%s] не найден среди активных', [message.requestID]).handle(callback);
-                    //return Controls.MegaAnswer;
                 } else {
                     _request.responseReceived();
                 }
 
-                var _process = this.findOrUploadProcess(message.processID);
-                if (!_process) {
-                    Answer.error('Процесс [%s] не найден', [message.processID]).handle(callback);
-                    return Controls.MegaAnswer;
-                }
+                var that = this;
 
-                var _token = _process.getToken(message.tokenID);
-                var _receivingNode = _token.currentNode();
+                this.findOrUploadProcess(message.processID).then(
+                    function(_process){
+                        var _token = _process.getToken(message.tokenID);
+                        var _receivingNode = _token.currentNode();
 
-                _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(message.requestID);
-                if (!_request) {
-                    throw 'System Error!'
-                }
-
-                _request.responseReceived();
-
-                var response = _request.createResponse(_request.getParent());
-                response.fillParams(message.response);
-
-                if ((_receivingNode instanceof UserTask) && (_receivingNode.hasScript())) {
-                    this.responseStorage.addResponseCallback(response, timeout, callback)
-                }
-
-                if (_process.canContinue()) {
-                    if (_process.isRunning()) {
-                        /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
-                        _receivingNode.execute(function () {
-                            _token.execute();
-                        });
-                    } else {
-                        if (!_process.isTokenInQueue(_token)) {
-                            _process.enqueueToken(_token)
+                        _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(message.requestID);
+                        if (!_request) {
+                            throw 'System Error!'
                         }
 
-                        _receivingNode.execute(function () {
-                            _token.execute();
-                        });
+                        _request.responseReceived();
+
+                        var response = _request.createResponse(_request.getParent());
+                        response.fillParams(message.response);
+
+                        if ((_receivingNode instanceof UserTask) && (_receivingNode.hasScript())) {
+                            that.responseStorage.addResponseCallback(response, timeout, callback)
+                        }
+
+                        if (_process.canContinue()) {
+                            if (_process.isRunning()) {
+                                /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
+                                _receivingNode.execute(function () {
+                                    _token.execute();
+                                });
+                            } else {
+                                if (!_process.isTokenInQueue(_token)) {
+                                    _process.enqueueToken(_token)
+                                }
+
+                                _receivingNode.execute(function () {
+                                    _token.execute();
+                                });
+                            }
+                        }
+                    },
+                    function(error) {
+                        Answer.error('Процесс [%s] не найден message [%s]', [message.processID, error.message]).handle(callback);
                     }
-                }
+                );
 
                 return Controls.MegaAnswer;
             },
@@ -528,16 +533,15 @@ define([
 
             },
 
-            deserializeProcess : function(processID, callback){
-                return this.adapter.deserialize(processID, callback);
-            },
+            deserializeProcessDefinition : function(resource, params){
+                var _callback = this.createComponentFunction;
 
-            deserializeProcessDefinition : function(resource){
-                var _callback = this.createComponentFunction
-
-                var _definition = this.db.deserialize(resource, {}, _callback);
+                if (!params) {
+                    params = {}
+                }
+                var _definition = this.db.deserialize(resource, params, _callback);
                 this.processDefinitions.push(_definition);
-                console.log('[%s] : }} Добавлено описание процесса [%s]', (new Date()).toLocaleTimeString(),  _definition.name());
+                console.log('[%s] : }} Загружено описание процесса [%s]', (new Date()).toLocaleTimeString(),  _definition.name());
 
                 return _definition;
             },
@@ -547,8 +551,12 @@ define([
             },
 
             archiveToken : function(token) {
-                var _process = this.findOrUploadProcess(token.processInstance().processID());
-                this.tokensArchive.push({processID : _process.processID(), token : token});
+                var that = this;
+                this.findOrUploadProcess(token.processInstance().processID()).then(
+                    function(_process){
+                        that.tokensArchive.push({processID : _process.processID(), token : token});
+                    }
+                );
             },
 
             getRequests : function(processGuid) {
@@ -650,17 +658,27 @@ define([
             },
 
             notifyAboutStart : function(subprocessID){
-                var _process = this.findOrUploadProcess(subprocessID);
-                if (_process) {
-                    this.subprocesses.execStartCallback(subprocessID)
-                }
+                var that = this;
+                this.findOrUploadProcess(subprocessID).then(
+                    function() {
+                        that.subprocesses.execStartCallback(subprocessID)
+                    },
+                    function(error){
+                        throw error
+                    }
+                );
             },
 
             notifyAboutFinish : function(subprocessID) {
-                var _process = this.findOrUploadProcess(subprocessID);
-                if (_process) {
-                    this.subprocesses.execEndCallback(subprocessID)
-                }
+                var that = this;
+                this.findOrUploadProcess(subprocessID).then(
+                    function() {
+                        that.subprocesses.execEndCallback(subprocessID)
+                    },
+                    function(error){
+                        throw error
+                    }
+                );
             },
 
             deliverMessage : function(messageInstance, messageRequest) {

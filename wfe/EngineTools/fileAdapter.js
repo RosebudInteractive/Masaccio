@@ -11,7 +11,7 @@ define(['fs', './../engineSingleton'],
 
         return class FileAdapter{
             constructor(){
-                this.engine = EngineSingleton.getInstance();
+                //this.engine = EngineSingleton.getInstance();
             }
 
             serialize(process) {
@@ -35,18 +35,25 @@ define(['fs', './../engineSingleton'],
             }
 
             deserialize(processID, createComponentFunction) {
-                if (!createComponentFunction) {
-                    createComponentFunction = this.engine.createComponentFunction
-                }
+                return new Promise(function(resolve, reject) {
+                    if (!createComponentFunction) {
+                        createComponentFunction = EngineSingleton.getInstance().createComponentFunction
+                    }
 
-                var _obj = fs.readFileSync(UCCELLO_CONFIG.wfe.processStorage + processID + '.txt');
-                _obj = JSON.parse(_obj);
+                    var _fileName = UCCELLO_CONFIG.wfe.processStorage + processID + '.txt';
+                    fs.readFile(_fileName, function(error, data) {
+                        if (error) {
+                            reject(error)
+                        } else {
+                            var _obj = JSON.parse(data);
+                            var _process = EngineSingleton.getInstance().db.deserialize(_obj, {}, createComponentFunction);
+                            console.log('[%s] : }} Процесс [%s] восстановлен', (new Date()).toLocaleTimeString(), processID);
+                            fs.unlink(_fileName);
 
-                var _process = this.db.deserialize(_obj, {}, createComponentFunction);
-                console.log('[%s] : }} Процесс [%s] восстановлен', (new Date()).toLocaleTimeString(), processID);
-                fs.unlink(UCCELLO_CONFIG.wfe.processStorage + processID + '.txt');
-
-                return _process
+                            resolve(_process)
+                        }
+                    });
+                });
             }
         }
 

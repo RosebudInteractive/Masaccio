@@ -86,7 +86,7 @@ define([
 
                     if (this.hasCondition()) {
                         var _script = this.script().asSimpleObject();
-                        _sequence.script(_sequence.getRoot().getOrCreateScript(_script));
+                        _sequence.script(_sequence.getRootObj().getOrCreateScript(_script));
                     }
                 }
 
@@ -140,7 +140,7 @@ define([
 
 
             setUserScript : function(script) {
-                this.script(this.getRoot().getOrCreateScript(script));
+                this.script(this.getRootObj().getOrCreateScript(script));
             },
 
             getUserScript : function() {
@@ -162,6 +162,10 @@ define([
 
             getParent : function() {
                 return this.pvt.parent
+            },
+
+            getRootObj : function() {
+                return this.getParent().getRootObj();
             },
 
             getControlManager : function() {

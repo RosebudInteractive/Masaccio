@@ -81,8 +81,8 @@ define([
                 return this.processInstance().getControlManager();
             },
 
-            getRoot : function() {
-                return this.getParent().getRoot();
+            getRootObj : function() {
+                return this.getParent().getRootObj();
             },
 
             parameters : function() {
@@ -135,9 +135,11 @@ define([
                     case (FlowNode.state.ExecutionComplete) : {
                         var that = this;
 
-                        this.currentNode().calcOutgoingNodes(function(result) {
-                            EngineSingleton.getInstance().activateProcess(that.processInstance().processID());
-                            EngineSingleton.getInstance().startOutgoingNodes(that);
+                        this.currentNode().calcOutgoingNodes(function() {
+                            EngineSingleton.getInstance().activateProcess(that.processInstance().processID()).then(
+                                function(){EngineSingleton.getInstance().startOutgoingNodes(that)},
+                                function(error) {throw error}
+                            );
                         });
 
                         break;
@@ -145,7 +147,7 @@ define([
 
                     case (FlowNode.state.WaitingUserScriptAnswer) : {
                         EngineSingleton.getInstance().deactivateProcess(this.processInstance());
-                        EngineSingleton.getInstance().switchTokens(this)
+                        EngineSingleton.getInstance().switchTokens(this);
                         break;
                     }
 
@@ -195,15 +197,22 @@ define([
             executeNode : function() {
                 var that = this;
                 this.currentNode().execute(function() {
-                    var _process = EngineSingleton.getInstance().findOrUploadProcess(that.processInstance().processID());
-                    if (_process.canContinue()) {
-                        EngineSingleton.getInstance().activateProcess(_process.processID());
-                        var _token = _process.getToken(that.tokenID());
-                        EngineSingleton.getInstance().switchTokens(_token);
+                    EngineSingleton.getInstance().findOrUploadProcess(that.processInstance().processID()).then(
+                        function(process){
+                            if (process.canContinue()) {
+                                process.activate();
+                                //EngineSingleton.getInstance().activateProcess(process.processID());
+                                var _token = process.getToken(that.tokenID());
+                                EngineSingleton.getInstance().switchTokens(_token);
+                            } else {
+                                EngineSingleton.getInstance().switchTokens(that);
+                            }
+                        },
+                        function(error) {
+                            throw error
+                        }
+                    );
 
-                    } else {
-                        EngineSingleton.getInstance().switchTokens(that);
-                    }
                 });
 
                 if (this.hasNewRequest() && this.currentNode().isWaitingRequest()) {

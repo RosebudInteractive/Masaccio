@@ -119,7 +119,7 @@ define([
                 return this.getCol('Scripts');
             },
 
-            getRoot : function() {
+            getRootObj : function() {
                 return this;
             },
 
@@ -271,6 +271,14 @@ define([
                 var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'InputParameters'});
                 _param.name(parameterName);
                 return _param;
+            },
+
+            getModelForProcess : function(){
+                return {name : 'Process'}
+            },
+
+            onSaveProcess : function(dbObject) {
+                console.log('Идет сохранение [%s]', dbObject.Name)
             }
         });
 

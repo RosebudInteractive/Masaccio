@@ -9,12 +9,12 @@ var Definition = require(PATH.definitions +'callActivity');
 var EngineSingleton = require(PATH.engine + 'engineSingleton');
 
 before(function() {
-    Main.Config.initServer();
-    Main.Config.testClient.setTimeout(3)
+    //Main.Config.initServer();
+    //Main.Config.testClient.setTimeout(3)
 });
 
 beforeEach(function() {
-    Main.Config.testClient.clear();
+    //Main.Config.testClient.clear();
 });
 
 xdescribe('CallActivity', function(){

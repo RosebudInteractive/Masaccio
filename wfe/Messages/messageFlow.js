@@ -64,9 +64,9 @@ define([
             //    return this.pvt.parent;
             //},
             //
-            //getRoot : function() {
+            //getRootObj : function() {
             //    if (this.getParent()) {
-            //        return this.getParent().getRoot()
+            //        return this.getParent().getRootObj()
             //    } else {
             //        return this
             //    }

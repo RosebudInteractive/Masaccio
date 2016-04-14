@@ -14,7 +14,7 @@ beforeEach(function() {
 });
 
 beforeEach(function() {
-    Main.Config.testClient.clear();
+    //Main.Config.testClient.clear();
 });
 
 describe('Message', function(){

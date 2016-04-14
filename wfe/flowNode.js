@@ -104,7 +104,7 @@ define([
                     }
                 }
 
-                var _node= this.createInstance(token.getControlManager(), params);
+                var _node = this.createInstance(token.getControlManager(), params);
                 _node.assign(this, token);
                 _node.assignConnections(this);
                 //_node.addLinkToParameters(this);
@@ -131,8 +131,8 @@ define([
                 return this.pvt.parent;
             },
 
-            getRoot : function() {
-                return this.getParent().getRoot();
+            getRootObj : function() {
+                return this.getParent().getRootObj();
             },
 
             assignConnections: function (source) {
