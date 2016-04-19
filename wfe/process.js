@@ -190,6 +190,10 @@ define([
             correlationKeys : function() {
                 return this.getCol('CorrelationKeys');
             },
+
+            requests : function() {
+                return this.getCol('Requests');
+            },
             //</editor-fold>
 
             getControlManager : function() {
@@ -267,8 +271,14 @@ define([
 
             finish : function() {
                 if (this.state() != processStates.Finished) {
-                    this.state(processStates.Finished);
-                    Logger.info('Процесс [%s] id [%s] закончил выполнение', this.name(), this.processID());
+                    var that = this;
+                    that.state(processStates.Finished);
+                    EngineSingleton.getInstance().saveProcess(this.processID()).then(function () {
+                        Logger.info('Процесс [%s] id [%s] закончил выполнение', that.name(), that.processID());
+                    }).
+                    catch(function (error) {
+                        throw error
+                    });
                 }
             },
 
@@ -401,8 +411,26 @@ define([
                 return this.definition().getModelForProcess()
             },
 
-            onSave : function(dbObject) {
-                this.definition().onSaveProcess(dbObject)
+            onSave : function(dbObject, params) {
+                if (!params) {
+                    params = {}
+                }
+                params.processInstance = this;
+                return this.definition().onSaveProcess(dbObject, params)
+            },
+
+            deleteRequest : function(request) {
+                var _token = this.getToken(request.tokenID());
+                if (_token) {
+                    _token.deleteRequest(request)
+                }
+            },
+
+            deleteResponse : function(response){
+                var _token = this.getToken(response.tokenID());
+                if (_token) {
+                    _token.deleteResponse(response)
+                }
             }
         });
 

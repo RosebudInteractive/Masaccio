@@ -17,7 +17,7 @@ define(['fs', './../engineSingleton'],
             serialize(process) {
                 return new Promise(function(resolve, reject){
                     process.clearFinishedTokens();
-                    var _obj = process.pvt.db.serialize(process);
+                    var _obj = process.pvt.db.serialize(process, true);
                     if (_obj) {
                         var _fileName = UCCELLO_CONFIG.wfe.processStorage + process.processID() + '.txt';
                         fs.writeFile(_fileName, JSON.stringify(_obj), function(error) {

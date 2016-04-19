@@ -24,7 +24,7 @@ describe('Engine', function(){
             EngineSingleton.getInstance().clearProcessDefinitions();
         });
 
-        describe('#waitForRequest', function () {
+        xdescribe('#waitForRequest', function () {
             it('Request должен быть получен', function (done) {
                 EngineSingleton.getInstance().startProcessInstance(Definition.names.forTestWaitRequest, function(_result) {
                     EngineSingleton.getInstance().waitForRequest(_result.processID, _result.tokenID, 'request1', 3000, function (result) {
@@ -57,7 +57,7 @@ describe('Engine', function(){
             })
         });
 
-        describe('#nodeStateWithTwoTokens', function () {
+        xdescribe('#nodeStateWithTwoTokens', function () {
             it('Должен быть запущен процесс с распараллеливанием токена и прохождением по одному узлу 2 токенов', function (done) {
                 EngineSingleton.getInstance().startProcessInstance(Definition.names.forTestNodeStateWithTwoTokens, function(result) {
                         var _process;
@@ -95,7 +95,7 @@ describe('Engine', function(){
             })
         });
 
-        xdescribe('#inclusiveGateway_with_reqeusts_&_script', function () {
+        describe('#inclusiveGateway_with_reqeusts_&_script', function () {
             it('Выставить реквесты и все остальное', function (done) {
                 var testBody = function(startResult) {
                     var _processID = startResult.processID;
@@ -115,9 +115,7 @@ describe('Engine', function(){
                     }, 1000)
                 };
 
-                var _def = Definition.forTestInclusiveGatewayProcess();
-                EngineSingleton.getInstance().addProcessDefinition(_def);
-                EngineSingleton.getInstance().startProcessInstance(_def.definitionID(), testBody);
+                EngineSingleton.getInstance().startProcessInstance(Definition.names.forTestInclusiveGatewayProcess, testBody);
             })
         })
     });

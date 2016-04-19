@@ -36,7 +36,6 @@ var Event = require('./../Events/event');
     var StartMessageEvent = require('./../Events/Start/messageStartEvent');
 
 var Initializer = {
-    //dbp : {name: "Engine", kind: "master", guid: 'fb9653ea-4fc3-aee0-7a31-172a91aa196b'},
 
     registerTypes : function(controlManager){
         //new UObject(controlManager);

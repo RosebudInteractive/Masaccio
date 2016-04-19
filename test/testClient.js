@@ -75,7 +75,7 @@ define(
                     requestID : requestInfo.requestID,
                     tokenID : requestInfo.tokenID,
                     response : _response
-                }
+                };
 
                 _responses.push(_answer);
                 console.log('[%s] : <= Готовим респонс [%s]', (new Date()).toLocaleTimeString(), _answer.name);

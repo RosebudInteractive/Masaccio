@@ -374,6 +374,22 @@ define([
 
             newLink : function(parent, collectionName) {
                 return Utils.createRefTo(this, {parent : parent, colName : collectionName})
+            },
+
+            deleteRequest : function(request){
+                for (var  i = 1; this.nodesProps().count(); i++) {
+                    if (this.nodesProps().get(i).findRequest(request.ID())) {
+                        this.nodesProps().get(i).deleteRequest(request)
+                    }
+                }
+            },
+
+            deleteResponse : function(response) {
+                for (var  i = 1; this.nodesProps().count(); i++) {
+                    if (this.nodesProps().get(i).findResponse(response.ID())) {
+                        this.nodesProps().get(i).deleteResponse(response)
+                    }
+                }
             }
         });
 

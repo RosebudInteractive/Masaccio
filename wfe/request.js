@@ -32,7 +32,8 @@ define([
                 {fname:"State",ftype:"integer"},
                 {fname:"TokenID",ftype:"string"},
                 {fname:"ProcessID",ftype:"string"},
-                {fname:"ID", ftype:"string"}
+                {fname:"ID", ftype:"string"},
+                {fname:'ResponseID', ftype: 'string'}
             ],
             metaCols: [
                 {'cname' : 'Parameters', 'ctype' : 'Parameter'}
@@ -72,6 +73,10 @@ define([
                 return this._genericSetter("ID",value);
             },
 
+            responseID: function(value) {
+                return this._genericSetter("ResponseID",value);
+            },
+
             parameters : function() {
                 return this.getCol('Parameters');
             },
@@ -108,6 +113,7 @@ define([
                 _response.tokenID(this.tokenID());
                 Utils.copyCollection(this.parameters(), _response.parameters());
                 _response.state(requestState.ResponseReceived);
+                this.responseID(_response.ID());
 
                 return _response;
             },
@@ -148,6 +154,10 @@ define([
 
             responseReceived : function() {
                 this.state(requestState.ResponseReceived);
+            },
+
+            hasReceivedResponse : function(){
+                return (this.state() == requestState.ResponseReceived) && !(!this.responseID())
             },
 
             isActive : function() {

@@ -103,7 +103,6 @@ var Definitions = {
 
         var _definition = EngineSingleton.getInstance().newProcessDefinition();
         _definition.definitionID("3289be23-3e15-4be2-957e-62e1c8516376");
-        //_definition.name('Определение тестового процесса с использованием inclusiveGateway');
         _definition.name(this.names.forTestInclusiveGatewayProcess);
 
         var _activity1 = _definition.addActivity('testActivity1');

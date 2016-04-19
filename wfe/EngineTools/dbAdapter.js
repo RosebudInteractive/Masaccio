@@ -6,8 +6,8 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
 
-define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicate', './../controls'],
-    function(EngineSingleton, Predicate, Controls) {
+define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicate'],
+    function(EngineSingleton, Predicate) {
 
         return class DbAdapter{
             constructor(){
@@ -18,76 +18,80 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                 this.db = EngineSingleton.getInstance().db;
                 var that = this;
 
-                return new Promise(function(resolve, reject){
+                return new Promise(function (resolve, reject) {
                     if (!process) {
                         reject(new Error('Can not serialize process'))
                     }
 
                     process.clearFinishedTokens();
-                    var _obj = process.pvt.db.serialize(process);
-                    //if (_obj) {
-                        var _predicate = new Predicate(that.db, {});
-                        _predicate.addCondition({field: "Guid", op: "=", value: process.processID()});
-                        var _expression = {
-                            model: process.getModel(), //{name : 'ProcessData'},
-                            predicate: that.db.serialize(_predicate)
-                        };
+                    var _obj = process.pvt.db.serialize(process, true);
 
-                        that.db.getRoots([that.queryGuid], {rtype: "data", expr: _expression}, function (guids) {
-                            var _objectGuid = guids.guids[0];
-                            that.queryGuid = _objectGuid;
+                    var _predicate = new Predicate(that.db, {});
+                    _predicate.addCondition({field: "Guid", op: "=", value: process.processID()});
+                    var _expression = {
+                        model: process.getModel(),
+                        predicate: that.db.serialize(_predicate)
+                    };
 
-                            var _root = that.db.getObj(_objectGuid);
-                            var _processObj = _root.getCol("DataElements").get(0);
-                            if (_processObj) {
-                                _processObj.edit(function (result) {
-                                    if (result === 'OK') {
-                                        _processObj.State(process.state());
-                                        _processObj.Body(JSON.stringify(_obj));
+                    that.db.getRoots([that.queryGuid], {rtype: "data", expr: _expression}, function (guids) {
+                        var _objectGuid = guids.guids[0];
+                        that.queryGuid = _objectGuid;
+
+                        var _root = that.db.getObj(_objectGuid);
+                        var _processObj = _root.getCol("DataElements").get(0);
+                        if (_processObj) {
+                            _processObj.edit(function (result) {
+                                if (result === 'OK') {
+                                    _processObj.State(process.state());
+                                    _processObj.Body(JSON.stringify(_obj));
+                                } else {
+                                    reject(new Error(result.message))
+                                }
+
+                                _processObj.save({}, function (result) {
+                                    if (result.result === 'OK') {
+                                        resolve()
                                     } else {
                                         reject(new Error(result.message))
                                     }
+                                })
+                            })
+                        } else {
 
-                                    _processObj.save({}, function (result) {
+                            _root.edit(function (result) {
+                                if (result.result === 'OK') {
+                                    _root.newObject({
+                                        $sys: {guid: process.processID()},
+                                        fields: {
+                                            Name: process.name(),
+                                            State: process.state(),
+                                            Body: JSON.stringify(_obj),
+                                            DefinitionId: process.definitionResourceID()
+                                        }
+                                    }, {}, function (result) {
                                         if (result.result === 'OK') {
-                                            resolve()
+                                            var _processObject = _root.getDB().getObj(result.newObject);
+                                            process.onSave(_processObject).then(
+                                                function () {
+                                                    _root.save({}, function (result) {
+                                                        if (result.result === 'OK') {
+                                                            resolve()
+                                                        } else {
+                                                            reject(new Error(result.message))
+                                                        }
+                                                    })
+                                                },
+                                                reject);
                                         } else {
                                             reject(new Error(result.message))
                                         }
-                                    })
-                                })
-                            } else {
-                                _root.edit(function (result) {
-                                    if (result.result === 'OK') {
-                                        _root.newObject({
-                                            $sys: {guid: process.processID()},
-                                            fields: {
-                                                Name: process.name(),
-                                                State: process.state(),
-                                                Body: JSON.stringify(_obj),
-                                                DefinitionId: process.definitionResourceID()
-                                            }
-                                        }, {}, function (result) {
-                                            if (result.result === 'OK') {
-                                                process.onSave(result.newObject);
-                                                _root.save({}, function (result) {
-                                                    if (result.result === 'OK') {
-                                                        resolve()
-                                                    } else {
-                                                        reject(new Error(result.message))
-                                                    }
-                                                })
-                                            } else {
-                                                reject(new Error(result.message))
-                                            }
-                                        })
-                                    } else {
-                                        reject(new Error(result.message))
-                                    }
-                                })
-                            }
-                        })
-                    //}
+                                    });
+                                } else {
+                                    reject(new Error(result.message))
+                                }
+                            })
+                        }
+                    });
                 });
             }
 

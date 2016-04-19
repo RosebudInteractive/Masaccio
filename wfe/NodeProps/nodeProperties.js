@@ -23,7 +23,7 @@ define(
             metaCols: [
                 {'cname' : 'Parameters', 'ctype' : 'Parameter'},
                 {'cname' : 'Requests', 'ctype' : 'Request'},
-                {'cname' : 'Responses', 'ctype' : 'Request'},
+                {'cname' : 'Responses', 'ctype' : 'Request'}
             ],
             //endregion
 
@@ -126,8 +126,25 @@ define(
                 }
                 return null;
 
-            }
+            },
 
+            deleteRequest : function(request) {
+                this.requests()._del(request)
+            },
+
+            findResponse : function(responseID) {
+                for (var i = 0; i < this.responses().count(); i++) {
+                    if (this.responses().get(i).ID() == responseID) {
+                        return this.responses().get(i)
+                    }
+
+                }
+                return null;
+            },
+
+            deleteResponse : function(response) {
+                this.responses()._del(response)
+            }
         });
 
         return NodeProperties;

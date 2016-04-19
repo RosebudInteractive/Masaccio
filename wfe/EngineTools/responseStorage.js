@@ -1,9 +1,11 @@
 /**
  * Created by staloverov on 31.07.2015.
  */
+
+'use strict';
+
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 var State = {
@@ -16,74 +18,106 @@ Object.freeze(State);
 define(
     ['./../answer'],
     function(Answer) {
-        return UccelloClass.extend({
-                init: function () {
-                    this.responses = [];
-                },
+        class ResponseStorage {
+            constructor() {
+                this.responses = [];
+                this.preparedForSave = [];
+            }
 
-                addResponseCallback: function (response, timeout, callback) {
-                    if (!this.isResponseExists(response.ID())) {
-                        var _item = {responseID : response.ID(), callback : callback, state : State.NEW}
-                        this.responses.push(_item);
+            addResponseCallback(response, timeout, callback) {
+                if (!this.isResponseExists(response.ID())) {
+                    var _item = {responseID: response.ID(), callback: callback, state: State.NEW}
+                    this.responses.push(_item);
 
-                        //var that = this;
-                        if (timeout) {
-                            _item.timer = setInterval(function () {
-                                clearInterval(_item.timer);
+                    if (timeout) {
+                        _item.timer = setInterval(function () {
+                            clearInterval(_item.timer);
 
-                                callback(Answer.error('Превышен интервал ожидания'));
-                                _item.state = State.EXECUTED
-                            }, timeout)
-                        }
+                            callback(Answer.error('Превышен интервал ожидания'));
+                            _item.state = State.EXECUTED
+                        }, timeout)
                     }
-                },
-
-                getResponseIndex : function(responseID) {
-                    var _index = -1;
-                    this.responses.some(function(element, index){
-                        if (element.responseID == responseID) {
-                            _index = index;
-                            return true;
-                        }
-                    });
-
-                    return _index;
-                },
-
-                getResponse: function (responseID) {
-                    var _index = this.getResponseIndex(responseID);
-                    if (_index > -1) {
-                        return this.responses[_index]
-                    } else {
-                        return null
-                    }
-                },
-
-                isResponseExists: function (responseID) {
-                    this.responses.some(function(element){
-                        if (element.responseID == responseID) {
-                            return true;
-                        }
-                    });
-                },
-
-                executeResponseCallback : function(responseID, result) {
-                    var _item = this.getResponse(responseID);
-                    if (_item) {
-                        if (_item.state == State.NEW) {
-                            if (_item.timer) {
-                                clearInterval(_item.timer);
-                            }
-                            _item.callback({result : 'OK', responseResult : result});
-                            _item.state = State.EXECUTED;
-                        }
-                    } else {
-                        throw 'Err';
-                    }
-
                 }
             }
-        );
+
+            getResponseIndex(responseID) {
+                var _index = -1;
+                this.responses.some(function (element, index) {
+                    if (element.responseID == responseID) {
+                        _index = index;
+                        return true;
+                    }
+                });
+
+                return _index;
+            }
+
+            getResponse(responseID) {
+                var _index = this.getResponseIndex(responseID);
+                if (_index > -1) {
+                    return this.responses[_index]
+                } else {
+                    return null
+                }
+            }
+
+            isResponseExists(responseID) {
+                this.responses.some(function (element) {
+                    if (element.responseID == responseID) {
+                        return true;
+                    }
+                });
+            }
+
+            executeResponseCallback(response, result) {
+                var _responseID = response.ID();
+                var _item = this.getResponse(_responseID);
+                if (_item) {
+                    if (_item.state == State.NEW) {
+                        if (_item.timer) {
+                            clearInterval(_item.timer);
+                        }
+                        _item.callback({result: 'OK', responseResult: result});
+                        _item.state = State.EXECUTED;
+                        this.addForSave(response);
+                    }
+                } else {
+                    throw 'Err';
+                }
+            }
+
+            addForSave(response) {
+                var _existResponse = this.preparedForSave.find(function (element) {
+                    return element.ID() == response.ID()
+                });
+
+                if (!_existResponse) {
+                    this.preparedForSave.push(response)
+                }
+            }
+
+            getProcessResponsesForSave(processID) {
+                var _resultArray = [];
+                this.preparedForSave.forEach(function(element){
+                    if (element.processID() == processID) {
+                        _resultArray.push(element)
+                    }
+                });
+
+                return _resultArray;
+            }
+
+            deleteProcessResponsesForSave(processID) {
+                this.preparedForSave.forEach(function(element, index, array) {
+                    if (element.processID() == processID){
+                        array.splice(index, 1)
+                    }
+                })
+            }
+
+        }
+
+        return ResponseStorage;
     }
 
 );

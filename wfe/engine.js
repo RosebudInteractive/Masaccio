@@ -415,6 +415,7 @@ define([
                             response.fillParams(answer.response);
 
                             that.responseStorage.addResponseCallback(response, 0, callback);
+                            that.requestStorage.addForSave(_request);
 
                             if (_process.isRunning()) {
                                 /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
@@ -471,6 +472,7 @@ define([
                         if ((_receivingNode instanceof UserTask) && (_receivingNode.hasScript())) {
                             that.responseStorage.addResponseCallback(response, timeout, callback)
                         }
+                        that.requestStorage.addForSave(_request);
 
                         if (_process.canContinue()) {
                             if (_process.isRunning()) {
