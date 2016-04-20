@@ -386,6 +386,7 @@ define([
                 var _request = request.clone(this.controlManager, {});
                 _request.ID(request.ID());
                 this.requestStorage.addRequest(_request, eventParams);
+                this.requestStorage.addForSave(_request);
                 console.log('[%s] : => Выставлен request [%s]', (new Date()).toLocaleTimeString(), request.name());
                 this.notifier.notify(eventParams);
             },
@@ -416,6 +417,7 @@ define([
 
                             that.responseStorage.addResponseCallback(response, 0, callback);
                             that.requestStorage.addForSave(_request);
+                            that.responseStorage.addForSave(response);
 
                             if (_process.isRunning()) {
                                 /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
@@ -473,6 +475,7 @@ define([
                             that.responseStorage.addResponseCallback(response, timeout, callback)
                         }
                         that.requestStorage.addForSave(_request);
+                        that.responseStorage.addForSave(response);
 
                         if (_process.canContinue()) {
                             if (_process.isRunning()) {
@@ -506,7 +509,32 @@ define([
                 return Controls.MegaAnswer;
             },
 
-            saveProcess : function(processID) {
+            saveAndUploadProcess : function(processID) {
+                var that = this;
+
+                return new Promise(function(resolve, reject) {
+                    that.justSaveProcess(processID).
+                    then(function () {
+                        var _index = that.processIntsances.findIndex(function (instance) {
+                            return instance.processID() == processID
+                        });
+
+                        if (_index != -1) {
+                            that.uploadedProcesses.push({
+                                processID: processID,
+                                isFinished: that.processIntsances[_index].isFinished()
+                            });
+                            that.processIntsances.splice(_index, 1);
+                        }
+                        resolve();
+                    }).
+                    catch(reject);
+                });
+            },
+
+
+
+            justSaveProcess: function(processID){
                 var that = this;
 
                 return new Promise(function(resolve, reject){
@@ -514,25 +542,12 @@ define([
 
                     if (_process) {
                         that.adapter.serialize(_process).then(
-                            function() {
-                                var _index = that.processIntsances.findIndex(function(instance) {
-                                    return instance.processID() == processID
-                                });
-
-                                if (_index != -1) {
-                                    that.uploadedProcesses.push({processID : processID, isFinished : that.processIntsances[_index].isFinished()});
-                                    that.processIntsances.splice(_index, 1);
-                                    resolve()
-                                } else {
-                                    reject(new Error('Can not upload serialized process [' + processID + ']'))
-                                }
-                            },
+                            resolve,
                             reject)
                     } else {
                         reject(new Error('Can not find process [' + processID + ']'))
                     }
                 });
-
             },
 
             deserializeProcessDefinition : function(resource, params){

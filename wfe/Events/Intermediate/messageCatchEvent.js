@@ -156,7 +156,7 @@ define([
                             if (this.hasScript()) {
                                 this.executeUserScript(callback);
                             } else {
-                                this.state(FlowNode.state.ExecutionComplete);
+                                this.completeExecution();
                                 this.callExecuteCallBack(callback);
                             }
                         } else {
@@ -166,14 +166,14 @@ define([
                     }
 
                     case FlowNode.state.UserScriptComplete : {
-                        this.state(FlowNode.state.ExecutionComplete);
+                        this.completeExecution();
                         this.callExecuteCallBack(callback);
                         break;
                     }
 
                     default : {
                         Logger.info('Узел [%s] отработал', this.name());
-                        this.state(FlowNode.state.ExecutionComplete);
+                        this.completeExecution();
                         this.callExecuteCallBack(callback);
                         break;
                     }

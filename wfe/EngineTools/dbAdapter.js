@@ -11,11 +11,122 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
 
         return class DbAdapter{
             constructor(){
-                this.queryGuid = '6df668d3-5f54-480f-963d-3fca2501b5a6'
+                this.queryGuid = '6df668d3-5f54-480f-963d-3fca2501b5a6';
+            }
+
+            _setDB(){
+                if (!this.db) {
+                    this.db = EngineSingleton.getInstance().db;
+                }
+            }
+
+            _getExpression(process){
+                var _predicate = new Predicate(this.db, {});
+                _predicate.addCondition({field: "Guid", op: "=", value: process.processID()});
+                return {
+                    model: process.getModel(),
+                    predicate: this.db.serialize(_predicate)
+                };
+            }
+
+            _getSerializedBody(process){
+                var _obj = this.db.serialize(process, true);
+                if (!_obj){
+                    throw new Error('Can not serialize process')
+                } else {
+                    return JSON.stringify(_obj)
+                }
+            }
+
+            _editProcessObj(processObj, process){
+                var that = this;
+
+                return new Promise(function(resolve, reject) {
+                    processObj.edit(function (result) {
+                        if (result.result === 'OK') {
+                            processObj.state(process.state());
+                            processObj.body(that._getSerializedBody(process));
+                        } else {
+                            reject(new Error(result.message))
+                        }
+
+                        process.onSave(processObj).
+                        then(
+                            function () {
+                                processObj.save({}, function (result) {
+                                    if (result.result === 'OK') {
+                                        resolve()
+                                    } else {
+                                        reject(new Error(result.message))
+                                    }
+                                })
+                            },
+                            reject);
+
+                    })
+                })
+            }
+
+            _addProcessObj(root, process){
+                var that = this;
+
+                return new Promise(function(resolve, reject){
+                    root.edit(function (result) {
+                        if (result.result === 'OK') {
+                            root.newObject({
+                                $sys: {guid: process.processID()},
+                                fields: {
+                                    Name: process.name(),
+                                    State: process.state(),
+                                    Body: that._getSerializedBody(process),
+                                    DefinitionId: process.definitionResourceID()
+                                }
+                            }, {}, function (result) {
+                                if (result.result === 'OK') {
+                                    var _processObject = root.getDB().getObj(result.newObject);
+                                    process.onSave(_processObject).then(
+                                        function () {
+                                            root.save({}, function (result) {
+                                                if (result.result === 'OK') {
+                                                    resolve()
+                                                } else {
+                                                    reject(new Error(result.message))
+                                                }
+                                            })
+                                        },
+                                        reject);
+                                } else {
+                                    reject(new Error(result.message))
+                                }
+                            });
+                        } else {
+                            reject(new Error(result.message))
+                        }
+                    })
+                });
+            }
+
+            save(process){
+                this._setDB();
+                var that = this;
+                return new Promise(function(resolve, reject){
+                    that.db.getRoots([that.queryGuid], {rtype: "data", expr: that._getExpression(process)}, function (guids) {
+                        var _objectGuid = guids.guids[0];
+                        that.queryGuid = _objectGuid;
+
+                        var _root = that.db.getObj(_objectGuid);
+                        var _processObj = _root.getCol("DataElements").get(0);
+                        if (_processObj) {
+                            that._editProcessObj(_processObj, process).then(resolve, reject);
+                        } else {
+                            that._addProcessObj(_root, process).then(resolve, reject);
+                        }
+                    });
+                });
             }
 
             serialize(process) {
-                this.db = EngineSingleton.getInstance().db;
+                this._setDB();
                 var that = this;
 
                 return new Promise(function (resolve, reject) {
@@ -23,75 +134,12 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                         reject(new Error('Can not serialize process'))
                     }
 
-                    process.clearFinishedTokens();
-                    var _obj = process.pvt.db.serialize(process, true);
-
-                    var _predicate = new Predicate(that.db, {});
-                    _predicate.addCondition({field: "Guid", op: "=", value: process.processID()});
-                    var _expression = {
-                        model: process.getModel(),
-                        predicate: that.db.serialize(_predicate)
-                    };
-
-                    that.db.getRoots([that.queryGuid], {rtype: "data", expr: _expression}, function (guids) {
-                        var _objectGuid = guids.guids[0];
-                        that.queryGuid = _objectGuid;
-
-                        var _root = that.db.getObj(_objectGuid);
-                        var _processObj = _root.getCol("DataElements").get(0);
-                        if (_processObj) {
-                            _processObj.edit(function (result) {
-                                if (result === 'OK') {
-                                    _processObj.State(process.state());
-                                    _processObj.Body(JSON.stringify(_obj));
-                                } else {
-                                    reject(new Error(result.message))
-                                }
-
-                                _processObj.save({}, function (result) {
-                                    if (result.result === 'OK') {
-                                        resolve()
-                                    } else {
-                                        reject(new Error(result.message))
-                                    }
-                                })
-                            })
-                        } else {
-
-                            _root.edit(function (result) {
-                                if (result.result === 'OK') {
-                                    _root.newObject({
-                                        $sys: {guid: process.processID()},
-                                        fields: {
-                                            Name: process.name(),
-                                            State: process.state(),
-                                            Body: JSON.stringify(_obj),
-                                            DefinitionId: process.definitionResourceID()
-                                        }
-                                    }, {}, function (result) {
-                                        if (result.result === 'OK') {
-                                            var _processObject = _root.getDB().getObj(result.newObject);
-                                            process.onSave(_processObject).then(
-                                                function () {
-                                                    _root.save({}, function (result) {
-                                                        if (result.result === 'OK') {
-                                                            resolve()
-                                                        } else {
-                                                            reject(new Error(result.message))
-                                                        }
-                                                    })
-                                                },
-                                                reject);
-                                        } else {
-                                            reject(new Error(result.message))
-                                        }
-                                    });
-                                } else {
-                                    reject(new Error(result.message))
-                                }
-                            })
-                        }
-                    });
+                    process.clearFinishedTokens()
+                    that.save(process).
+                        then(resolve).
+                        catch(function(err){
+                            throw err
+                        });
                 });
             }
 

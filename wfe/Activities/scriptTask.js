@@ -79,7 +79,7 @@ define([
 
                 _scriptObject.setCallback(
                     function(subject, result){
-                        subject.state(FlowNode.state.ExecutionComplete);
+                        subject.completeExecution();
                         subject.processInstance().activate();
 
                         if ((_scriptObject.response) && (result)) {

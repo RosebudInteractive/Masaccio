@@ -38,7 +38,7 @@ define([
 
             execute : function(callback) {
                 UccelloClass.super.apply(this, [callback]);
-                this.state(FlowNode.state.ExecutionComplete);
+                this.completeExecution();
                 Logger.info('Произошло стартовое событие [%s]', this.name());
 
                 var that = this;

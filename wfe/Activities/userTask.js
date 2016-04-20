@@ -85,17 +85,18 @@ define(
                     var _activityState = this.exposeRequests();
                     if (_activityState == Activity.state.Waiting) {
                         this.state(FlowNode.state.WaitingRequest);
+                        this.needSave = true;
                         this.processInstance().enqueueCurrentToken();
                     }
                     else if (_activityState == Activity.state.Executing) {
-                        this.state(FlowNode.state.ExecutionComplete)
+                        this.completeExecution();
                     }
                 }
                 else if (this.state() == FlowNode.state.WaitingRequest) {
                     logResponses.call(this);
 
                     if (this.token().getPropertiesOfNode(this.name()).isAllResponseReceived()){
-                        this.state(FlowNode.state.ExecutionComplete);
+                        this.completeExecution();
                         if (this.processInstance().isWaitingScriptAnswer()){
                             this.processInstance().enqueueCurrentToken();
                             console.log('[%s] : => Узел [%s] ждет выполнения скрипта', (new Date()).toLocaleTimeString(), this.name());
@@ -115,7 +116,7 @@ define(
                 }
                 else {
                     console.log('[%s] : => Узел отработал %s', (new Date()).toLocaleTimeString(), this.name());
-                    this.state(FlowNode.state.ExecutionComplete)
+                    this.completeExecution();
                 }
 
                 this.callExecuteCallBack(callback);

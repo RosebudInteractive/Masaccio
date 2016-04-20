@@ -28,8 +28,8 @@ define([
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
         './controls',
         './parameter',
-        './objectRef'
-        //'./../public/utils'
+        './objectRef',
+        './engineSingleton'
     ],
     function(
         UObject,
@@ -39,8 +39,8 @@ define([
         UUtils,
         Controls,
         Parameter,
-        ObjectRef
-        //Utils
+        ObjectRef,
+        EngineSingleton
     ){
         var FlowNode = UObject.extend({
 
@@ -67,6 +67,7 @@ define([
                 }
 
                 this.conditionsResult = new ConditionsResult();
+                this.needSave = false;
             },
 
             //<editor-fold desc="MetaFields & MetaCols">
@@ -121,6 +122,11 @@ define([
                 //_node.copyParameters(this)
 
                 return _node;
+            },
+
+            completeExecution: function(){
+                this.state(flowNodeState.ExecutionComplete);
+                this.needSave = true;
             },
 
             createInstance : function(){
@@ -227,7 +233,7 @@ define([
                 this.state(flowNodeState.Closed);
             },
 
-            execute : function() {
+            execute : function(callback) {
                 for (var i = 0; i < this.outgoing().count(); i++){
                     this.outgoing().get(i).object().state(SequenceFlow.state.Unchecked);
                 }
@@ -238,7 +244,21 @@ define([
 
             callExecuteCallBack : function(callback) {
                 if (callback) {
-                    setTimeout(callback, 0)
+                    if (!this.needSave) {
+                        callback()
+                    } else {
+                        var that = this;
+                            EngineSingleton.getInstance().justSaveProcess(this.processInstance().processID()).
+                        then(function() {
+                                that.needSave = false;
+                                callback()
+                            }).
+                        catch(function (err) {
+                                that.needSave = false;
+                            throw err
+                        })
+
+                    }
                 } else {
                     throw 'No execute callback'
                 }

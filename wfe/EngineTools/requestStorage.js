@@ -112,12 +112,14 @@ define(
             }
 
             addForSave(request) {
-                var _existRequest = this.preparedForSave.find(function (element) {
+                var _index = this.preparedForSave.findIndex(function (element) {
                     return element.ID() == request.ID()
                 });
 
-                if (!_existRequest) {
+                if (_index == -1) {
                     this.preparedForSave.push(request)
+                } else {
+                    this.preparedForSave[_index] = request
                 }
             }
 

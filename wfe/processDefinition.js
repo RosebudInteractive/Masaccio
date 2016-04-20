@@ -303,35 +303,41 @@ define([
                     name: 'Process',
                     childs: [{
                         dataObject: {
-                            name: 'Request', isStub : true
+                            name: 'Request'
                         }
                     }]
                 }
             },
 
             onSaveProcess: function (dbObject, params) {
-                console.log('Идет сохранение [%s]', dbObject.Name);
+                //console.log('Идет сохранение [%s]', dbObject.name());
                 var that = this;
                 return new Promise(function (resolve, reject) {
                     if ((!params) || (!params.processInstance)) {
                         reject(new Error('Undefined process instance'))
                     }
 
-                    that._saveRequests(dbObject, params).then(
-                        function () {
-                            return that._deleteSavedRequests(params.processInstance);
-                            //resolve();
-                        },
-                        function (error) {
-                            console.log(error.message)
-                        }
-                    ).then(resolve, reject).catch(function(error) {
-                        throw error});
+                    that._saveRequests(dbObject, params)
+                        .then(function () {
+                            that._deleteSavedRequests(params.processInstance);
+                        })
+                        .then(resolve)
+                        .catch(function(error) {
+                            throw error
+                        });
                 });
             },
 
+
             _saveRequests: function (dbObject, params) {
-                var that = this;
+                function getRequestObject(request){
+                    var _collection = dbObject.getDataRoot('Request').getCol('DataElements');
+                    for (var i = 0; i < _collection.count(); i++){
+                        if (_collection.get(i).parseGuid(_collection.get(i).pvt.guid) == request.ID()){
+                            return _collection.get(i);
+                        }
+                    }
+                }
 
                 return new Promise(function (resolve, reject) {
                     var _processID = params.processInstance.processID();
@@ -347,6 +353,7 @@ define([
                         var _count = 0;
 
                         var _root = dbObject.getDataRoot('Request');
+
                         _requests.forEach(function (request) {
                             var _requestBody = EngineSingleton.getInstance().db.serialize(request, true);
                             _requestBody = JSON.stringify(_requestBody);
@@ -363,24 +370,87 @@ define([
                                 }
                             }
 
-                            _root.newObject({
-                                $sys: {guid: request.ID()},
-                                fields: {
-                                    ProcessId: dbObject.id(),
-                                    TokenGuid: request.tokenID(),
-                                    Name: request.name(),
-                                    State: request.state(),
-                                    RequestBody: _requestBody,
-                                    ResponceBody: _responseBody
-                                }
-                            }, {}, function (result) {
-                                if (result.result !== 'OK') {
-                                    reject(new Error(result.message))
-                                } else {
-                                    _count++;
-                                    checkDone();
-                                }
-                            })
+                            var _requestObj = getRequestObject(request);
+                            if (!_requestObj){
+                                _root.newObject({
+                                    $sys: {guid: request.ID()},
+                                    fields: {
+                                        ProcessId: dbObject.id(),
+                                        TokenGuid: request.tokenID(),
+                                        Name: request.name(),
+                                        State: request.state(),
+                                        RequestBody: _requestBody,
+                                        ResponceBody: _responseBody
+                                    }
+                                }, {}, function (result) {
+                                    if (result.result !== 'OK') {
+                                        reject(new Error(result.message))
+                                    } else {
+                                        _count++;
+                                        checkDone();
+                                    }
+                                })
+                            } else {
+                                _requestObj.processId(dbObject.id());
+                                _requestObj.tokenGuid(request.tokenID());
+                                _requestObj.name(request.name());
+                                _requestObj.state(request.state());
+                                _requestObj.requestBody(_requestBody);
+                                _requestObj.responceBody(_responseBody);
+
+                                _count++;
+                                checkDone();
+                                //_requestObj.edit(function (result) {
+                                //    if (result.result !== 'OK') {
+                                //        reject(new Error(result.message))
+                                //    } else {
+                                //        _requestObj.processId() = dbObject.id();
+                                //                TokenGuid: request.tokenID(),
+                                //                Name: request.name(),
+                                //                State: request.state(),
+                                //                RequestBody: _requestBody,
+                                //                ResponceBody: _responseBody
+                                //
+                                //        _count++;
+                                //        checkDone();
+                                //    }
+                                //})
+                            }
+
+
+
+                                //    $sys: {guid: request.ID()},
+                                //    fields: {
+                                //        ProcessId: dbObject.id(),
+                                //        TokenGuid: request.tokenID(),
+                                //        Name: request.name(),
+                                //        State: request.state(),
+                                //        RequestBody: _requestBody,
+                                //        ResponceBody: _responseBody
+                                //    }
+                                //}, {},
+                                //})
+                            //}
+
+
+                            //_root.newObject({
+                            //    $sys: {guid: request.ID()},
+                            //    fields: {
+                            //        ProcessId: dbObject.id(),
+                            //        TokenGuid: request.tokenID(),
+                            //        Name: request.name(),
+                            //        State: request.state(),
+                            //        RequestBody: _requestBody,
+                            //        ResponceBody: _responseBody
+                            //    }
+                            //}, {}, function (result) {
+                            //    if (result.result !== 'OK') {
+                            //        reject(new Error(result.message))
+                            //    } else {
+                            //        _count++;
+                            //        checkDone();
+                            //    }
+                            //})
                         });
 
                         function checkDone() {
@@ -388,100 +458,10 @@ define([
                                 resolve();
                             }
                         }
-
-                        //var _root = dbObject.getDataRoot('Request');
-                        //that._internalSaveRequests(_requests, _root, dbObject.id()).
-                        //then(function () {
-                        //    that._internalSaveResponses(_responses, _root, dbObject.id()).then(
-                        //        function () {
-                        //            resolve()
-                        //        },
-                        //        function (err) {
-                        //            reject(err)
-                        //        })
-                        //}).catch(function(err) {reject(err)})
-
-
+                    } else {
+                        resolve()
                     }
                 })
-            },
-
-            _internalSaveRequests: function (requests, root, processID) {
-                var _count = 0;
-
-                return new Promise(function(resolve, reject){
-                    if (requests.length == 0) {
-                        resolve()
-                    }
-
-                    requests.forEach(function (request) {
-                        var _requestBody = EngineSingleton.getInstance().db.serialize(request, true);
-                        _requestBody = JSON.stringify(_requestBody);
-
-                        root.newObject({
-                            $sys: {guid: request.ID()},
-                            fields: {
-                                ProcessId: processID,
-                                TokenGuid: request.tokenID(),
-                                Name: request.name(),
-                                State: request.state(),
-                                RequestBody: _requestBody
-                            }
-                        }, {}, function (result) {
-                            if (result.result !== 'OK') {
-                                reject(new Error(result.message))
-                            } else {
-                                _count++;
-                                checkDone();
-                            }
-                        })
-                    });
-
-                    function checkDone() {
-                        if (_count == requests.length) {
-                            resolve();
-                        }
-                    }
-                });
-            },
-
-            _internalSaveResponses : function(responses, root, processID) {
-                var _count = 0;
-
-                return new Promise(function (resolve, reject) {
-                    if (responses.length == 0) {
-                        resolve()
-                    }
-
-                    responses.forEach(function (response) {
-                        var _responseBody = EngineSingleton.getInstance().db.serialize(response, true);
-                        _responseBody = JSON.stringify(_responseBody);
-
-                        root.newObject({
-                            $sys: {guid: response.ID()},
-                            fields: {
-                                ProcessId: processID,
-                                TokenGuid: response.tokenID(),
-                                Name: response.name(),
-                                State: response.state(),
-                                ResponseBody: _responseBody
-                            }
-                        }, {}, function (result) {
-                            if (result.result !== 'OK') {
-                                reject(new Error(result.message))
-                            } else {
-                                _count++;
-                                checkDone();
-                            }
-                        })
-                    });
-
-                    function checkDone() {
-                        if (_count == responses.length) {
-                            resolve();
-                        }
-                    }
-                });
             },
 
             _deleteSavedRequests: function (processInstance) {
@@ -492,7 +472,7 @@ define([
                 //_requests.forEach(function (request) {
                 //    processInstance.deleteRequest(request)
                 //});
-
+                //
                 //_responses.forEach(function (response) {
                 //    processInstance.deleteResponse(response)
                 //});

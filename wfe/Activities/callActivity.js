@@ -64,7 +64,7 @@ define([
                 };
 
                 var _endCallback = function() {
-                    that.state(FlowNode.state.ExecutionComplete);
+                    that.completeExecution();
                     that.processInstance().activate();
                     that.callExecuteCallBack(callback);
                 };

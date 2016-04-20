@@ -31,12 +31,12 @@ define(
                 super.execute(callback);
                 if (this.getDirection() == Gateway.direction.Converging || this.getDirection() == Gateway.direction.Mixed){
                     if (this.processInstance.getNodeTokens(this).length == this.incoming().count()) {
-                        this.state(FlowNode.state.ExecutionComplete)
+                        this.completeExecution();
                     } else {
                         this.state(FlowNode.state.WaitingRequest)
                     }
                 } else if (this.getDirection() == Gateway.direction.Diverging) {
-                    this.state(FlowNode.state.ExecutionComplete)
+                    this.completeExecution();
                 } else {
                     throw 'Неизвестный тип GatewayDirection'
                 }

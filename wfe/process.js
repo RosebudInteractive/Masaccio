@@ -273,8 +273,9 @@ define([
                 if (this.state() != processStates.Finished) {
                     var that = this;
                     that.state(processStates.Finished);
-                    EngineSingleton.getInstance().saveProcess(this.processID()).then(function () {
+                    EngineSingleton.getInstance().justSaveProcess(this.processID()).then(function () {
                         Logger.info('Процесс [%s] id [%s] закончил выполнение', that.name(), that.processID());
+
                     }).
                     catch(function (error) {
                         throw error
@@ -339,15 +340,23 @@ define([
                 return null;
             },
 
-            wait : function(){
+            wait : function(done) {
                 this.state(processStates.Waiting);
+                var that = this;
+                //EngineSingleton.getInstance().justSaveProcess(this.processID()).
+                //then(function () {
                 if (UCCELLO_CONFIG.wfe.idleTimeout != Infinity) {
-                    var that = this;
-                    this.idleTimer = setInterval(function () {
+                    that.idleTimer = setInterval(function () {
                         clearInterval(that.idleTimer);
-                        EngineSingleton.getInstance().saveProcess(that.processID());
+                        EngineSingleton.getInstance().saveAndUploadProcess(that.processID());
                     }, UCCELLO_CONFIG.wfe.idleTimeout)
                 }
+
+                //done();
+                //}).
+                //catch(function (err) {
+                //    throw err
+                //});
             },
 
             waitScriptAnswer : function(){

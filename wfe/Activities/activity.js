@@ -42,7 +42,7 @@ define(
 
             execute : function(callback) {
                 UccelloClass.super.apply(this, [callback]);
-                this.state(FlowNode.state.ExecutionComplete);
+                this.completeExecution();
                 Logger.info('Выполняется узел [%s]', this.name());
                 this.callExecuteCallBack(callback)
             },

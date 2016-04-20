@@ -57,7 +57,7 @@ describe('Engine', function(){
             })
         });
 
-        xdescribe('#nodeStateWithTwoTokens', function () {
+        describe('#nodeStateWithTwoTokens', function () {
             it('Должен быть запущен процесс с распараллеливанием токена и прохождением по одному узлу 2 токенов', function (done) {
                 EngineSingleton.getInstance().startProcessInstance(Definition.names.forTestNodeStateWithTwoTokens, function(result) {
                         var _process;
@@ -69,7 +69,7 @@ describe('Engine', function(){
                                 var _value = _process.findParameter('count').value();
                                 _value.should.equal(7);
 
-                                EngineSingleton.getInstance().saveProcess(result.processID).then(
+                                EngineSingleton.getInstance().saveAndUploadProcess(result.processID).then(
                                     function(){
                                         EngineSingleton.getInstance().findOrUploadProcess(result.processID).then(
                                             function(process){
@@ -95,7 +95,7 @@ describe('Engine', function(){
             })
         });
 
-        describe('#inclusiveGateway_with_reqeusts_&_script', function () {
+        xdescribe('#inclusiveGateway_with_reqeusts_&_script', function () {
             it('Выставить реквесты и все остальное', function (done) {
                 var testBody = function(startResult) {
                     var _processID = startResult.processID;

@@ -72,7 +72,7 @@ define([
                         }
                     }
 
-                    this.state(FlowNode.state.ExecutionComplete);
+                    this.completeExecution();
                 }
 
                 /*

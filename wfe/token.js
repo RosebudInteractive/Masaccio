@@ -137,7 +137,10 @@ define([
 
                         this.currentNode().calcOutgoingNodes(function() {
                             EngineSingleton.getInstance().activateProcess(that.processInstance().processID()).then(
-                                function(){EngineSingleton.getInstance().startOutgoingNodes(that)},
+                                function(){
+                                    EngineSingleton.getInstance().startOutgoingNodes(that);
+                                    EngineSingleton.getInstance().switchTokens(that);
+                                },
                                 function(error) {throw error}
                             );
                         });

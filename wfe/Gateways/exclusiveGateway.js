@@ -38,7 +38,7 @@ define([
             execute (callback) {
                 super.execute(callback);
 
-                this.state(FlowNode.state.ExecutionComplete);
+                this.completeExecution();
                 this.callExecuteCallBack(callback)
             }
 

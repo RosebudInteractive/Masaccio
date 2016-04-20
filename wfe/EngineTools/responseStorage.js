@@ -79,7 +79,6 @@ define(
                         }
                         _item.callback({result: 'OK', responseResult: result});
                         _item.state = State.EXECUTED;
-                        this.addForSave(response);
                     }
                 } else {
                     throw 'Err';
