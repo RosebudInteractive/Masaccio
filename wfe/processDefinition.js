@@ -25,8 +25,7 @@ define([
         './Messages/messageFlow',
         './Events/eventReferences',
         './Messages/correlationKey',
-        './engineSingleton',
-        UCCELLO_CONFIG.uccelloPath + 'predicate/predicate'
+        './engineSingleton'
     ],
     function(
         UObject,
@@ -48,8 +47,7 @@ define([
         MessageFlow,
         EventRef,
         CorrelationKey,
-        EngineSingleton,
-        Predicate
+        EngineSingleton
     ) {
         var ProcessDefinition = Resource.extend({
 
@@ -317,21 +315,21 @@ define([
                         reject(new Error('Undefined process instance'))
                     }
 
-                    that._saveRequests(dbObject, params).then(
+                    that._saveRequests(dbObject, params).
+                    then(
                         function () {
                             return that._deleteSavedRequests(params.processInstance);
-                            //resolve();
                         },
                         function (error) {
                             console.log(error.message)
-                        }
-                    ).then(resolve, reject).catch(function(error) {
+                        }).
+                    then(resolve).
+                    catch(function(error) {
                         throw error});
                 });
             },
 
             _saveRequests: function (dbObject, params) {
-                var that = this;
 
                 return new Promise(function (resolve, reject) {
                     var _processID = params.processInstance.processID();
@@ -388,100 +386,8 @@ define([
                                 resolve();
                             }
                         }
-
-                        //var _root = dbObject.getDataRoot('Request');
-                        //that._internalSaveRequests(_requests, _root, dbObject.id()).
-                        //then(function () {
-                        //    that._internalSaveResponses(_responses, _root, dbObject.id()).then(
-                        //        function () {
-                        //            resolve()
-                        //        },
-                        //        function (err) {
-                        //            reject(err)
-                        //        })
-                        //}).catch(function(err) {reject(err)})
-
-
                     }
                 })
-            },
-
-            _internalSaveRequests: function (requests, root, processID) {
-                var _count = 0;
-
-                return new Promise(function(resolve, reject){
-                    if (requests.length == 0) {
-                        resolve()
-                    }
-
-                    requests.forEach(function (request) {
-                        var _requestBody = EngineSingleton.getInstance().db.serialize(request, true);
-                        _requestBody = JSON.stringify(_requestBody);
-
-                        root.newObject({
-                            $sys: {guid: request.ID()},
-                            fields: {
-                                ProcessId: processID,
-                                TokenGuid: request.tokenID(),
-                                Name: request.name(),
-                                State: request.state(),
-                                RequestBody: _requestBody
-                            }
-                        }, {}, function (result) {
-                            if (result.result !== 'OK') {
-                                reject(new Error(result.message))
-                            } else {
-                                _count++;
-                                checkDone();
-                            }
-                        })
-                    });
-
-                    function checkDone() {
-                        if (_count == requests.length) {
-                            resolve();
-                        }
-                    }
-                });
-            },
-
-            _internalSaveResponses : function(responses, root, processID) {
-                var _count = 0;
-
-                return new Promise(function (resolve, reject) {
-                    if (responses.length == 0) {
-                        resolve()
-                    }
-
-                    responses.forEach(function (response) {
-                        var _responseBody = EngineSingleton.getInstance().db.serialize(response, true);
-                        _responseBody = JSON.stringify(_responseBody);
-
-                        root.newObject({
-                            $sys: {guid: response.ID()},
-                            fields: {
-                                ProcessId: processID,
-                                TokenGuid: response.tokenID(),
-                                Name: response.name(),
-                                State: response.state(),
-                                ResponseBody: _responseBody
-                            }
-                        }, {}, function (result) {
-                            if (result.result !== 'OK') {
-                                reject(new Error(result.message))
-                            } else {
-                                _count++;
-                                checkDone();
-                            }
-                        })
-                    });
-
-                    function checkDone() {
-                        if (_count == responses.length) {
-                            resolve();
-                        }
-                    }
-                });
             },
 
             _deleteSavedRequests: function (processInstance) {
