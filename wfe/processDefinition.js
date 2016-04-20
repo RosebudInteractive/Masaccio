@@ -310,7 +310,6 @@ define([
             },
 
             onSaveProcess: function (dbObject, params) {
-                //console.log('Идет сохранение [%s]', dbObject.name());
                 var that = this;
                 return new Promise(function (resolve, reject) {
                     if ((!params) || (!params.processInstance)) {
@@ -330,10 +329,11 @@ define([
 
 
             _saveRequests: function (dbObject, params) {
+
                 function getRequestObject(request){
                     var _collection = dbObject.getDataRoot('Request').getCol('DataElements');
                     for (var i = 0; i < _collection.count(); i++){
-                        if (_collection.get(i).parseGuid(_collection.get(i).pvt.guid) == request.ID()){
+                        if (_collection.get(i).parseGuid(_collection.get(i).pvt.guid).guid == request.ID()){
                             return _collection.get(i);
                         }
                     }
@@ -391,66 +391,13 @@ define([
                                     }
                                 })
                             } else {
-                                _requestObj.processId(dbObject.id());
-                                _requestObj.tokenGuid(request.tokenID());
-                                _requestObj.name(request.name());
                                 _requestObj.state(request.state());
                                 _requestObj.requestBody(_requestBody);
                                 _requestObj.responceBody(_responseBody);
 
                                 _count++;
                                 checkDone();
-                                //_requestObj.edit(function (result) {
-                                //    if (result.result !== 'OK') {
-                                //        reject(new Error(result.message))
-                                //    } else {
-                                //        _requestObj.processId() = dbObject.id();
-                                //                TokenGuid: request.tokenID(),
-                                //                Name: request.name(),
-                                //                State: request.state(),
-                                //                RequestBody: _requestBody,
-                                //                ResponceBody: _responseBody
-                                //
-                                //        _count++;
-                                //        checkDone();
-                                //    }
-                                //})
                             }
-
-
-
-                                //    $sys: {guid: request.ID()},
-                                //    fields: {
-                                //        ProcessId: dbObject.id(),
-                                //        TokenGuid: request.tokenID(),
-                                //        Name: request.name(),
-                                //        State: request.state(),
-                                //        RequestBody: _requestBody,
-                                //        ResponceBody: _responseBody
-                                //    }
-                                //}, {},
-                                //})
-                            //}
-
-
-                            //_root.newObject({
-                            //    $sys: {guid: request.ID()},
-                            //    fields: {
-                            //        ProcessId: dbObject.id(),
-                            //        TokenGuid: request.tokenID(),
-                            //        Name: request.name(),
-                            //        State: request.state(),
-                            //        RequestBody: _requestBody,
-                            //        ResponceBody: _responseBody
-                            //    }
-                            //}, {}, function (result) {
-                            //    if (result.result !== 'OK') {
-                            //        reject(new Error(result.message))
-                            //    } else {
-                            //        _count++;
-                            //        checkDone();
-                            //    }
-                            //})
                         });
 
                         function checkDone() {
