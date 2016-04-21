@@ -188,7 +188,6 @@ define([
                                 reject(new Error(result.message))
                             } else {
                                 var _defResource = result.datas[0].resource;
-                                //_def = that.deserializeProcessDefinition(_defResource);
                                 var _process = new Process(that.controlManager, {definitionResourceID : result.datas[0].id}, _defResource);
                                 resolve(_process);
                             }
@@ -548,19 +547,6 @@ define([
                         reject(new Error('Can not find process [' + processID + ']'))
                     }
                 });
-            },
-
-            deserializeProcessDefinition : function(resource, params){
-                var _callback = this.createComponentFunction;
-
-                if (!params) {
-                    params = {}
-                }
-                var _definition = this.db.deserialize(resource, params, _callback);
-                this.processDefinitions.push(_definition);
-                console.log('[%s] : }} Загружено описание процесса [%s]', (new Date()).toLocaleTimeString(),  _definition.name());
-
-                return _definition;
             },
 
             getControlManager : function() {

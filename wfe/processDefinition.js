@@ -82,6 +82,10 @@ define([
                 return {name: "ProcessDef"};
             },
 
+            onSave: function (data_object) {
+
+            },
+
             //<editor-fold desc="MetaFields & MetaCols">
             name: function (value) {
                 return this._genericSetter("ResName", value);
