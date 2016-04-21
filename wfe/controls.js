@@ -42,7 +42,10 @@ var controls = [
     {className: 'RetrievalExpression',      component: './Messages/retrievalExpression',    guid: '36136243-425c-439d-a782-eed5c1e7bee8'},
 
     {className: 'MessageRetrievalExpression',   component: './Messages/messageRetrievalExpression',    guid: '4d02d5e9-4df5-44dc-8eed-7008e114b812'},
-    {className: 'ObjectRef',                component: './objectRef',                  guid: 'd59ea34f-a525-4551-b8e8-8d182e32571c'}
+    {className: 'ObjectRef',                component: './objectRef',                       guid: 'd59ea34f-a525-4551-b8e8-8d182e32571c'},
+
+    {className: 'TaskDef',                  component: './Task/taskDef',                    guid: 'ccbe0ea3-994d-4733-a8d6-64bb8c5ae2df'},
+    {className: 'TaskDefStage',             component: './Tas/taskDefStage',                guid: '783d3c15-1c4d-4890-8a73-629b16d7c770'}
 ];
 
 var guidOf = function(className) {
