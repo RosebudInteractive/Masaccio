@@ -4,6 +4,7 @@
 'use strict';
 var fs = require('fs');
 var EngineTestDefinition = require(PATH.definitions +'engine');
+var TaskDefinition = require(PATH.definitions +'taskDef');
 
 class Generator{
     constructor(engine){
@@ -13,6 +14,8 @@ class Generator{
         this.defintions.push(EngineTestDefinition.forTestWaitRequest());
         this.defintions.push(EngineTestDefinition.forTestNodeStateWithTwoTokens());
         this.defintions.push(EngineTestDefinition.forTestInclusiveGatewayProcess());
+
+        this.defintions.push(TaskDefinition.forSimpleTaskDef());
 
         this.savePath = './';
     }

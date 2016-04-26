@@ -1,9 +1,7 @@
 /**
  * Created by staloverov on 01.06.2015.
  */
-var Main = require('./../main');
 var EngineSingleton = require(PATH.engine + 'engineSingleton');
-var fs = require('fs');
 
 var Definitions = {
     names : {

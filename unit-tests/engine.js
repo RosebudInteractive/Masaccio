@@ -9,8 +9,12 @@ var Definition = require(PATH.definitions +'engine');
 var EngineSingleton = require(PATH.engine + 'engineSingleton');
 
 
-before(function() {
-    return Initiator.importData()
+before(function(done) {
+    Initiator.importData().
+    then(function(){done()}).
+    catch(function(err){
+        done(err)
+    });
 });
 
 beforeEach(function() {

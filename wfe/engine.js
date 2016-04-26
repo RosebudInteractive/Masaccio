@@ -24,7 +24,8 @@ define([
         './EngineTools/subprocessCallback',
         './EngineTools/messageCache',
         './EngineTools/fileAdapter',
-        './EngineTools/dbAdapter'
+        './EngineTools/dbAdapter',
+        './Task/taskDef'
     ],
     function(
         Process,
@@ -47,7 +48,8 @@ define([
         SubProcessCallback,
         MessageCache,
         FileAdapter,
-        DbAdapter
+        DbAdapter,
+        TaskDef
     ) {
 
         var wfeInterfaceGUID = "a75970d5-f9dc-4b1b-90c7-f70c37bbbb9b";
@@ -580,7 +582,12 @@ define([
 
             newProcessDefinition : function() {
                 var _definition = new ProcessDefinition(this.getControlManager(), {});
-                _definition.definitionID(UUtils.guid())
+                _definition.definitionID(UUtils.guid());
+                return _definition;
+            },
+
+            newTaskDefinition : function() {
+                var _definition = new TaskDef(this.getControlManager(), {});
                 return _definition;
             },
 
