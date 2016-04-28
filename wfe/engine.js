@@ -69,7 +69,7 @@ define([
             submitResponseAndWait : "function",
             waitForRequest : "function",
             processResponse : 'function',
-            getProcessDefinitionParams : 'function'
+            getTaskDefParameters : 'function'
         };
 
         var Engine = UccelloClass.extend({
@@ -534,7 +534,7 @@ define([
                 });
             },
 
-            getProcessDefinitionParams : function(definitionIdentifier){
+            getTaskDefParameters : function(definitionIdentifier){
                 var that = this;
                 return new Promise(function(resolve, reject){
                     that.resman.loadRes([definitionIdentifier], function(result){

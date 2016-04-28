@@ -23,6 +23,7 @@ define([
                     {fname: 'Id', ftype: 'integer'},
                     {fname: 'TaskId', ftype: 'integer'},
                     {fname: 'TaskDefStageId', ftype: 'integer'},
+                    {fname: 'StageCode', ftype: 'string'},
                     {fname: 'StageState', ftype: 'integer'}
                 ]
             }
@@ -37,6 +38,10 @@ define([
 
             taskDefStageId(value) {
                 return this._genericSetter("TaskDefStageId",value);
+            }
+
+            stageCode(value) {
+                return this._genericSetter("StageCode",value);
             }
 
             stageState(value) {

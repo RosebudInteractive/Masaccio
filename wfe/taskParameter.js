@@ -44,6 +44,10 @@ define(
             objId(value) {
                 return this._genericSetter("ObjId",value);
             }
+
+            taskStages() {
+                return this.getCol('TaskStages');
+            }
         }
     }
 );
