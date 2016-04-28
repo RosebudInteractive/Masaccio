@@ -68,7 +68,8 @@ define([
             startProcessInstanceAndWait : "function",
             submitResponseAndWait : "function",
             waitForRequest : "function",
-            processResponse : 'function'
+            processResponse : 'function',
+            getProcessDefinitionParams : 'function'
         };
 
         var Engine = UccelloClass.extend({
@@ -533,7 +534,20 @@ define([
                 });
             },
 
+            getProcessDefinitionParams : function(definitionIdentifier){
+                var that = this;
+                return new Promise(function(resolve, reject){
+                    that.resman.loadRes([definitionIdentifier], function(result){
+                        if ((result.result) && (result.result == 'ERROR')) {
+                            reject(new Error(result.message))
+                        } else {
+                            var _params = result.datas[0].resource;
 
+                        }
+                    })
+
+                });
+            },
 
             justSaveProcess: function(processID){
                 var that = this;

@@ -9,7 +9,7 @@ if (typeof define !== 'function') {
 define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
         './controls',
-        './parameter'
+        './simpleParameter'
     ],
     function(
         UObject,

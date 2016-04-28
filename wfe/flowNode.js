@@ -27,7 +27,7 @@ define([
         './Gateways/conditionsResult',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
         './controls',
-        './parameter',
+        './simpleParameter',
         './objectRef',
         './engineSingleton'
     ],

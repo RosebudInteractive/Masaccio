@@ -15,7 +15,7 @@ define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
         'util',
         './../public/utils',
-        './parameter',
+        './simpleParameter',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
         './controls',
         './userScript'

@@ -11,7 +11,7 @@ define([
         './../flowNode',
         './../scriptObject',
         './../../public/utils',
-        './../parameter',
+        './../simpleParameter',
         './../controls',
         './../engineSingleton'
     ],

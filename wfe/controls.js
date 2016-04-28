@@ -31,7 +31,7 @@ var controls = [
 
     {className: 'Token',                    component: './token',                                   guid: 'd09117fc-b298-42f6-84fc-c8807e83ca12'},
     {className: 'Request',                  component: './request',                                 guid: '783cc459-0b03-4cbd-9960-6401a031537c'},
-    {className: 'Parameter',                component: './parameter',                               guid: '9232bbd5-e2f8-466a-877f-5bc6576b5d02'},
+    {className: 'SimpleParameter',          component: './simpleParameter',                         guid: '9232bbd5-e2f8-466a-877f-5bc6576b5d02'},
 
     {className: 'MessageFlow',              component: './Messages/messageFlow',                    guid: 'c10a9573-1274-4008-9353-d6c466fb0e35'},
     {className: 'MessageDefinition',        component: './Messages/messageDefinition',              guid: 'f24ec009-3e62-479b-935e-c9779655d548'},
@@ -45,7 +45,10 @@ var controls = [
     {className: 'ObjectRef',                component: './objectRef',                               guid: 'd59ea34f-a525-4551-b8e8-8d182e32571c'},
 
     {className: 'TaskDef',                  component: './Task/taskDef',                            guid: 'ccbe0ea3-994d-4733-a8d6-64bb8c5ae2df'},
-    {className: 'TaskDefStage',             component: './Task/taskDefStage',                       guid: '783d3c15-1c4d-4890-8a73-629b16d7c770'}
+    {className: 'TaskDefStage',             component: './Task/taskDefStage',                       guid: '783d3c15-1c4d-4890-8a73-629b16d7c770'},
+    {className: 'TaskStage',                component: './Task/taskStage',                          guid: 'c2f02b7a-1204-4dca-9ece-3400b4550c8d'},
+
+    {className: 'Parameter',                component: './parameter',                               guid: 'b3746562-946f-46f6-b74f-a50eaff7a771'}
 ];
 
 var guidOf = function(className) {

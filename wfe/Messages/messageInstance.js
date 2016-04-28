@@ -12,7 +12,7 @@ if (typeof define !== 'function') {
 define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
         '../../public/utils',
-        './../parameter',
+        './../simpleParameter',
         './../controls',
         UCCELLO_CONFIG.uccelloPath + 'system/utils'
     ],

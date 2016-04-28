@@ -16,7 +16,7 @@ define([
         './request',
         './engineSingleton',
         './controls',
-        './parameter',
+        './simpleParameter',
         './../public/utils'
     ],
     function(
