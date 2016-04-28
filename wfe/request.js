@@ -18,7 +18,7 @@ define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
         '../public/utils',
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
-        './simpleParameter',
+        './parameter',
         './controls'
     ],
     function(UObject, Utils, UUtils, Parameter, Controls){

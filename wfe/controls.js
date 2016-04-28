@@ -31,7 +31,7 @@ var controls = [
 
     {className: 'Token',                    component: './token',                                   guid: 'd09117fc-b298-42f6-84fc-c8807e83ca12'},
     {className: 'Request',                  component: './request',                                 guid: '783cc459-0b03-4cbd-9960-6401a031537c'},
-    {className: 'SimpleParameter',          component: './simpleParameter',                         guid: '9232bbd5-e2f8-466a-877f-5bc6576b5d02'},
+    {className: 'Parameter',                component: './parameter',                               guid: '9232bbd5-e2f8-466a-877f-5bc6576b5d02'},
 
     {className: 'MessageFlow',              component: './Messages/messageFlow',                    guid: 'c10a9573-1274-4008-9353-d6c466fb0e35'},
     {className: 'MessageDefinition',        component: './Messages/messageDefinition',              guid: 'f24ec009-3e62-479b-935e-c9779655d548'},

@@ -9,7 +9,7 @@ define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
         UCCELLO_CONFIG.uccelloPath + 'resman/dataTypes/resource',
         '../public/utils',
-        './simpleParameter',
+        './parameter',
         './controls',
         './Activities/activity',
         './Activities/userTask',
@@ -61,7 +61,7 @@ define([
                 {fname: 'DefinitionID', ftype: 'string'}
             ],
             metaCols: [
-                {'cname': 'SimpleParameters', 'ctype': 'SimpleParameter'},
+                {'cname': 'Parameters', 'ctype': 'Parameter'},
                 {'cname': 'InputParameters', 'ctype': 'Parameter'},
                 {'cname': 'Connectors', 'ctype': 'SequenceFlow'},
                 {'cname': 'Nodes', 'ctype': 'FlowNode'},
@@ -92,7 +92,7 @@ define([
             },
 
             parameters: function () {
-                return this.getCol('SimpleParameters');
+                return this.getCol('Parameters');
             },
 
             inputParameters: function () {
@@ -391,6 +391,7 @@ define([
                                     }
                                 })
                             } else {
+                                _requestObj.state(request.state());
                                 _requestObj.state(request.state());
                                 _requestObj.requestBody(_requestBody);
                                 _requestObj.responceBody(_responseBody);
