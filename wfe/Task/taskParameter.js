@@ -8,11 +8,11 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './controls'],
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './../controls'],
     function(UObject, Controls){
         return class Parameter extends UObject{
-            get className() {return "Parameter"}
-            get classGuid() { return Controls.guidOf('Parameter')}
+            get className() {return "TaskParameter"}
+            get classGuid() { return Controls.guidOf('TaskParameter')}
 
             get metaFields() {
                 return [
