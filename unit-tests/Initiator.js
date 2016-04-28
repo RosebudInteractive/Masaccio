@@ -39,7 +39,7 @@ function fakeAuthenticate(user, pass, done) {
 
 class Initiator {
     constructor(){
-        this.dataLoaded = !((UCCELLO_CONFIG.dataman) && (UCCELLO_CONFIG.dataman.importData) && (UCCELLO_CONFIG.dataman.importData.autoimport));
+        this.dataLoaded = !((UCCELLO_CONFIG.dataman) && (UCCELLO_CONFIG.dataman.importData) && (UCCELLO_CONFIG.needRecreateDB));
 
         var uccelloServ = new UccelloServ({
             authenticate: fakeAuthenticate,

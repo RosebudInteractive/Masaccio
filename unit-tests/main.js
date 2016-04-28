@@ -46,7 +46,7 @@ var mysql_connection = { //MySql
     }
 };
 
-USE_MSSQL_SERVER = true;
+USE_MSSQL_SERVER = false;
 
 var _config = {
     wfe: {
@@ -63,39 +63,13 @@ var _config = {
 
     testClientTimeout : 3,
 
-    dataman: {
-        //connection: USE_MSSQL_SERVER ? mssql_connection : mysql_connection,
+    needRecreateDB : true,
 
-        connection: {
-            host: "localhost",
-            username: "sa",
-            password: "",
-            database: "masaccio_test",
-            provider: "mssql",
-            connection_options: {instanceName: "SQLEXPRESS"},
-            provider_options: {},
-            pool: {
-                max: 5,
-                min: 0,
-                idle: 10000
-            }
-        },
-        //connection: { //MySql
-        //    host: "localhost",
-        //    username: "root",
-        //    password: "1q2w3e",
-        //    database: "genetix_test",
-        //    provider: "mysql",
-        //    connection_options: {},
-        //    provider_options: {},
-        //    pool: {
-        //        max: 5,
-        //        min: 0,
-        //        idle: 10000
-        //    },
-        //},
+    dataman: {
+        connection: USE_MSSQL_SERVER ? mssql_connection : mysql_connection,
+
         importData: {
-            autoimport: true,
+            autoimport: false,
             dir: _dbPath + "tables/"
         },
         trace: {
@@ -107,13 +81,13 @@ var _config = {
         useDb: true,
         defaultProduct: "ProtoOne",
         sourceDir: [
-            //{path: _dbPath + 'forms/', type: 'FRM'},
+            {path: _dbPath + 'forms/', type: 'FRM'},
             {path: __dirname + '/data/processDefinitions/', type: 'PR_DEF', generator: __dirname + '/generators/processDefGenerator.js'}
         ]
     },
     resourceBuilder: {
         types: [
-            //{Code: "FRM", Name: "User Form", ClassName: "ResForm", Description: "Пользовательская форма"},
+            {Code: "FRM", Name: "User Form", ClassName: "ResForm", Description: "Пользовательская форма"},
             {Code: "PR_DEF", Name: "Process Definition", ClassName: "ProcessDefinition", Description: "Определение процесса"}
         ],
         destDir : _dbPath + "tables/",
