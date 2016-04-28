@@ -68,7 +68,7 @@ define(
 
                     removeInstance : function(instance) {
                         _messageItem.instances.some(function(element, index, array) {
-                            if (element.id() == instance.id()) {
+                            if (element.guid() == instance.guid()) {
                                 array.splice(index, 1);
                                 return true;
                             }
@@ -77,7 +77,7 @@ define(
 
                     removeRequest : function(request) {
                         _messageItem.requests.some(function(element, index, array) {
-                            if (element.id() == request.id()) {
+                            if (element.guid() == request.guid()) {
                                 array.splice(index, 1);
                                 return true;
                             }

@@ -374,7 +374,7 @@ define([
             findNodeByID : function(nodeID) {
                 for (var i = 0; i < this.nodes().count(); i++) {
                     var _node = this.nodes().get(i);
-                    if (_node.id() == nodeID){
+                    if (_node.guid() == nodeID){
                         return _node;
                     }
                 }
@@ -387,7 +387,7 @@ define([
             findConnector : function(connector) {
                 for (var i = 0; i < this.connectors().count(); i++) {
                     var _connector = this.connectors().get(i);
-                    if ((_connector.id() == connector.id()) && (_connector.name() == connector.name())){
+                    if ((_connector.guid() == connector.guid()) && (_connector.name() == connector.name())){
                         return _connector;
                     }
                 }
@@ -401,7 +401,7 @@ define([
 
             getMessageFlow : function(messageFlow) {
                 for (var i = 0; i < this.messageFlows().count(); i++) {
-                    if (this.messageFlows().get(i).id() == messageFlow.id()) {
+                    if (this.messageFlows().get(i).guid() == messageFlow.guid()) {
                         return this.messageFlows().get(i);
                     }
                 }

@@ -47,8 +47,8 @@ var controls = [
     {className: 'TaskDef',                  component: './Task/taskDef',                            guid: 'ccbe0ea3-994d-4733-a8d6-64bb8c5ae2df'},
     {className: 'TaskDefStage',             component: './Task/taskDefStage',                       guid: '783d3c15-1c4d-4890-8a73-629b16d7c770'},
     {className: 'TaskStage',                component: './Task/taskStage',                          guid: 'c2f02b7a-1204-4dca-9ece-3400b4550c8d'},
+    {className: 'TaskParameter',            component: './Task/taskParameter',                      guid: 'b3746562-946f-46f6-b74f-a50eaff7a771'}
 
-    {className: 'TaskParameter',                component: './Task/taskParameter',                               guid: 'b3746562-946f-46f6-b74f-a50eaff7a771'}
 ];
 
 var guidOf = function(className) {

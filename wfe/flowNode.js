@@ -49,7 +49,7 @@ define([
             metaFields: [
                 {fname : 'Name',  ftype : 'string'},
                 {fname : 'State', ftype : 'integer'},
-                {fname : 'ID',    ftype : 'string'}
+                {fname : 'Guid',    ftype : 'string'}
             ],
             metaCols: [
                 {'cname' : 'Incoming', 'ctype' : 'ObjectRef'},
@@ -62,8 +62,8 @@ define([
                 UccelloClass.super.apply(this, [cm, params]);
                 if (!params) { return }
 
-                if (!this.id()) {
-                    this.id(UUtils.guid());
+                if (!this.guid()) {
+                    this.guid(UUtils.guid());
                 }
 
                 this.conditionsResult = new ConditionsResult();
@@ -71,8 +71,8 @@ define([
             },
 
             //<editor-fold desc="MetaFields & MetaCols">
-            id : function(value) {
-                return this._genericSetter("ID",value);
+            guid : function(value) {
+                return this._genericSetter("Guid",value);
             },
 
             name: function(value) {
@@ -117,7 +117,7 @@ define([
             copyNodeDefinition : function(process, params){
                 var _node= this.createInstance(process.getControlManager(), params);
                 _node.assign(this, process);
-                _node.id(this.id());
+                _node.guid(this.guid());
                 _node.copyCollectionDefinitions(this, process);
                 //_node.copyParameters(this)
 
@@ -172,7 +172,7 @@ define([
             findConnector : function(connector) {
                 for (var i = 0; i < this.connectors().count(); i++) {
                     var _connector = this.connectors().get(i);
-                    if ((_connector.id() == connector.id()) && (_connector.name() == connector.name())){
+                    if ((_connector.guid() == connector.guid()) && (_connector.name() == connector.name())){
                         return _connector;
                     }
                 }

@@ -35,6 +35,8 @@ var MessageInstance = require('./../Messages/messageInstance');
 var Event = require('./../Events/event');
     var StartMessageEvent = require('./../Events/Start/messageStartEvent');
 
+var TaskStage = require('./../Task/taskStage');
+
 var Initializer = {
 
     registerTypes : function(controlManager){
@@ -73,6 +75,8 @@ var Initializer = {
         new NodeProps(controlManager);
         new Token(controlManager);
         new Process(controlManager);
+
+        new TaskStage(controlManager);
     },
 
     createInternalDb : function(dbController) {

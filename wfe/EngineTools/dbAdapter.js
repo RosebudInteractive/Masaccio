@@ -25,7 +25,7 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                 _predicate.addCondition({field: "Guid", op: "=", value: process.processID()});
                 return {
                     model: process.getModel(),
-                    predicate: this.db.serialize(_predicate)
+                    predicate: this.db.serialize(_predicate, true)
                 };
             }
 

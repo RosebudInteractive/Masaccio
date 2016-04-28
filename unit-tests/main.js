@@ -46,7 +46,7 @@ var mysql_connection = { //MySql
     }
 };
 
-USE_MSSQL_SERVER = false;
+USE_MSSQL_SERVER = true;
 
 var _config = {
     wfe: {
@@ -63,14 +63,14 @@ var _config = {
 
     testClientTimeout : 3,
 
-    needRecreateDB : true,
+    needRecreateDB : false,
 
     dataman: {
         connection: USE_MSSQL_SERVER ? mssql_connection : mysql_connection,
 
         importData: {
             autoimport: false,
-            dir: _dbPath + "tables/"
+            dir: __dirname + "/data/tables/"
         },
         trace: {
             sqlCommands: true,
@@ -81,16 +81,16 @@ var _config = {
         useDb: true,
         defaultProduct: "ProtoOne",
         sourceDir: [
-            {path: _dbPath + 'forms/', type: 'FRM'},
+            //{path: __dirname + '/data/forms/', type: 'FRM'},
             {path: __dirname + '/data/processDefinitions/', type: 'PR_DEF', generator: __dirname + '/generators/processDefGenerator.js'}
         ]
     },
     resourceBuilder: {
         types: [
-            {Code: "FRM", Name: "User Form", ClassName: "ResForm", Description: "Пользовательская форма"},
+            //{Code: "FRM", Name: "User Form", ClassName: "ResForm", Description: "Пользовательская форма"},
             {Code: "PR_DEF", Name: "Process Definition", ClassName: "ProcessDefinition", Description: "Определение процесса"}
         ],
-        destDir : _dbPath + "tables/",
+        destDir : __dirname + "/data/tables/",
         formResTypeId: 1,
         productId: 2,
         currBuildId: 2

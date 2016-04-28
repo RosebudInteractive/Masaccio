@@ -6,6 +6,19 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
 
+var State = {
+    idle : {value : 0, code : 'в ожидании'},
+    canStart : {value : 1, code : 'можно приступать'},
+    inProcess : {value :2, code : 'в процессе'},
+    finished : {value : 3, code : 'завершено'},
+    canceled : {value : 4, code : 'аннулировано'},
+    interrupted : {value : 5, code : 'прервано'}
+};
+
+function getStageState(state){
+    return state.value
+}
+
 define([
         UCCELLO_CONFIG.uccelloPath+'system/uobject',
         './../controls'
@@ -46,6 +59,17 @@ define([
 
             stageState(value) {
                 return this._genericSetter("StageState",value);
+            }
+
+            getControlManager() {
+                return this.pvt.controlMgr;
+            }
+
+            static createFromDefinition(taskDefStage, parameter){
+                var _instance = new TaskStage(parameter.getControlManager(), {parent : parameter, colName : 'TaskStages'});
+                _instance.taskDefStageId(taskDefStage.id());
+                _instance.stageCode(taskDefStage.name());
+                _instance.stageState(getStageState(State.idle));
             }
         }
     });

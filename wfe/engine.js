@@ -25,7 +25,8 @@ define([
         './EngineTools/messageCache',
         './EngineTools/fileAdapter',
         './EngineTools/dbAdapter',
-        './Task/taskDef'
+        './Task/taskDef',
+        './EngineTools/processCache'
     ],
     function(
         Process,
@@ -49,7 +50,8 @@ define([
         MessageCache,
         FileAdapter,
         DbAdapter,
-        TaskDef
+        TaskDef,
+        ProcessCache
     ) {
 
         var wfeInterfaceGUID = "a75970d5-f9dc-4b1b-90c7-f70c37bbbb9b";
@@ -69,7 +71,7 @@ define([
             submitResponseAndWait : "function",
             waitForRequest : "function",
             processResponse : 'function',
-            getTaskDefParameters : 'function'
+            getProcessDefParameters : 'function'
         };
 
         var Engine = UccelloClass.extend({
@@ -88,6 +90,8 @@ define([
                 this.responseStorage = new ResponseStorage();
                 this.subprocesses = new SubProcessCallback();
                 this.messageCache = new MessageCache();
+
+                this.processes = new ProcessCache({resman : initParams.resman});
 
                 this.uploadedProcesses = [];
                 this.tokensArchive = [];
@@ -111,10 +115,6 @@ define([
 
             getInterface: function () {
                 return wfeInterface;
-            },
-
-            clearProcessDefinitions : function() {
-                this.processDefinitions.length = 0;
             },
 
             /*  ----- Definitions ----- */
@@ -191,7 +191,7 @@ define([
                                 reject(new Error(result.message))
                             } else {
                                 var _defResource = result.datas[0].resource;
-                                var _process = new Process(that.controlManager, {definitionResourceID : result.datas[0].id}, _defResource);
+                                var _process = new Process(that.controlManager, {definitionResourceID : result.datas[0].guid}, _defResource);
                                 resolve(_process);
                             }
                         })
@@ -534,19 +534,16 @@ define([
                 });
             },
 
-            getTaskDefParameters : function(definitionIdentifier){
-                var that = this;
-                return new Promise(function(resolve, reject){
-                    that.resman.loadRes([definitionIdentifier], function(result){
-                        if ((result.result) && (result.result == 'ERROR')) {
-                            reject(new Error(result.message))
-                        } else {
-                            var _params = result.datas[0].resource;
-
-                        }
-                    })
-
+            getProcessDefParameters : function(definitionIdentifier, done){
+                this.processes.getDefinitionParameters(definitionIdentifier).
+                then(function(params){
+                    Answer.success('Параметры найдены').add({params : params}).handle(done);
+                }).
+                catch(function(err){
+                    Answer.error('Параметры не найдены message [%s]', [err.message]).handle(done);
                 });
+
+                return Controls.MegaAnswer;
             },
 
             justSaveProcess: function(processID){

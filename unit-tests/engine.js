@@ -7,6 +7,7 @@ var expect = require('chai').expect;
 var Initiator = require("./initiator");
 var Definition = require(PATH.definitions +'engine');
 var EngineSingleton = require(PATH.engine + 'engineSingleton');
+var TaskDefinition = require(PATH.definitions +'taskDef');
 
 
 before(function(done) {
@@ -25,7 +26,39 @@ describe('Engine', function(){
 
     describe('#common', function() {
         beforeEach(function() {
-            EngineSingleton.getInstance().clearProcessDefinitions();
+            EngineSingleton.getInstance().processes.clearDefinitions();
+        });
+
+        describe('Интерфейсные функции', function(){
+            describe('#getProcessDefParameters', function(){
+                var guids = {
+                    existingDef: 'cbf35df0-8317-4f2f-8728-88736251ff0b',
+                    nonexistentDef: '3fdd3c7e-196d-440c-982c-c33b7ca0ab4d',
+
+                    Type : '08b97860-179a-4292-a48d-bfb9535115d3'
+                };
+
+                it('Найти параметры по Guid TaskDef - Ok', function(done) {
+                    EngineSingleton.getInstance().getProcessDefParameters({resType : guids.Type, resName : TaskDefinition.names.forSimpleTaskDef}, function(result){
+                        if (result.result !== 'OK'){
+                            done(new Error(result.message));
+                        } else {
+                            result.params.should.be.exists;
+                            done()
+                        }
+                    })
+                });
+
+                it('Искать по несуществующему Guid - Error', function(done){
+                    EngineSingleton.getInstance().getProcessDefParameters(guids.nonexistentDef, function(result){
+                        if (result.result !== 'OK'){
+                            done();
+                        } else {
+                            done(new Error('Должна вернуться ошибка'))
+                        }
+                    })
+                })
+            })
         });
 
         xdescribe('#waitForRequest', function () {
@@ -126,7 +159,7 @@ describe('Engine', function(){
 
     xdescribe('#process', function(){
         beforeEach(function() {
-            EngineSingleton.getInstance().clearProcessDefinitions();
+            EngineSingleton.getInstance().processes.clearDefinitions();
         });
 
         describe('#startProcessInstance', function() {

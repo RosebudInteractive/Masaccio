@@ -48,6 +48,10 @@ define(
             taskStages() {
                 return this.getCol('TaskStages');
             }
+
+            getControlManager() {
+                return this.pvt.controlMgr;
+            }
         }
     }
 );

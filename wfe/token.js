@@ -360,7 +360,7 @@ define([
             findNodeInstanceByID : function(nodeID) {
                 for (var i = 0; i < this.nodeInstances().count(); i++) {
                     var _node = this.nodeInstances().get(i);
-                    if (_node.id() == nodeID){
+                    if (_node.guid() == nodeID){
                         return _node;
                     }
                 }

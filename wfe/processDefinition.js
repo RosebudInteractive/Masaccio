@@ -3,6 +3,7 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
+    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define([
@@ -26,7 +27,7 @@ define([
         './Events/eventReferences',
         './Messages/correlationKey',
         './engineSingleton',
-        UCCELLO_CONFIG.uccelloPath + 'predicate/predicate'
+        './Task/taskParameter'
     ],
     function(
         UObject,
@@ -49,7 +50,7 @@ define([
         EventRef,
         CorrelationKey,
         EngineSingleton,
-        Predicate
+        TaskParameter
     ) {
         var ProcessDefinition = Resource.extend({
 
@@ -57,7 +58,6 @@ define([
             className: "ProcessDefinition",
             classGuid: Controls.guidOf('ProcessDefinition'),
             metaFields: [
-                //{fname : "ResName", ftype : "string"},
                 {fname: 'DefinitionID', ftype: 'string'}
             ],
             metaCols: [
@@ -70,13 +70,23 @@ define([
                 {'cname': 'Scripts', 'ctype': 'UserScript'},
 
                 {'cname': 'MessageFlows', 'ctype': 'MessageFlow'},
-                {'cname': 'CorrelationKeys', 'ctype': 'CorrelationKey'}
+                {'cname': 'CorrelationKeys', 'ctype': 'CorrelationKey'},
 
+                {'cname': 'TaskParams', 'ctype': 'TaskParameter'}
             ],
 
             elemNamePrefix: "Field",
             queryGuid: '1811166b-b719-4bf1-8527-8db9f8a8c67e',
             //</editor-fold>
+
+            init: function(cm, params){
+                UccelloClass.super.apply(this, [cm, params]);
+                if (!params) { return }
+
+                if (!this.taskParams()) {
+                    new TaskParameter(this.getControlManager(), {parent: this, colName: 'TaskParams'});
+                }
+            },
 
             getModelDescription: function () {
                 return {name: "ProcessDef"};
@@ -105,6 +115,10 @@ define([
 
             nodes: function () {
                 return this.getCol('Nodes');
+            },
+
+            taskParams: function () {
+                return this.getCol('TaskParams').get(0);
             },
 
             //messageDefinitions : function() {
@@ -375,7 +389,7 @@ define([
                                 _root.newObject({
                                     $sys: {guid: request.ID()},
                                     fields: {
-                                        ProcessId: dbObject.id(),
+                                        ProcessId: dbObject.guid(),
                                         TokenGuid: request.tokenID(),
                                         Name: request.name(),
                                         State: request.state(),
@@ -427,9 +441,11 @@ define([
 
                 EngineSingleton.getInstance().requestStorage.deleteProcessRequestsForSave(_processID);
                 EngineSingleton.getInstance().responseStorage.deleteProcessResponsesForSave(_processID);
+            },
+
+            fillTaskParams : function(){
+                throw new Error('Only Task definition can fill task parameters');
             }
-
-
         });
 
         return ProcessDefinition;

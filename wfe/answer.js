@@ -1,11 +1,13 @@
 /**
  * Created by staloverov on 04.08.2015.
  */
+'use strict';
+
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
-    var Util = require('util');
-    var Logger = require('./../public/logger');
+    //var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
+    //var Util = require('util');
+    //var Logger = require('./../public/logger');
 }
 
 var Result = {
@@ -15,47 +17,90 @@ var Result = {
     ERROR : 'ERROR'
 };
 
-function success(message) {
-    var _instance = new Answer();
-    _instance.result = Result.OK;
-    if (arguments.length > 1) {
-        var _arg = Array.prototype.slice.call(arguments, 1);
-        _instance.message = Util.format(message, _arg);
-    } else {
-        _instance.message = message;
-    }
+//function success(message) {
+//    var _instance = new Answer();
+//    _instance.result = Result.OK;
+//    if (arguments.length > 1) {
+//        var _arg = Array.prototype.slice.call(arguments, 1);
+//        _instance.message = Util.format(message, _arg);
+//    } else {
+//        _instance.message = message;
+//    }
+//
+//    return _instance;
+//}
 
-    return _instance;
-}
+//function error(message) {
+//    var _instance = new Answer();
+//    _instance.result = Result.ERROR;
+//    if (arguments.length > 1) {
+//        var _arg = Array.prototype.slice.call(arguments, 1);
+//        _instance.message = Util.format(message, _arg);
+//    } else {
+//        _instance.message = message;
+//    }
+//
+//    return _instance;
+//}
 
-function error(message) {
-    var _instance = new Answer();
-    _instance.result = Result.ERROR;
-    if (arguments.length > 1) {
-        var _arg = Array.prototype.slice.call(arguments, 1);
-        _instance.message = Util.format(message, _arg);
-    } else {
-        _instance.message = message;
-    }
+define(
+    ['util', './../public/logger'],
+    function(Util, Logger) {
+        return class Answer{
+            constructor () {
+                this.result = Result.UNKNOWN;
+            }
 
-    return _instance;
-}
+            handle(callback) {
+                Logger.info(this);
 
-var Answer = UccelloClass.extend({
-    init: function () {
-        this.result = Result.UNKNOWN;
-    },
+                if (callback) {
+                    callback(this)
+                }
+            }
 
-    handle : function(callback) {
-        Logger.info(this);
+            add(object){
+                for (var prop in object){
+                    if (object.hasOwnProperty(prop)){
+                        this[prop] = object[prop]
+                    }
+                }
 
-        if (callback) {
-            callback(this)
+                return this;
+            }
+
+            static success(message) {
+                var _instance = new Answer();
+                _instance.result = Result.OK;
+                if (arguments.length > 1) {
+                    var _arg = Array.prototype.slice.call(arguments, 1);
+                    _instance.message = Util.format(message, _arg);
+                } else {
+                    _instance.message = message;
+                }
+
+                return _instance;
+            }
+
+            static error(message) {
+                var _instance = new Answer();
+                _instance.result = Result.ERROR;
+                if (arguments.length > 1) {
+                    var _arg = Array.prototype.slice.call(arguments, 1);
+                    _instance.message = Util.format(message, _arg);
+                } else {
+                    _instance.message = message;
+                }
+
+                return _instance;
+            }
         }
     }
-});
+);
 
-if (module) {
-    module.exports.success = success;
-    module.exports.error = error
-}
+
+
+//if (module) {
+//    module.exports.success = success;
+//    module.exports.error = error
+//}
