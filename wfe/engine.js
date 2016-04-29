@@ -138,21 +138,28 @@ define([
             /*  ----- Definitions ----- */
 
 
-            startProcessInstanceAndWait : function(definitionID, requestName, timeout, callback) {
+            startProcessInstanceAndWait : function(definitionID, options, callback) {
+                if (!options) {
+                    Answer.error('Не указаны параметры запуска процесса [%s]', [definitionID]).handle(callback)
+                }
                 console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
                 var that = this;
 
                 this.createNewProcess1(definitionID).then(
                     function(process) {
+                        if (options.hasOwnProperty('taskParams'))
+
                         console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), process.processID());
-                        that.waitForRequest(process.processID(), 1, requestName, timeout, callback);
+                        var _requestName = options.requestName;
+                        var _timeout = options.timeout;
+                        that.waitForRequest(process.processID(), 1, _requestName, _timeout, callback);
                         setTimeout(function () {
                             that.runProcess(process);
                             console.log('[%s] : => процесс processID [%s] запущен', (new Date()).toLocaleTimeString(), process.processID());
                         }, 0);
                     },
                     function(reason) {
-                        callback({result : 'ERROR', message : 'Не удалось создать процесс'});
+                        Answer.error('Не удалось создать процесс [%s]', [reason.message]).handle(callback);
                     }
                 );
 
