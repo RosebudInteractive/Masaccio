@@ -59,7 +59,7 @@ define(
                                     reject(new Error('Can not find task parameters'))
                                 } else {
                                     var _params = object.detail[0].Params;
-                                    resolve(_params)
+                                    resolve(JSON.parse(_params));
                                 }
                             }).
                             catch(function(err){

@@ -55,7 +55,10 @@ define(
                 Logger.info(this);
 
                 if (callback) {
-                    callback(this)
+                    var that = this;
+                    setTimeout(function () {
+                        callback(that)
+                    }, 0)
                 }
             }
 
