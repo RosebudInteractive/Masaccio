@@ -18,9 +18,14 @@ define([
         TaskDefStage,
         TaskStage
     ){
-        return class TaskDef extends ProcessDefinition{
-            get className() {return "TaskDef"}
-            get classGuid() { return Controls.guidOf('TaskDef')}
+        return class TaskDef extends ProcessDefinition {
+            get className() {
+                return "TaskDef"
+            }
+
+            get classGuid() {
+                return Controls.guidOf('TaskDef')
+            }
 
             get metaFields() {
                 return [
@@ -58,13 +63,13 @@ define([
                 }
             }
 
-            _fillTaskParams(dbObject) {
+            _saveTaskParams(dbObject) {
                 this.taskParams().name(this.name());
 
                 for (var i = 0; i < this.nodes().count(); i++) {
                     var _node = this.nodes().get(i);
                     if (_node instanceof TaskDefStage) {
-                        TaskStage.createFromDefinition(_node, this.taskParams())
+                        TaskStage.createFromDefinition(_node, {parent : this.taskParams(), colName: 'TaskStages'})
                     }
                 }
 
@@ -79,63 +84,12 @@ define([
                     data_object.isSystem(that.isSystem() ? true : false);
 
                     var _root = data_object.getDataRoot('TaskDefStage');
-                    that._fillStagesCollection(_root).
-                    then(function(){
-                        that._fillTaskParams(data_object);
+                    that._fillStagesCollection(_root).then(function () {
+                        that._saveTaskParams(data_object);
                         resolve()
-                    }).
-                    catch(function(err){
+                    }).catch(function (err) {
                         reject(err)
                     });
-
-
-                    //var _stagesCollection = _root.getCol("DataElements");
-                    //
-                    //function getStage(code) {
-                    //    for (var i = 0; i < _stagesCollection.count(); i++) {
-                    //        if (_stagesCollection.get(i).stageCode() == code) {
-                    //            return _stagesCollection.get(i);
-                    //        }
-                    //    }
-                    //}
-                    //
-                    //var _count = 0;
-                    //
-                    //for (var i = 0; i < that.nodes().count(); i++) {
-                    //    var _node = that.nodes().get(i);
-                    //    if (_node.className === 'TaskDefStage') {
-                    //        var _nodeDbObj = getStage(_node.name());
-                    //        if (!_nodeDbObj) {
-                    //            _root.newObject({
-                    //                    fields: {
-                    //                        StageCode: _node.name()
-                    //                    }
-                    //                }, {},
-                    //                function (result) {
-                    //                    if (result.result !== 'OK') {
-                    //                        reject(new Error(result.message))
-                    //                    } else {
-                    //                        _count++;
-                    //                        checkDone();
-                    //                    }
-                    //                })
-                    //        } else {
-                    //            _nodeDbObj.stageCode(_node.name());
-                    //            _count++;
-                    //            checkDone();
-                    //
-                    //        }
-                    //    } else {
-                    //        _count++;
-                    //        checkDone();
-                    //    }
-                    //}
-                    //
-                    //function checkDone() {
-                    //    if (_count == that.nodes().count()) {
-                    //        resolve();
-                    //    }
-                    //}
                 });
             }
 
@@ -143,7 +97,7 @@ define([
                 var that = this;
                 var _stagesCollection = root.getCol("DataElements");
 
-                return new Promise(function(resolve, reject){
+                return new Promise(function (resolve, reject) {
 
                     var _count = 0;
 
@@ -211,6 +165,18 @@ define([
                     _node.setUserScript(script)
                 }
                 return _node;
+            }
+
+            applyTaskParams(params) {
+                this.taskParams().copy(this.inputTaskParams());    
+            }
+
+            checkInputParams() {
+                var _params = this.inputTaskParams();
+                return _params &&
+                    _params['TaskNumber'] &&
+                    _params['Specification'] &&
+                    _params['ObjId']
             }
         }
 

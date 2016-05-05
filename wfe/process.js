@@ -24,7 +24,8 @@ define([
         './engineSingleton',
         './controls',
         './userScript',
-        './../public/logger'
+        './../public/logger',
+        './processVar'
     ],
     function(
         UObject,
@@ -34,7 +35,8 @@ define([
         EngineSingleton,
         Controls,
         UserScript,
-        Logger
+        Logger,
+        ProcessVar
     ){
         var Process = UObject.extend({
 
@@ -68,9 +70,12 @@ define([
                 {'cname' : 'MessageInstances', 'ctype' : 'MessageInstance'},
                 {'cname' : 'MessageFlows', 'ctype' : 'MessageFlow'},
                 {'cname' : 'MessageRequests', 'ctype' : 'MessageInstance'},
-                {'cname' : 'Definitions', 'ctype' : 'ProcessDefinition'}
+                {'cname' : 'Definitions', 'ctype' : 'ProcessDefinition'},
+                {'cname' : 'Vars', 'ctype' : 'ProcessVar'}
             ],
             //</editor-fold>
+            
+            
 
             init: function(cm, params, definition){
                 UccelloClass.super.apply(this, [cm, params]);
@@ -82,6 +87,16 @@ define([
                     if (params.hasOwnProperty('definitionResourceID')) {
                         this.definitionResourceID(params.definitionResourceID)
                     }
+                    
+                    if (params.hasOwnProperty('params')) {
+                        this.definition().setInputParams(params.params);
+                    }
+
+                    if (this.checkInputParams()) {
+                        this.definition().applyInputTaskParams();
+                        this.createProcessVar();
+                        
+                    }
 
                     this.processID(UUtils.guid());
                     this.sequenceValue(0);
@@ -90,6 +105,16 @@ define([
                 }
             },
 
+            checkParams : function(params) {
+                return this.definition().checkParams(params)
+            },
+
+            createProcessVar: function () {
+                var _taskParameter = this.definition().taskParams();
+                var _processVar = new ProcessVar(this.getControlManager(), {parent: this, colName: 'Vars'});
+                _processVar.copy(_taskParameter);
+            },
+            
             copyMessages: function (definition) {
                 for (var i = 0; i < definition.messageFlows().count(); i++) {
                     definition.messageFlows().get(i).addNewCopyTo(this);
@@ -119,6 +144,10 @@ define([
             },
 
             //<editor-fold desc="MetaFields & MetaCols">
+            processVar : function(){
+                return this.getCol('ProcessVars').get(0);
+            },
+            
             definition : function(){
                 return this.getCol('Definitions').get(0);
             },
@@ -340,23 +369,15 @@ define([
                 return null;
             },
 
-            wait : function(done) {
+            wait : function() {
                 this.state(processStates.Waiting);
                 var that = this;
-                //EngineSingleton.getInstance().justSaveProcess(this.processID()).
-                //then(function () {
                 if (UCCELLO_CONFIG.wfe.idleTimeout != Infinity) {
                     that.idleTimer = setInterval(function () {
                         clearInterval(that.idleTimer);
                         EngineSingleton.getInstance().saveAndUploadProcess(that.processID());
                     }, UCCELLO_CONFIG.wfe.idleTimeout)
                 }
-
-                //done();
-                //}).
-                //catch(function (err) {
-                //    throw err
-                //});
             },
 
             waitScriptAnswer : function(){

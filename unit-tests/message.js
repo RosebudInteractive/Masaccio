@@ -17,7 +17,7 @@ beforeEach(function() {
     //Main.Config.testClient.clear();
 });
 
-describe('Message', function(){
+xdescribe('Message', function(){
     describe('Должено появиться описание сообщения и само сообщение ', function() {
 
             xit('message1', function (done) {

@@ -20,16 +20,19 @@ function getStageState(state){
 }
 
 define([
-        UCCELLO_CONFIG.uccelloPath+'system/uobject',
-        './../controls'
+        './../Activities/userTask'
     ],
     function(
-        UObject,
-        Controls
+        UserTask
     ){
-        return class TaskStage extends UObject{
-            get className() {return "TaskStage"}
-            get classGuid() { return Controls.guidOf('TaskStage')}
+        return class TaskStage extends UserTask {
+            get className() {
+                return "TaskStage"
+            }
+
+            get classGuid() {
+                return UCCELLO_CONFIG.classGuids.TaskStage
+            }
 
             get metaFields() {
                 return [
@@ -42,34 +45,91 @@ define([
             }
 
             id(value) {
-                return this._genericSetter("Id",value);
+                return this._genericSetter("Id", value);
             }
 
             taskId(value) {
-                return this._genericSetter("TaskId",value);
+                return this._genericSetter("TaskId", value);
             }
 
             taskDefStageId(value) {
-                return this._genericSetter("TaskDefStageId",value);
+                return this._genericSetter("TaskDefStageId", value);
             }
 
             stageCode(value) {
-                return this._genericSetter("StageCode",value);
+                return this._genericSetter("StageCode", value);
             }
 
             stageState(value) {
-                return this._genericSetter("StageState",value);
+                return this._genericSetter("StageState", value);
             }
 
             getControlManager() {
                 return this.pvt.controlMgr;
             }
 
-            static createFromDefinition(taskDefStage, parameter){
-                var _instance = new TaskStage(parameter.getControlManager(), {parent : parameter, colName : 'TaskStages'});
+            addNewCopyTo(parent) {
+                var _newStage = new TaskStage(parent.getControlManager(), {parent : parent, colName : 'TaskStages'});
+                _newStage.id(this.id());
+                _newStage.taskId(this.taskId());
+                _newStage.taskDefStageId(this.taskDefStageId());
+                _newStage.stageCode(this.stageCode());
+                _newStage.stageState(this.stageState());
+                
+                return _newStage;
+            }
+
+            static createFromDefinition(taskDefStage, params) {
+                var _instance = new TaskStage(params.parent.getControlManager(), {
+                    parent: params.parent,
+                    colName: params.colName
+                });
                 _instance.taskDefStageId(taskDefStage.id());
                 _instance.stageCode(taskDefStage.name());
                 _instance.stageState(getStageState(State.idle));
+                
+                return _instance;
+            }
+
+            _getInternalRequest() {
+                if (this.outgoing().count() > 0) {
+                    var _request = this.addRequest('_internalRequest');
+                    _request.isService(true);
+                    _request.taskParams().addAvailableNode(this.name());
+                    for (var i = 0; i < this.outgoing().count(); i++) {
+                        _request.taskParams().addAvailableNode(this.outgoing().get(i).object().target().name())
+                    }
+
+                    return _request
+                } else {
+                    return null
+                }
+            }
+
+            _hasUserSelectedNextNode() {
+                return this._getServiceResponse() ? true : false;
+            }
+            
+            _getServiceResponse() {
+                var _responsesCol = this.token().getPropertiesOfNode(this.name()).responses();
+                for (var i = 0; i < _responsesCol.count(); i++){
+                    var _response = _responsesCol.get(i);
+                    if (_response.isService() && _response.selectedNode()) {
+                        return _response
+                    }
+                }    
+            }
+
+            _getUserSelectedNexNode() {
+                var _serviceResponse = this._getServiceResponse();
+                var _result = [];
+                if (_serviceResponse) {
+                    var _node = this.processInstance().findNodeByName(_serviceResponse.selectedNode())
+                    if (_node) {
+                        _result.push(_node)
+                    }
+                } 
+                return _result
             }
         }
     });

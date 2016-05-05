@@ -22,7 +22,7 @@ beforeEach(function() {
     Initiator.clearTestClient();
 });
 
-describe('Engine', function(){
+xdescribe('Engine', function(){
 
     describe('#common', function() {
         beforeEach(function() {
@@ -39,8 +39,8 @@ describe('Engine', function(){
                 };
 
                 it('Найти параметры по Guid TaskDef - Ok', function(done) {
-                    //EngineSingleton.getInstance().getProcessDefParameters({resType : guids.Type, resName : TaskDefinition.names.forSimpleTaskDef}, function(result){
-                    EngineSingleton.getInstance().getProcessDefParameters('32d7a96c-6264-cd94-e8a9-672c9cea84ee', function(result){
+                    EngineSingleton.getInstance().getProcessDefParameters({resType : guids.Type, resName : TaskDefinition.names.forSimpleTaskDef}, function(result){
+                    // EngineSingleton.getInstance().getProcessDefParameters('32d7a96c-6264-cd94-e8a9-672c9cea84ee', function(result){
                         if (result.result !== 'OK'){
                             done(new Error(result.message));
                         } else {

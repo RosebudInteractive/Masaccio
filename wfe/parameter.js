@@ -11,8 +11,8 @@ define(
     function(UObject, Controls){
         var Parameter = UObject.extend({
 
-            className: "Parameter",
-            classGuid: Controls.guidOf('Parameter'),
+            className: "WfeParameter",
+            classGuid: Controls.guidOf('WfeParameter'),
             metaFields: [
                 {fname : "Name"   , ftype : "string"},
                 {fname : "Value"  , ftype : "string"}

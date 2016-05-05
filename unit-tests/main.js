@@ -12,7 +12,8 @@ var _path = {
     definitions : _definitionsPath,
     Uccello : _uccelloDir,
     Masaccio : _parentDir + '/../',
-    DbPath : _dbPath
+    DbPath : _dbPath,
+    testDataPath : __dirname + '/data/'
 };
 
 var mssql_connection = { //MSSQL
@@ -59,6 +60,7 @@ var _config = {
     dataPath: _path.DbPath,
     uccelloPath: _path.Uccello,
     masaccioPath : _path.Masaccio + 'wfe/',
+    
     webSocketServer: {port: 8082},
 
     testClientTimeout : 3,

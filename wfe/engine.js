@@ -76,11 +76,10 @@ define([
 
         var Engine = UccelloClass.extend({
             init: function (initParams) {
-                //this.db = Initializer.createInternalDb(initParams.dbController);
                 this.controlManager = Initializer.createControlManager(initParams);
                 this.constructHolder = initParams.constructHolder;
                 this.resman = initParams.resman;
-                Initializer.registerTypes(this.controlManager);
+                // Initializer.registerTypes(this.controlManager);
 
                 this.db = this.controlManager;
                 this.adapter = new DbAdapter();
@@ -143,12 +142,15 @@ define([
                     Answer.error('Не указаны параметры запуска процесса [%s]', [definitionID]).handle(callback)
                 }
                 console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
+
+                var _processOptions = {};
+                if (options.hasOwnProperty('taskParams')){
+                    _processOptions.params = options.params
+                }
+
                 var that = this;
-
-                this.createNewProcess1(definitionID).then(
+                this.createNewProcess1(definitionID, _processOptions).then(
                     function(process) {
-                        if (options.hasOwnProperty('taskParams'))
-
                         console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), process.processID());
                         var _requestName = options.requestName;
                         var _timeout = options.timeout;
@@ -166,10 +168,15 @@ define([
                 return Controls.MegaAnswer;
             },
 
-            startProcessInstance : function(definitionID, callback) {
+            startProcessInstance : function(definitionID, options, callback) {
                 console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
+                var _processOptions = {};
+                if (options.hasOwnProperty('taskParams')){
+                    _processOptions.params = options.params
+                }
+
                 var that = this;
-                this.createNewProcess1(definitionID).then(
+                this.createNewProcess1(definitionID, _processOptions).then(
                     function(process) {
                         that.runProcess(process);
                         var _answer = Answer.success('Процесс processID [%s] запущен',  process.processID());
@@ -178,12 +185,12 @@ define([
                         _answer.handle(callback);
                     },
                     function(reason){
-                        Answer.error('Не удалось создать процесс [%s]', [definitionID]).handle(callback);
+                        Answer.error('Не удалось создать процесс [%s]', [reason.message]).handle(callback);
                     }
                 );
             },
 
-            createNewProcess1 : function(definitionName) {
+            createNewProcess1 : function(definitionName, options) {
                 var that = this;
                 return new Promise(promiseBody);
 
@@ -198,7 +205,13 @@ define([
                                 reject(new Error(result.message))
                             } else {
                                 var _defResource = result.datas[0].resource;
-                                var _process = new Process(that.controlManager, {definitionResourceID : result.datas[0].guid}, _defResource);
+                                var _options = {
+                                    definitionResourceID : result.datas[0].guid
+                                };
+                                if (options) {
+                                    _options.params = options.params
+                                }
+                                var _process = new Process(that.controlManager, _options, _defResource);
                                 resolve(_process);
                             }
                         })

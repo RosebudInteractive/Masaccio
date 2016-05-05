@@ -138,6 +138,7 @@ define(
             addRequest : function(name) {
                 var _request = new Request(this.getControlManager(), {parent  : this.getParent(), colName : 'Requests'});
                 _request.name(name);
+                _request.isService(false);
                 this.requests()._add(_request);
                 return _request;
             },
@@ -150,16 +151,19 @@ define(
 
 
             exposeRequests : function() {
-                if (this.requests().count() > 0){
+                var _requests = this._getRequests();
+
+                if (_requests.length > 0){
                     var _process = this.processInstance();
                     var _token = _process.currentToken();
                     var _props = _token.getPropertiesOfNode(this.name());
 
-                    for (var i = 0; i < this.requests().count(); i++) {
-                        var _request = this.requests().get(i).clone(this.getControlManager(), {parent : _props, colName : 'Requests'});
+                    var that = this;
+                    _requests.forEach(function(request){
+                        var _request = request.clone(that.getControlManager(), {parent : _props, colName : 'Requests'});
                         _request.processID(_process.processID());
                         _request.tokenID(_token.tokenID())
-                    }
+                    });
 
                     return Activity.state.Waiting
                 }
@@ -168,6 +172,27 @@ define(
                 }
             },
 
+            _getRequests : function(){
+                var _result = [];
+
+                if (this.requests().count() > 0) {
+                    for (var i = 0; i < this.requests().count(); i++) {
+                        _result.push(this.requests().get(i))
+                    }
+                } else {
+                    var _internalRequest = this._getInternalRequest();
+                    if (_internalRequest) {
+                        _result.push(_internalRequest);
+                    }
+                }
+
+                return _result;
+            },
+
+            _getInternalRequest: function() {
+                // переопределяется для Task
+                return null
+            },
 
             hasNewRequests : function() {
                 for (var i = 0; i < this.requests().count(); i++) {

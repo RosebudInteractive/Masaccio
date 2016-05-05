@@ -35,7 +35,9 @@ var MessageInstance = require('./../Messages/messageInstance');
 var Event = require('./../Events/event');
     var StartMessageEvent = require('./../Events/Start/messageStartEvent');
 
+var TaskDef = require('./../Task/taskDef');
 var TaskStage = require('./../Task/taskStage');
+var TaskParameter = require('./../Task/taskParameter');
 
 var Initializer = {
 
@@ -76,7 +78,9 @@ var Initializer = {
         new Token(controlManager);
         new Process(controlManager);
 
+        new TaskDef(controlManager);
         new TaskStage(controlManager);
+        new TaskParameter(controlManager);
     },
 
     createInternalDb : function(dbController) {

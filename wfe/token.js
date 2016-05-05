@@ -47,7 +47,7 @@ define([
                 }
             ],
             metaCols: [
-                {'cname' : 'Parameters', 'ctype' : 'Parameter'},
+                {'cname' : 'Parameters', 'ctype' : 'WfeParameter'},
                 {'cname' : 'NodesProps', 'ctype' : 'NodeProperties'},
                 {'cname' : 'NodeInstances', 'ctype' : 'FlowNode'},
                 {'cname' : 'SentMessages', 'ctype' : 'MessageInstance'},

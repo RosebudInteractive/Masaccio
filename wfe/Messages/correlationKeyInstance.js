@@ -26,7 +26,7 @@ define([
                 {fname : 'KeyName',    ftype : 'string'}
             ],
             metaCols: [
-                {'cname' : 'CorrelationValues', 'ctype' : 'Parameter'}
+                {'cname' : 'CorrelationValues', 'ctype' : 'WfeParameter'}
             ],
             //</editor-fold>
 

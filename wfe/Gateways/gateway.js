@@ -73,7 +73,6 @@ define(
                         var _scriptObject = this.createSequenceScriptObject(_sequence, callback);
                         this.state(FlowNode.state.WaitingUserScriptAnswer);
                         /* Todo : возможно здесь нуден не currentToken, а token узла */
-                        //this.processInstance().enqueueCurrentToken();
                         _sequence.checkConditionSatisfied(_scriptObject);
                     }
                     else {

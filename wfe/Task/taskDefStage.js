@@ -8,11 +8,13 @@ if (typeof define !== 'function') {
 
 define([
         './../Activities/userTask',
-        './../controls'
+        './../controls',
+        './taskStage'
     ],
     function(
         UserTask,
-        Controls
+        Controls,
+        TaskStage
     ){
         return class TaskDefStage extends UserTask{
             get className() {return "TaskDefStage"}
@@ -36,6 +38,10 @@ define([
 
             name(value) {
                 return this._genericSetter("StageCode", value);
+            }
+
+            createInstance(cm, params){
+                return TaskStage.createFromDefinition(this, params);
             }
         }
     });

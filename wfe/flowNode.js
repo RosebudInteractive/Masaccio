@@ -55,7 +55,7 @@ define([
                 {'cname' : 'Incoming', 'ctype' : 'ObjectRef'},
                 {'cname' : 'Outgoing', 'ctype' : 'ObjectRef'},
                 {'cname' : 'Connectors', 'ctype' : 'SequenceFlow'},
-                {'cname' : 'Parameters', 'ctype' : 'Parameter'}
+                {'cname' : 'Parameters', 'ctype' : 'WfeParameter'}
             ],
 
             init: function(cm, params){
@@ -97,7 +97,6 @@ define([
             //</editor-fold>
 
             getInstance : function(token, params){
-                // todo : возможно обойтись без process
                 if (!params) {
                     params = {
                         parent  : token,
@@ -108,18 +107,7 @@ define([
                 var _node = this.createInstance(token.getControlManager(), params);
                 _node.assign(this, token);
                 _node.assignConnections(this);
-                //_node.addLinkToParameters(this);
                 _node.addCollectionInstances(this);
-
-                return _node;
-            },
-
-            copyNodeDefinition : function(process, params){
-                var _node= this.createInstance(process.getControlManager(), params);
-                _node.assign(this, process);
-                _node.guid(this.guid());
-                _node.copyCollectionDefinitions(this, process);
-                //_node.copyParameters(this)
 
                 return _node;
             },
@@ -145,14 +133,10 @@ define([
                 for (var i = 0; i < source.incoming().count(); i++) {
                     var _inConnector = source.incoming().get(i).object().clone(this, {parent  : this, colName : 'Connectors'});
                     _inConnector.newIncomingLink(this);
-                    //Utils.createRefTo(_inConnector, {parent  : this, colName : 'Incoming'});
-                    //this.incoming()._add()
                 }
                 for (var i = 0; i < source.outgoing().count(); i++) {
                     var _outConnector = source.outgoing().get(i).object().clone(this, {parent  : this, colName : 'Connectors'});
                     _outConnector.newOutgoingLink(this);
-                    //ObjectRef.createRefTo(_outConnector, {parent  : this, colName : 'Outgoing'});
-                    //this.outgoing()._add()
                 }
             },
 

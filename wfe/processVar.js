@@ -1,5 +1,5 @@
 /**
- * Created by Alex on 28.04.2016.
+ * Created by staloverov on 04.05.2016.
  */
 'use strict';
 
@@ -9,14 +9,14 @@ if (typeof define !== 'function') {
 
 define(
     [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
-    function(UObject){
-        return class TaskParameter extends UObject {
+    function(UObject) {
+        return class ProcessVar extends UObject {
             get className() {
-                return "TaskParameter"
+                return "ProcessVar"
             }
 
             get classGuid() {
-                return UCCELLO_CONFIG.classGuids.TaskParameter
+                return UCCELLO_CONFIG.classGuids.ProcessVar;
             }
 
             get metaFields() {
@@ -59,9 +59,14 @@ define(
             }
 
             copy(source) {
+                this.name(source.name());
                 this.taskNumber(source.taskNumber());
                 this.specification(source.specification());
                 this.objId(source.objId());
+                
+                for (var i = 0; i < source.taskStages().count(); i++){
+                    source.taskStages().get(i).addNewCopyTo(this)
+                }
             }
         }
     }

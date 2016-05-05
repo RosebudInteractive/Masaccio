@@ -61,8 +61,8 @@ define([
                 {fname: 'DefinitionID', ftype: 'string'}
             ],
             metaCols: [
-                {'cname': 'Parameters', 'ctype': 'Parameter'},
-                {'cname': 'InputParameters', 'ctype': 'Parameter'},
+                {'cname': 'Parameters', 'ctype': 'WfeParameter'},
+                {'cname': 'InputParameters', 'ctype': 'WfeParameter'},
                 {'cname': 'Connectors', 'ctype': 'SequenceFlow'},
                 {'cname': 'Nodes', 'ctype': 'FlowNode'},
 
@@ -119,6 +119,10 @@ define([
 
             taskParams: function () {
                 return this.getCol('TaskParams').get(0);
+            },
+            
+            inputTaskParams: function() {
+                return this.getCol('TaskParams').get(1);
             },
 
             //messageDefinitions : function() {
@@ -333,6 +337,7 @@ define([
                     that._saveRequests(dbObject, params)
                         .then(function () {
                             that._deleteSavedRequests(params.processInstance);
+                            that._saveProcessVar(dbObject);
                         })
                         .then(resolve)
                         .catch(function(error) {
@@ -443,8 +448,27 @@ define([
                 EngineSingleton.getInstance().responseStorage.deleteProcessResponsesForSave(_processID);
             },
 
-            fillTaskParams : function(){
-                throw new Error('Only Task definition can fill task parameters');
+            _saveProcessVar : function(dbObject){
+                var _processVar = EngineSingleton.getInstance().db.serialize(this.processVar(), true);
+                _processVar = JSON.stringify(_processVar);
+                dbObject.vars(_processVar);
+            },
+
+            applyInputTaskParams : function(){
+                // Only Task definition can use task parameters
+                // implementation in TaskDef
+            },
+
+            checkInputParams: function(params){
+                return true
+            },
+
+            setInputParams: function(params){
+                if (this.inputTaskParams()) {
+                    this.getCol('TaskParams')._del(this.inputTaskParams())
+                }
+                
+                this.pvt.db.deserialize(params, {obj: this, colName: 'TaskParams'}, EngineSingleton.getInstance().createComponentFunction);
             }
         });
 
