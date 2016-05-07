@@ -57,7 +57,8 @@ define(
                 }
                 var requestInfo = eventParams.requestInfo;
 
-                var _request = requestInfo.request; //EngineSingleton.getInstance().requestStorage.getRequest(requestInfo.requestID);
+                var _request = EngineSingleton.getInstance().requestStorage.getRequest(requestInfo.requestID);
+                // var _request = requestInfo.request; //
                 if (!_request) { throw 'Token ID [%s] do not exists', requestInfo.requestID }
 
                 var _response = {};
@@ -65,6 +66,7 @@ define(
                     for (var param in _request) {
                         _response[param] = _request[param];
                     }
+                    _response.selectedNode = 'task2'
                 } else {
                     _customizeResponse(_response);
                 }

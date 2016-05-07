@@ -13,7 +13,8 @@ var processStates = {
     Aborted : 3,
     Waiting : 4,
     WaitingScriptAnswer : 5,
-    None : 6
+    None : 6,
+    Saving : 7
 };
 
 define([
@@ -105,8 +106,8 @@ define([
                 }
             },
 
-            checkParams : function(params) {
-                return this.definition().checkParams(params)
+            checkInputParams : function(params) {
+                return this.definition().checkInputParams(params)
             },
 
             createProcessVar: function () {
@@ -145,7 +146,7 @@ define([
 
             //<editor-fold desc="MetaFields & MetaCols">
             processVar : function(){
-                return this.getCol('ProcessVars').get(0);
+                return this.getCol('Vars').get(0);
             },
             
             definition : function(){
@@ -322,7 +323,9 @@ define([
             },
 
             canContinue : function() {
-                return (this.state() != processStates.WaitingScriptAnswer) && (this.state() != processStates.Finished)
+                return (this.state() != processStates.WaitingScriptAnswer) 
+                    && (this.state() != processStates.Finished)
+                    && (this.state() != processStates.Saving)
             },
 
             activate : function() {
@@ -333,12 +336,22 @@ define([
                 }
             },
 
+            saving : function(){
+                this.state(processStates.Saving);
+            },
+
+            isSaving : function(){
+                return this.state() == processStates.Saving;
+            },
+
             isWaitingScriptAnswer : function() {
                 return this.state() == processStates.WaitingScriptAnswer;
             },
 
             isWaiting : function() {
-                return (this.state() == processStates.WaitingScriptAnswer) || (this.state() == processStates.Waiting);
+                return (this.state() == processStates.WaitingScriptAnswer)
+                    || (this.state() == processStates.Waiting)
+                    || (this.state() == processStates.Saving);
             },
 
             isRunning : function() {
@@ -370,13 +383,15 @@ define([
             },
 
             wait : function() {
-                this.state(processStates.Waiting);
-                var that = this;
-                if (UCCELLO_CONFIG.wfe.idleTimeout != Infinity) {
-                    that.idleTimer = setInterval(function () {
-                        clearInterval(that.idleTimer);
-                        EngineSingleton.getInstance().saveAndUploadProcess(that.processID());
-                    }, UCCELLO_CONFIG.wfe.idleTimeout)
+                if (this.state() != processStates.Saving) {
+                    this.state(processStates.Waiting);
+                    var that = this;
+                    if (UCCELLO_CONFIG.wfe.idleTimeout != Infinity) {
+                        that.idleTimer = setInterval(function () {
+                            clearInterval(that.idleTimer);
+                            EngineSingleton.getInstance().saveAndUploadProcess(that.processID());
+                        }, UCCELLO_CONFIG.wfe.idleTimeout)
+                    }
                 }
             },
 

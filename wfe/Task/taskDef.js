@@ -167,16 +167,16 @@ define([
                 return _node;
             }
 
-            applyTaskParams(params) {
+            applyInputTaskParams() {
                 this.taskParams().copy(this.inputTaskParams());    
             }
 
             checkInputParams() {
                 var _params = this.inputTaskParams();
                 return _params &&
-                    _params['TaskNumber'] &&
-                    _params['Specification'] &&
-                    _params['ObjId']
+                    _params.taskNumber() &&
+                    _params.specification() &&
+                    _params.objId()
             }
         }
 

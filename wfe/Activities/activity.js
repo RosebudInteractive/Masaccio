@@ -56,24 +56,24 @@ define(
                     setTimeout(callback(), 0)
                 }
 
-                if (this._hasUserSelectedNextNode()){
+                if (this._hasUserSelectedNextNode()) {
                     setTimeout(callback(), 0)
-                }
+                } else {
+                    for (var i = 0; i < this.outgoing().count(); i++) {
+                        var _sequence = this.outgoing().get(i).object();
+                        if (_sequence.hasCondition()) {
+                            var _scriptObject = this.createSequenceScriptObject(_sequence, callback);
 
-                for (var i = 0; i < this.outgoing().count(); i++) {
-                    var _sequence = this.outgoing().get(i).object();
-                    if (_sequence.hasCondition()) {
-                        var _scriptObject = this.createSequenceScriptObject(_sequence, callback);
-
-                        this.waitUserScriptAnswer();
-                        _sequence.checkConditionSatisfied(_scriptObject);
-                    }
-                    else {
-                        this.conditionsResult.addResult(_sequence, true);
-                        _sequence.check();
-                        if (this.isAllOutgoingChecked()) {
-                            //this.processInstance.wait();
-                            setTimeout(callback(), 0)
+                            this.waitUserScriptAnswer();
+                            _sequence.checkConditionSatisfied(_scriptObject);
+                        }
+                        else {
+                            this.conditionsResult.addResult(_sequence, true);
+                            _sequence.check();
+                            if (this.isAllOutgoingChecked()) {
+                                //this.processInstance.wait();
+                                setTimeout(callback(), 0)
+                            }
                         }
                     }
                 }

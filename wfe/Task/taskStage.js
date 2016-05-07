@@ -93,8 +93,7 @@ define([
 
             _getInternalRequest() {
                 if (this.outgoing().count() > 0) {
-                    var _request = this.addRequest('_internalRequest');
-                    _request.isService(true);
+                    var _request = this.addServiceRequest();
                     _request.taskParams().addAvailableNode(this.name());
                     for (var i = 0; i < this.outgoing().count(); i++) {
                         _request.taskParams().addAvailableNode(this.outgoing().get(i).object().target().name())
@@ -114,7 +113,7 @@ define([
                 var _responsesCol = this.token().getPropertiesOfNode(this.name()).responses();
                 for (var i = 0; i < _responsesCol.count(); i++){
                     var _response = _responsesCol.get(i);
-                    if (_response.isService() && _response.selectedNode()) {
+                    if (_response.isService() && _response.taskParams().selectedNode()) {
                         return _response
                     }
                 }    
@@ -124,7 +123,7 @@ define([
                 var _serviceResponse = this._getServiceResponse();
                 var _result = [];
                 if (_serviceResponse) {
-                    var _node = this.processInstance().findNodeByName(_serviceResponse.selectedNode())
+                    var _node = this.processInstance().findNodeByName(_serviceResponse.taskParams().selectedNode());
                     if (_node) {
                         _result.push(_node)
                     }

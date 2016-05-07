@@ -41,21 +41,41 @@ describe('Task', function(){
         
         it('Запуск процесса', function(done){
             var _options = {
-                taskParams : _inputTaskParams
+                taskParams : _inputTaskParams,
+                // requestName : 'TaskRequest',
+                // timeout : 0
+                
             };
 
             EngineSingleton.getInstance().startProcessInstance(TaskDefinition.names.forSimpleTaskDef, _options, function(result) {
-                result.result.should.equal('OK');
-                expect(result.requestInfo).to.be.exist;
-                expect(result.message).to.be.not.exist;
-                _processID = result.requestInfo.processID;
-                expect(result.requestInfo.processID).to.be.exist;
-                expect(result.requestInfo.tokenID).to.be.exist;
-                result.requestInfo.requestName.should.equal('request1');
-                result.requestInfo.nodeName.should.equal('userTask');
+                var _process;
 
-                done();
-            });    
+                var _interval = setInterval(function () {
+                    _process = EngineSingleton.getInstance().getProcessInstance(result.processID);
+                    if (_process && _process.isFinished()) {
+                        clearInterval(_interval);
+                        EngineSingleton.getInstance().saveAndUploadProcess(result.processID).then(
+                            function(){
+                                EngineSingleton.getInstance().findOrUploadProcess(result.processID).then(
+                                    function(process){
+                                        EngineSingleton.getInstance().deleteProcess(process.processID);
+                                        done()
+                                    },
+                                    function(error){
+                                        //throw error
+                                        done(error)
+                                    }
+                                );
+                            },
+                            function(error){done(error)}
+                        );
+
+                    } else {
+                        console.log('[%s] Еще работает', (new Date()).toLocaleTimeString())
+                    }
+
+                }, 1000)
+            });
         })
     })
 });

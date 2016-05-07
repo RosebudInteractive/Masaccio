@@ -70,7 +70,17 @@ define(
                 return this.getUnhandledResponse() ? true : false;
             },
 
+            handleResponse : function(done){
+                this.state(FlowNode.state.HasNewResponse);
+                done();
+            },
+
             execute : function(callback) {
+                if (this.processInstance().isSaving()) {
+                    this.saving();
+                    this.callExecuteCallBack(callback);
+                }
+                
                 var that = this;
 
                 function logResponses() {
@@ -92,7 +102,7 @@ define(
                         this.completeExecution();
                     }
                 }
-                else if (this.state() == FlowNode.state.WaitingRequest) {
+                else if ((this.state() == FlowNode.state.WaitingRequest) || (this.state() == FlowNode.state.HasNewResponse)) {
                     logResponses.call(this);
 
                     if (this.token().getPropertiesOfNode(this.name()).isAllResponseReceived()){
@@ -141,6 +151,14 @@ define(
                 _request.isService(false);
                 this.requests()._add(_request);
                 return _request;
+            },
+            
+            addServiceRequest : function() {
+                var _request = new Request(this.getControlManager(), {parent  : this.processInstance().definition(), colName : 'Requests'});
+                _request.name('TaskRequest');
+                _request.isService(true);
+                this.requests()._add(_request);
+                return _request;    
             },
 
             close : function() {

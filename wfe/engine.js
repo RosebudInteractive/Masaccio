@@ -145,7 +145,7 @@ define([
 
                 var _processOptions = {};
                 if (options.hasOwnProperty('taskParams')){
-                    _processOptions.params = options.params
+                    _processOptions.params = options.taskParams
                 }
 
                 var that = this;
@@ -172,7 +172,7 @@ define([
                 console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
                 var _processOptions = {};
                 if (options.hasOwnProperty('taskParams')){
-                    _processOptions.params = options.params
+                    _processOptions.params = options.taskParams
                 }
 
                 var that = this;
@@ -206,7 +206,7 @@ define([
                             } else {
                                 var _defResource = result.datas[0].resource;
                                 var _options = {
-                                    definitionResourceID : result.datas[0].guid
+                                    definitionResourceID : result.datas[0].resVerId
                                 };
                                 if (options) {
                                     _options.params = options.params
@@ -434,7 +434,7 @@ define([
                                 throw 'Error!'
                             }
 
-                            var response = _request.createResponse(_request.getParent());
+                            var response = _request.createResponse(_request.etParent());
                             response.fillParams(answer.response);
 
                             that.responseStorage.addResponseCallback(response, 0, callback);
@@ -443,15 +443,22 @@ define([
 
                             if (_process.isRunning()) {
                                 /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
-                                _receivingNode.execute(function () {
-                                    _token.execute();
-                                });
+                                if (_receivingNode['handleResponse']){
+                                    _receivingNode.handleResponse(function () {
+                                        _token.execute();
+                                    });    
+                                }
+                                
                             } else {
                                 if (!_process.isTokenInQueue(_token)) {
                                     _process.enqueueToken(_token)
                                 }
 
-                                _receivingNode.execute();
+                                if (_receivingNode['handleResponse']){
+                                    _receivingNode.handleResponse(function () {
+                                        _token.execute();
+                                    });
+                                }
                             }
                         },
                         function(error){

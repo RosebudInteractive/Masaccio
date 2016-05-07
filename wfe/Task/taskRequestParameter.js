@@ -8,8 +8,8 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', '../../public/utils'],
-    function(UObject, Utils){
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject', '../../public/utils', './../parameter'],
+    function(UObject, Utils, Parameter){
         return class TaskRequestParameter extends UObject {
             get className() {
                 return "TaskRequestParameter"
@@ -27,7 +27,7 @@ define(
 
             get metaCols() {
                 return [
-                    {'cname': 'AvailableNodes', 'ctype': 'string'}
+                    {'cname': 'AvailableNodes', 'ctype': 'WfeParameter'}
                 ]
             }
 
@@ -40,7 +40,10 @@ define(
             }
             
             addAvailableNode(nodeName) {
-                this.availableNodes()._add(nodeName)
+                var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'AvailableNodes'});
+                _param.name('Node');
+                _param.value(nodeName);
+                return _param;
             }
 
             getControlManager() {

@@ -56,7 +56,7 @@ define([
                     this.ID(UUtils.guid());
                 }
                 if (!this.taskParams()) {
-                    new TaskParameter(this.getControlManager(), {parent: this, colName: 'TaskParameters'});
+                    new TaskParameter(cm, {parent: this, colName: 'TaskParameters'});
                 }
             },
 
@@ -129,8 +129,10 @@ define([
                 _response.name(this.name());
                 _response.processID(this.processID());
                 _response.tokenID(this.tokenID());
+                _response.isService(this.isService());
                 Utils.copyCollection(this.parameters(), _response.parameters());
                 _response.state(requestState.ResponseReceived);
+                this.state(requestState.ResponseReceived);
                 this.responseID(_response.ID());
 
                 return _response;
@@ -153,6 +155,11 @@ define([
                     if (_param) {
                         _param.value(paramsObject[_prop])
                     }
+                }
+
+
+                if (paramsObject.hasOwnProperty('selectedNode')){
+                    this.taskParams().selectedNode(paramsObject['selectedNode'])
                 }
             },
 

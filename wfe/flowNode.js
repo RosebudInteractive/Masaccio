@@ -17,7 +17,8 @@ var flowNodeState = {
         ExecutionComplete : 6,
         UserScriptComplete : 7,
         WaitingSubProcess : 8,
-        Closed : 9
+        Closed : 9,
+        HasNewResponse : 10
     };
 
 define([
@@ -156,7 +157,7 @@ define([
             findConnector : function(connector) {
                 for (var i = 0; i < this.connectors().count(); i++) {
                     var _connector = this.connectors().get(i);
-                    if ((_connector.guid() == connector.guid()) && (_connector.name() == connector.name())){
+                    if ((_connector.id() == connector.id()) && (_connector.name() == connector.name())){
                         return _connector;
                     }
                 }
@@ -218,12 +219,17 @@ define([
             },
 
             execute : function(callback) {
-                for (var i = 0; i < this.outgoing().count(); i++){
-                    this.outgoing().get(i).object().state(SequenceFlow.state.Unchecked);
-                }
+                if (this.processInstance().isSaving()) {
+                    this.saving();
+                    this.callExecuteCallBack(callback);
+                } else {
+                    for (var i = 0; i < this.outgoing().count(); i++){
+                        this.outgoing().get(i).object().state(SequenceFlow.state.Unchecked);
+                    }
 
-                this.processInstance().enqueueCurrentToken();
-                this.processInstance().wait();
+                    this.processInstance().enqueueCurrentToken();
+                    this.processInstance().wait();
+                }
             },
 
             callExecuteCallBack : function(callback) {
@@ -232,13 +238,17 @@ define([
                         callback()
                     } else {
                         var that = this;
-                            EngineSingleton.getInstance().justSaveProcess(this.processInstance().processID()).
-                        then(function() {
-                                that.needSave = false;
-                                callback()
-                            }).
+                        var _state = this.processInstance().state();
+                        this.processInstance().saving();
+                        EngineSingleton.getInstance().justSaveProcess(this.processInstance().processID()).
+                        then(function () {
+                            that.needSave = false;
+                            that.processInstance().state(_state);
+                            callback()
+                        }).
                         catch(function (err) {
-                                that.needSave = false;
+                            that.needSave = false;
+                            that.processInstance().state(_state);
                             throw err
                         })
 
@@ -302,6 +312,11 @@ define([
             waitUserScriptAnswer : function(){
                 this.state(flowNodeState.WaitingUserScriptAnswer);
                 this.processInstance().wait();
+            },
+
+            saving : function(){
+                this.needSave = false;
+                // this.state(flowNodeState.Saving)
             },
 
             isWaitingRequest : function() {

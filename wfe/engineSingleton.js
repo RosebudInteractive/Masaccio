@@ -10,7 +10,7 @@ var Singleton = {
         _instance.constructHolder = initParams.constructHolder;
 
         var createComponent = function (typeObj, parent, sobj) {
-            var params = {ini: sobj, parent: parent.obj, colName: parent.colName};
+            var params = {ini: sobj, parent: parent.obj, colName: parent.colName, isDeserialize : true};
             var constr = _instance.constructHolder.getComponent(typeObj.getGuid()).constr;
             var _obj = new constr(_instance.getControlManager(), params);
             return _obj

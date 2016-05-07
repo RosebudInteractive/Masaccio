@@ -48,7 +48,8 @@ var controls = [
     {className: 'TaskDefStage',             component: './Task/taskDefStage',                       guid: '783d3c15-1c4d-4890-8a73-629b16d7c770'},
     {className: 'TaskStage',                component: './Task/taskStage',                          guid: 'c2f02b7a-1204-4dca-9ece-3400b4550c8d'},
     {className: 'TaskParameter',            component: './Task/taskParameter',                      guid: 'b3746562-946f-46f6-b74f-a50eaff7a771'},
-    {className: 'TaskRequestParameter',     component: './Task/taskRequestParameter',               guid: '31809e1f-a2c2-4dbb-b653-51e8bdf950a2'}
+    {className: 'TaskRequestParameter',     component: './Task/taskRequestParameter',               guid: '31809e1f-a2c2-4dbb-b653-51e8bdf950a2'},
+    {className: 'ProcessVar',               component: './processVar',                              guid: 'b8fd05dc-08de-479e-8557-dba372e2b4b6'}
 
 ];
 

@@ -83,8 +83,10 @@ define([
                 UccelloClass.super.apply(this, [cm, params]);
                 if (!params) { return }
 
-                if (!this.taskParams()) {
-                    new TaskParameter(this.getControlManager(), {parent: this, colName: 'TaskParams'});
+                if (!params.isDeserialize){
+                    if (!this.taskParams()) {
+                        new TaskParameter(this.getControlManager(), {parent: this, colName: 'TaskParams'});
+                    }
                 }
             },
 
@@ -337,7 +339,7 @@ define([
                     that._saveRequests(dbObject, params)
                         .then(function () {
                             that._deleteSavedRequests(params.processInstance);
-                            that._saveProcessVar(dbObject);
+                            that._saveProcessVar(dbObject, params.processInstance);
                         })
                         .then(resolve)
                         .catch(function(error) {
@@ -394,8 +396,8 @@ define([
                                 _root.newObject({
                                     $sys: {guid: request.ID()},
                                     fields: {
-                                        ProcessId: dbObject.guid(),
-                                        TokenGuid: request.tokenID(),
+                                        ProcessId: dbObject.id(),
+                                        TokenId: request.tokenID(),
                                         Name: request.name(),
                                         State: request.state(),
                                         RequestBody: _requestBody,
@@ -413,7 +415,7 @@ define([
                                 _requestObj.state(request.state());
                                 _requestObj.state(request.state());
                                 _requestObj.requestBody(_requestBody);
-                                _requestObj.responceBody(_responseBody);
+                                _requestObj.responseBody(_responseBody);
 
                                 _count++;
                                 checkDone();
@@ -448,8 +450,8 @@ define([
                 EngineSingleton.getInstance().responseStorage.deleteProcessResponsesForSave(_processID);
             },
 
-            _saveProcessVar : function(dbObject){
-                var _processVar = EngineSingleton.getInstance().db.serialize(this.processVar(), true);
+            _saveProcessVar : function(dbObject, processInstance){
+                var _processVar = EngineSingleton.getInstance().db.serialize(processInstance.processVar(), true);
                 _processVar = JSON.stringify(_processVar);
                 dbObject.vars(_processVar);
             },
@@ -464,11 +466,12 @@ define([
             },
 
             setInputParams: function(params){
-                if (this.inputTaskParams()) {
-                    this.getCol('TaskParams')._del(this.inputTaskParams())
+                var _inputParam = this.inputTaskParams();
+                if (_inputParam) {
+                    this.getCol('TaskParams')._del(_inputParam)
                 }
-                
-                this.pvt.db.deserialize(params, {obj: this, colName: 'TaskParams'}, EngineSingleton.getInstance().createComponentFunction);
+                var _db = this.pvt.db ? this.pvt.db : this.getRoot().pvt.db;
+                _db.deserialize(params, {obj: this, colName: 'TaskParams'}, EngineSingleton.getInstance().createComponentFunction);
             }
         });
 

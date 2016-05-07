@@ -125,11 +125,18 @@ define([
                         break;
                     }
 
+                    case (FlowNode.state.HasNewResponse) : {
+                        this.executeNode();
+                        EngineSingleton.getInstance().switchTokens(this);
+                        break;
+                    }
+
                     case (FlowNode.state.WaitingRequest) || (FlowNode.state.WaitingTokens) : {
                         /* Todo : возможно нужен callback*/
                         EngineSingleton.getInstance().deactivateProcess(this.processInstance());
                         /* Todo : Сохранение и выгрузка из памяти процесса */
-                        return 'Процесс ожидает ответ';
+                        // return 'Процесс ожидает ответ';
+                        break;
                     }
 
                     case (FlowNode.state.ExecutionComplete) : {
@@ -150,6 +157,11 @@ define([
 
                     case (FlowNode.state.WaitingUserScriptAnswer) : {
                         EngineSingleton.getInstance().deactivateProcess(this.processInstance());
+                        EngineSingleton.getInstance().switchTokens(this);
+                        break;
+                    }
+
+                    case (FlowNode.state.Saving) : {
                         EngineSingleton.getInstance().switchTokens(this);
                         break;
                     }

@@ -46,6 +46,7 @@ define([
                     EngineSingleton.getInstance().notifyAboutStart(that.getRoot().processID());
                 }, 0);
 
+                this.needSave = false;
                 this.callExecuteCallBack(callback)
             }
         });
