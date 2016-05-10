@@ -17,7 +17,8 @@ var flowNodeState = {
         ExecutionComplete : 6,
         UserScriptComplete : 7,
         WaitingSubProcess : 8,
-        Closed : 9
+        Closed : 9,
+        HasNewResponse : 10
     };
 
 define([
@@ -55,7 +56,7 @@ define([
                 {'cname' : 'Incoming', 'ctype' : 'ObjectRef'},
                 {'cname' : 'Outgoing', 'ctype' : 'ObjectRef'},
                 {'cname' : 'Connectors', 'ctype' : 'SequenceFlow'},
-                {'cname' : 'Parameters', 'ctype' : 'Parameter'}
+                {'cname' : 'Parameters', 'ctype' : 'WfeParameter'}
             ],
 
             init: function(cm, params){
@@ -97,7 +98,6 @@ define([
             //</editor-fold>
 
             getInstance : function(token, params){
-                // todo : возможно обойтись без process
                 if (!params) {
                     params = {
                         parent  : token,
@@ -108,18 +108,7 @@ define([
                 var _node = this.createInstance(token.getControlManager(), params);
                 _node.assign(this, token);
                 _node.assignConnections(this);
-                //_node.addLinkToParameters(this);
                 _node.addCollectionInstances(this);
-
-                return _node;
-            },
-
-            copyNodeDefinition : function(process, params){
-                var _node= this.createInstance(process.getControlManager(), params);
-                _node.assign(this, process);
-                _node.guid(this.guid());
-                _node.copyCollectionDefinitions(this, process);
-                //_node.copyParameters(this)
 
                 return _node;
             },
@@ -145,14 +134,10 @@ define([
                 for (var i = 0; i < source.incoming().count(); i++) {
                     var _inConnector = source.incoming().get(i).object().clone(this, {parent  : this, colName : 'Connectors'});
                     _inConnector.newIncomingLink(this);
-                    //Utils.createRefTo(_inConnector, {parent  : this, colName : 'Incoming'});
-                    //this.incoming()._add()
                 }
                 for (var i = 0; i < source.outgoing().count(); i++) {
                     var _outConnector = source.outgoing().get(i).object().clone(this, {parent  : this, colName : 'Connectors'});
                     _outConnector.newOutgoingLink(this);
-                    //ObjectRef.createRefTo(_outConnector, {parent  : this, colName : 'Outgoing'});
-                    //this.outgoing()._add()
                 }
             },
 
@@ -172,7 +157,7 @@ define([
             findConnector : function(connector) {
                 for (var i = 0; i < this.connectors().count(); i++) {
                     var _connector = this.connectors().get(i);
-                    if ((_connector.guid() == connector.guid()) && (_connector.name() == connector.name())){
+                    if ((_connector.id() == connector.id()) && (_connector.name() == connector.name())){
                         return _connector;
                     }
                 }
@@ -234,12 +219,17 @@ define([
             },
 
             execute : function(callback) {
-                for (var i = 0; i < this.outgoing().count(); i++){
-                    this.outgoing().get(i).object().state(SequenceFlow.state.Unchecked);
-                }
+                if (this.processInstance().isSaving()) {
+                    this.saving();
+                    this.callExecuteCallBack(callback);
+                } else {
+                    for (var i = 0; i < this.outgoing().count(); i++){
+                        this.outgoing().get(i).object().state(SequenceFlow.state.Unchecked);
+                    }
 
-                this.processInstance().enqueueCurrentToken();
-                this.processInstance().wait();
+                    this.processInstance().enqueueCurrentToken();
+                    this.processInstance().wait();
+                }
             },
 
             callExecuteCallBack : function(callback) {
@@ -248,13 +238,17 @@ define([
                         callback()
                     } else {
                         var that = this;
-                            EngineSingleton.getInstance().justSaveProcess(this.processInstance().processID()).
-                        then(function() {
-                                that.needSave = false;
-                                callback()
-                            }).
+                        var _state = this.processInstance().state();
+                        this.processInstance().saving();
+                        EngineSingleton.getInstance().justSaveProcess(this.processInstance().processID()).
+                        then(function () {
+                            that.needSave = false;
+                            that.processInstance().state(_state);
+                            callback()
+                        }).
                         catch(function (err) {
-                                that.needSave = false;
+                            that.needSave = false;
+                            that.processInstance().state(_state);
                             throw err
                         })
 
@@ -318,6 +312,11 @@ define([
             waitUserScriptAnswer : function(){
                 this.state(flowNodeState.WaitingUserScriptAnswer);
                 this.processInstance().wait();
+            },
+
+            saving : function(){
+                this.needSave = false;
+                // this.state(flowNodeState.Saving)
             },
 
             isWaitingRequest : function() {

@@ -110,7 +110,8 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                 this._setDB();
                 var that = this;
                 return new Promise(function(resolve, reject){
-                    that.db.getRoots([that.queryGuid], {rtype: "data", expr: that._getExpression(process)}, function (guids) {
+                    var _expr = that._getExpression(process);
+                    that.db.getRoots([that.queryGuid], {rtype: "data", expr: _expr}, function (guids) {
                         var _objectGuid = guids.guids[0];
                         that.queryGuid = _objectGuid;
 
@@ -134,12 +135,14 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                         reject(new Error('Can not serialize process'))
                     }
 
-                    process.clearFinishedTokens()
+                    process.clearFinishedTokens();
                     that.save(process).
-                        then(resolve).
-                        catch(function(err){
-                            throw err
-                        });
+                    then(function () {
+                        resolve()
+                    }).
+                    catch(function (err) {
+                        throw err
+                    });
                 });
             }
 

@@ -13,7 +13,8 @@ var processStates = {
     Aborted : 3,
     Waiting : 4,
     WaitingScriptAnswer : 5,
-    None : 6
+    None : 6,
+    Saving : 7
 };
 
 define([
@@ -24,7 +25,8 @@ define([
         './engineSingleton',
         './controls',
         './userScript',
-        './../public/logger'
+        './../public/logger',
+        './processVar'
     ],
     function(
         UObject,
@@ -34,7 +36,8 @@ define([
         EngineSingleton,
         Controls,
         UserScript,
-        Logger
+        Logger,
+        ProcessVar
     ){
         var Process = UObject.extend({
 
@@ -68,9 +71,12 @@ define([
                 {'cname' : 'MessageInstances', 'ctype' : 'MessageInstance'},
                 {'cname' : 'MessageFlows', 'ctype' : 'MessageFlow'},
                 {'cname' : 'MessageRequests', 'ctype' : 'MessageInstance'},
-                {'cname' : 'Definitions', 'ctype' : 'ProcessDefinition'}
+                {'cname' : 'Definitions', 'ctype' : 'ProcessDefinition'},
+                {'cname' : 'Vars', 'ctype' : 'ProcessVar'}
             ],
             //</editor-fold>
+            
+            
 
             init: function(cm, params, definition){
                 UccelloClass.super.apply(this, [cm, params]);
@@ -82,6 +88,16 @@ define([
                     if (params.hasOwnProperty('definitionResourceID')) {
                         this.definitionResourceID(params.definitionResourceID)
                     }
+                    
+                    if (params.hasOwnProperty('params')) {
+                        this.definition().setInputParams(params.params);
+                    }
+
+                    if (this.checkInputParams()) {
+                        this.definition().applyInputTaskParams();
+                        this.createProcessVar();
+                        
+                    }
 
                     this.processID(UUtils.guid());
                     this.sequenceValue(0);
@@ -90,6 +106,16 @@ define([
                 }
             },
 
+            checkInputParams : function(params) {
+                return this.definition().checkInputParams(params)
+            },
+
+            createProcessVar: function () {
+                var _taskParameter = this.definition().taskParams();
+                var _processVar = new ProcessVar(this.getControlManager(), {parent: this, colName: 'Vars'});
+                _processVar.copy(_taskParameter);
+            },
+            
             copyMessages: function (definition) {
                 for (var i = 0; i < definition.messageFlows().count(); i++) {
                     definition.messageFlows().get(i).addNewCopyTo(this);
@@ -119,6 +145,10 @@ define([
             },
 
             //<editor-fold desc="MetaFields & MetaCols">
+            processVar : function(){
+                return this.getCol('Vars').get(0);
+            },
+            
             definition : function(){
                 return this.getCol('Definitions').get(0);
             },
@@ -293,7 +323,9 @@ define([
             },
 
             canContinue : function() {
-                return (this.state() != processStates.WaitingScriptAnswer) && (this.state() != processStates.Finished)
+                return (this.state() != processStates.WaitingScriptAnswer) 
+                    && (this.state() != processStates.Finished)
+                    && (this.state() != processStates.Saving)
             },
 
             activate : function() {
@@ -304,12 +336,22 @@ define([
                 }
             },
 
+            saving : function(){
+                this.state(processStates.Saving);
+            },
+
+            isSaving : function(){
+                return this.state() == processStates.Saving;
+            },
+
             isWaitingScriptAnswer : function() {
                 return this.state() == processStates.WaitingScriptAnswer;
             },
 
             isWaiting : function() {
-                return (this.state() == processStates.WaitingScriptAnswer) || (this.state() == processStates.Waiting);
+                return (this.state() == processStates.WaitingScriptAnswer)
+                    || (this.state() == processStates.Waiting)
+                    || (this.state() == processStates.Saving);
             },
 
             isRunning : function() {
@@ -340,23 +382,17 @@ define([
                 return null;
             },
 
-            wait : function(done) {
-                this.state(processStates.Waiting);
-                var that = this;
-                //EngineSingleton.getInstance().justSaveProcess(this.processID()).
-                //then(function () {
-                if (UCCELLO_CONFIG.wfe.idleTimeout != Infinity) {
-                    that.idleTimer = setInterval(function () {
-                        clearInterval(that.idleTimer);
-                        EngineSingleton.getInstance().saveAndUploadProcess(that.processID());
-                    }, UCCELLO_CONFIG.wfe.idleTimeout)
+            wait : function() {
+                if (this.state() != processStates.Saving) {
+                    this.state(processStates.Waiting);
+                    var that = this;
+                    if (UCCELLO_CONFIG.wfe.idleTimeout != Infinity) {
+                        that.idleTimer = setInterval(function () {
+                            clearInterval(that.idleTimer);
+                            EngineSingleton.getInstance().saveAndUploadProcess(that.processID());
+                        }, UCCELLO_CONFIG.wfe.idleTimeout)
+                    }
                 }
-
-                //done();
-                //}).
-                //catch(function (err) {
-                //    throw err
-                //});
             },
 
             waitScriptAnswer : function(){

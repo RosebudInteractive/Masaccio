@@ -25,7 +25,7 @@ define([
                 {fname : "MethodName"   , ftype : "string"}
             ],
             metaCols: [
-                {'cname' : 'ScriptParams', 'ctype' : 'Parameter'}
+                {'cname' : 'ScriptParams', 'ctype' : 'WfeParameter'}
             ],
 
             //init: function(root, params){

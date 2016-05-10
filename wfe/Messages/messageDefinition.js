@@ -28,7 +28,7 @@ define([
                 {fname : 'DefinitionID', ftype : 'string'}
             ],
             metaCols: [
-                {'cname' : 'Parameters', 'ctype' : 'Parameter'}
+                {'cname' : 'Parameters', 'ctype' : 'WfeParameter'}
 
             ],
             //</editor-fold>

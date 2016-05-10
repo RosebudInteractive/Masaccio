@@ -76,11 +76,10 @@ define([
 
         var Engine = UccelloClass.extend({
             init: function (initParams) {
-                //this.db = Initializer.createInternalDb(initParams.dbController);
                 this.controlManager = Initializer.createControlManager(initParams);
                 this.constructHolder = initParams.constructHolder;
                 this.resman = initParams.resman;
-                Initializer.registerTypes(this.controlManager);
+                // Initializer.registerTypes(this.controlManager);
 
                 this.db = this.controlManager;
                 this.adapter = new DbAdapter();
@@ -138,31 +137,46 @@ define([
             /*  ----- Definitions ----- */
 
 
-            startProcessInstanceAndWait : function(definitionID, requestName, timeout, callback) {
+            startProcessInstanceAndWait : function(definitionID, options, callback) {
+                if (!options) {
+                    Answer.error('Не указаны параметры запуска процесса [%s]', [definitionID]).handle(callback)
+                }
                 console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
-                var that = this;
 
-                this.createNewProcess1(definitionID).then(
+                var _processOptions = {};
+                if (options.hasOwnProperty('taskParams')){
+                    _processOptions.params = options.taskParams
+                }
+
+                var that = this;
+                this.createNewProcess1(definitionID, _processOptions).then(
                     function(process) {
                         console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), process.processID());
-                        that.waitForRequest(process.processID(), 1, requestName, timeout, callback);
+                        var _requestName = options.requestName;
+                        var _timeout = options.timeout;
+                        that.waitForRequest({processID : process.processID(), tokenID : 1, requestName : _requestName}, _timeout, callback);
                         setTimeout(function () {
                             that.runProcess(process);
                             console.log('[%s] : => процесс processID [%s] запущен', (new Date()).toLocaleTimeString(), process.processID());
                         }, 0);
                     },
                     function(reason) {
-                        callback({result : 'ERROR', message : 'Не удалось создать процесс'});
+                        Answer.error('Не удалось создать процесс [%s]', [reason.message]).handle(callback);
                     }
                 );
 
                 return Controls.MegaAnswer;
             },
 
-            startProcessInstance : function(definitionID, callback) {
+            startProcessInstance : function(definitionID, options, callback) {
                 console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
+                var _processOptions = {};
+                if (options.hasOwnProperty('taskParams')){
+                    _processOptions.params = options.taskParams
+                }
+
                 var that = this;
-                this.createNewProcess1(definitionID).then(
+                this.createNewProcess1(definitionID, _processOptions).then(
                     function(process) {
                         that.runProcess(process);
                         var _answer = Answer.success('Процесс processID [%s] запущен',  process.processID());
@@ -171,12 +185,12 @@ define([
                         _answer.handle(callback);
                     },
                     function(reason){
-                        Answer.error('Не удалось создать процесс [%s]', [definitionID]).handle(callback);
+                        Answer.error('Не удалось создать процесс [%s]', [reason.message]).handle(callback);
                     }
                 );
             },
 
-            createNewProcess1 : function(definitionName) {
+            createNewProcess1 : function(definitionName, options) {
                 var that = this;
                 return new Promise(promiseBody);
 
@@ -191,7 +205,13 @@ define([
                                 reject(new Error(result.message))
                             } else {
                                 var _defResource = result.datas[0].resource;
-                                var _process = new Process(that.controlManager, {definitionResourceID : result.datas[0].guid}, _defResource);
+                                var _options = {
+                                    definitionResourceID : result.datas[0].resVerId
+                                };
+                                if (options) {
+                                    _options.params = options.params
+                                }
+                                var _process = new Process(that.controlManager, _options, _defResource);
                                 resolve(_process);
                             }
                         })
@@ -268,16 +288,32 @@ define([
                     return instance.processID() == processID
                 });
             },
+            
+            _createRequestOptions : function (requestInfo) {
+                var _result ={};
+                
+                if (requestInfo.hasOwnProperty('requestID')){
+                    // Todo : искать реквест в памяти и базе!
+                } else {
+                    _result.processID = requestInfo.processID;
+                    if (requestInfo.hasOwnProperty('tokenID')) {
+                        _result.tokenID = requestInfo.tokenID
+                    } else {
+                        _result.tokenID = null;    
+                    }
+                    _result.requestName = requestInfo.requestName;
+                }  
+                
+                return _result;
+            },
 
-            waitForRequest : function(processID, tokenID, requestName, timeout, callback){
-                var _isNeedNotify = this.requestStorage.isActiveRequestExistsByName(requestName, processID);
+            waitForRequest : function(requestInfo, timeout, callback){
+                var _options = this._createRequestOptions(requestInfo);
+                
+                var _isNeedNotify = this.requestStorage.isActiveRequestExistsByName(_options.requestName, _options.processID);
 
                 this.notifier.registerObserverOnRequest(
-                    {
-                        processID: processID,
-                        tokenID: tokenID,
-                        requestName: requestName
-                    },
+                    _options,
                     timeout,
                     callback);
 
@@ -396,7 +432,7 @@ define([
             submitResponse : function(answer, callback) {
                 var _request = this.requestStorage.getRequest(answer.requestID);
                 if (_request && _request.isActive()) {
-                    var _processID = answer.processID;
+                    var _processID = _request.processID();
 
                     var that = this;
                     this.findOrUploadProcess(_processID).then(
@@ -405,17 +441,17 @@ define([
                                 _process.activate();
                             }
 
-                            var _token = _process.getToken(answer.tokenID);
+                            var _token = _process.getToken(_request.tokenID());
 
                             var _receivingNode = _token.currentNode();
 
-                            _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(answer.requestID);
+                            _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(_request.requestID());
                             if (!_request) {
                                 throw 'Error!'
                             }
 
                             var response = _request.createResponse(_request.getParent());
-                            response.fillParams(answer.response);
+                            response.fillParams(answer);
 
                             that.responseStorage.addResponseCallback(response, 0, callback);
                             that.requestStorage.addForSave(_request);
@@ -423,15 +459,22 @@ define([
 
                             if (_process.isRunning()) {
                                 /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
-                                _receivingNode.execute(function () {
-                                    _token.execute();
-                                });
+                                if (_receivingNode['handleResponse']){
+                                    _receivingNode.handleResponse(function () {
+                                        _token.execute();
+                                    });    
+                                }
+                                
                             } else {
                                 if (!_process.isTokenInQueue(_token)) {
                                     _process.enqueueToken(_token)
                                 }
 
-                                _receivingNode.execute();
+                                if (_receivingNode['handleResponse']){
+                                    _receivingNode.handleResponse(function () {
+                                        _token.execute();
+                                    });
+                                }
                             }
                         },
                         function(error){
@@ -447,23 +490,23 @@ define([
                 return Controls.MegaAnswer;
             },
 
-            processResponse : function(message, timeout, callback) {
-                var _request = this.requestStorage.getActiveRequest(message.requestID);
+            processResponse : function(answer, timeout, callback) {
+                var _request = this.requestStorage.getActiveRequest(answer.requestID);
 
                 if (!_request) {
-                    Answer.error('Реквест [%s] не найден среди активных', [message.requestID]).handle(callback);
+                    Answer.error('Реквест [%s] не найден среди активных', [answer.requestID]).handle(callback);
                 } else {
                     _request.responseReceived();
                 }
 
                 var that = this;
 
-                this.findOrUploadProcess(message.processID).then(
+                this.findOrUploadProcess(_request.processID()).then(
                     function(_process){
-                        var _token = _process.getToken(message.tokenID);
+                        var _token = _process.getToken(_request.tokenID());
                         var _receivingNode = _token.currentNode();
 
-                        _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(message.requestID);
+                        _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(_request.ID());
                         if (!_request) {
                             throw 'System Error!'
                         }
@@ -471,13 +514,21 @@ define([
                         _request.responseReceived();
 
                         var response = _request.createResponse(_request.getParent());
-                        response.fillParams(message.response);
+                        response.fillParams(answer);
 
-                        if ((_receivingNode instanceof UserTask) && (_receivingNode.hasScript())) {
+
+                        // _receivingNode.requests().count() == 0 - будет служебный request
+                        if ((_receivingNode instanceof UserTask) && ((_receivingNode.hasScript() || _receivingNode._hasUserSelectedNextNode()))) {
                             that.responseStorage.addResponseCallback(response, timeout, callback)
                         }
                         that.requestStorage.addForSave(_request);
                         that.responseStorage.addForSave(response);
+
+                        if (_receivingNode['handleResponse']){
+                            _receivingNode.handleResponse(function () {
+                                _token.execute();
+                            });
+                        }
 
                         if (_process.canContinue()) {
                             if (_process.isRunning()) {
@@ -497,7 +548,7 @@ define([
                         }
                     },
                     function(error) {
-                        Answer.error('Процесс [%s] не найден message [%s]', [message.processID, error.message]).handle(callback);
+                        Answer.error('Процесс [%s] не найден\n error : [%s]', [_request.processID(), error.message]).handle(callback);
                     }
                 );
 
@@ -505,6 +556,7 @@ define([
             },
 
             submitResponseAndWait : function(response, requestName, timeout, callback) {
+                // Todo : Исправить в waitForRequest передавать объект
                 this.waitForRequest(response.processID, response.tokenID, requestName, timeout, callback);
                 this.submitResponse(response, callback);
 
@@ -535,6 +587,12 @@ define([
             },
 
             getProcessDefParameters : function(definitionIdentifier, done){
+                if (typeof definitionIdentifier == 'object') {
+                    if (!definitionIdentifier.hasOwnProperty('resType')) {
+                        definitionIdentifier.resType = UCCELLO_CONFIG.classGuids.ProcessDefinition
+                    }
+                }
+                
                 this.processes.getDefinitionParameters(definitionIdentifier).
                 then(function(params){
                     Answer.success('Параметры найдены').add({params : params}).handle(done);

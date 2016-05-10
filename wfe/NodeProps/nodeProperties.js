@@ -21,7 +21,7 @@ define(
                 {fname : "ProcessID", ftype : "string"}
             ],
             metaCols: [
-                {'cname' : 'Parameters', 'ctype' : 'Parameter'},
+                {'cname' : 'Parameters', 'ctype' : 'WfeParameter'},
                 {'cname' : 'Requests', 'ctype' : 'Request'},
                 {'cname' : 'Responses', 'ctype' : 'Request'}
             ],

@@ -61,8 +61,8 @@ define([
                 {fname: 'DefinitionID', ftype: 'string'}
             ],
             metaCols: [
-                {'cname': 'Parameters', 'ctype': 'Parameter'},
-                {'cname': 'InputParameters', 'ctype': 'Parameter'},
+                {'cname': 'Parameters', 'ctype': 'WfeParameter'},
+                {'cname': 'InputParameters', 'ctype': 'WfeParameter'},
                 {'cname': 'Connectors', 'ctype': 'SequenceFlow'},
                 {'cname': 'Nodes', 'ctype': 'FlowNode'},
 
@@ -83,8 +83,10 @@ define([
                 UccelloClass.super.apply(this, [cm, params]);
                 if (!params) { return }
 
-                if (!this.taskParams()) {
-                    new TaskParameter(this.getControlManager(), {parent: this, colName: 'TaskParams'});
+                if (!params.isDeserialize){
+                    if (!this.taskParams()) {
+                        new TaskParameter(this.getControlManager(), {parent: this, colName: 'TaskParams'});
+                    }
                 }
             },
 
@@ -119,6 +121,10 @@ define([
 
             taskParams: function () {
                 return this.getCol('TaskParams').get(0);
+            },
+            
+            inputTaskParams: function() {
+                return this.getCol('TaskParams').get(1);
             },
 
             //messageDefinitions : function() {
@@ -333,6 +339,7 @@ define([
                     that._saveRequests(dbObject, params)
                         .then(function () {
                             that._deleteSavedRequests(params.processInstance);
+                            that._saveProcessVar(dbObject, params.processInstance);
                         })
                         .then(resolve)
                         .catch(function(error) {
@@ -389,8 +396,8 @@ define([
                                 _root.newObject({
                                     $sys: {guid: request.ID()},
                                     fields: {
-                                        ProcessId: dbObject.guid(),
-                                        TokenGuid: request.tokenID(),
+                                        ProcessId: dbObject.id(),
+                                        TokenId: request.tokenID(),
                                         Name: request.name(),
                                         State: request.state(),
                                         RequestBody: _requestBody,
@@ -408,7 +415,7 @@ define([
                                 _requestObj.state(request.state());
                                 _requestObj.state(request.state());
                                 _requestObj.requestBody(_requestBody);
-                                _requestObj.responceBody(_responseBody);
+                                _requestObj.responseBody(_responseBody);
 
                                 _count++;
                                 checkDone();
@@ -443,8 +450,28 @@ define([
                 EngineSingleton.getInstance().responseStorage.deleteProcessResponsesForSave(_processID);
             },
 
-            fillTaskParams : function(){
-                throw new Error('Only Task definition can fill task parameters');
+            _saveProcessVar : function(dbObject, processInstance){
+                var _processVar = EngineSingleton.getInstance().db.serialize(processInstance.processVar(), true);
+                _processVar = JSON.stringify(_processVar);
+                dbObject.vars(_processVar);
+            },
+
+            applyInputTaskParams : function(){
+                // Only Task definition can use task parameters
+                // implementation in TaskDef
+            },
+
+            checkInputParams: function(params){
+                return true
+            },
+
+            setInputParams: function(params){
+                var _inputParam = this.inputTaskParams();
+                if (_inputParam) {
+                    this.getCol('TaskParams')._del(_inputParam)
+                }
+                var _db = this.pvt.db ? this.pvt.db : this.getRoot().pvt.db;
+                _db.deserialize(params, {obj: this, colName: 'TaskParams'}, EngineSingleton.getInstance().createComponentFunction);
             }
         });
 

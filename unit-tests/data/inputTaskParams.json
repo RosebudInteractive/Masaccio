@@ -1,0 +1,56 @@
+{
+  "$sys": {
+    "guid": "812069b6-53ba-f301-c776-3b8ea1e4f85a",
+    "typeGuid": "b3746562-946f-46f6-b74f-a50eaff7a771"
+  },
+  "ver": 3,
+  "fields": {
+    "Name": "Simple Task Definition",
+    "TaskNumber": "1205",
+    "Specification": "Спецификация",
+    "ObjId": "1"
+  },
+  "collections": {
+    "TaskStages": {
+      "0": {
+        "$sys": {
+          "guid": "ef5eadbb-0a34-ca24-b646-adb0f3c5cc6e",
+          "typeGuid": "c2f02b7a-1204-4dca-9ece-3400b4550c8d"
+        },
+        "ver": 3,
+        "fields": {
+          "TaskDefStageId": 1,
+          "StageCode": "task1",
+          "StageState": 0
+        },
+        "collections": {}
+      },
+      "1": {
+        "$sys": {
+          "guid": "2e541856-05b3-6b9c-e699-095853418e80",
+          "typeGuid": "c2f02b7a-1204-4dca-9ece-3400b4550c8d"
+        },
+        "ver": 3,
+        "fields": {
+          "TaskDefStageId": 2,
+          "StageCode": "task2",
+          "StageState": 0
+        },
+        "collections": {}
+      },
+      "2": {
+        "$sys": {
+          "guid": "51e78276-693c-c3ac-38db-85eff65681cc",
+          "typeGuid": "c2f02b7a-1204-4dca-9ece-3400b4550c8d"
+        },
+        "ver": 3,
+        "fields": {
+          "TaskDefStageId": 3,
+          "StageCode": "task3",
+          "StageState": 0
+        },
+        "collections": {}
+      }
+    }
+  }
+}

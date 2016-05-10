@@ -53,40 +53,55 @@ define(
 
             calcOutgoingNodes : function(callback) {
                 if (this.outgoing().count() == 0) {
-                    //this.processInstance.wait();
-                    setTimeout(callback(null), 0)
+                    setTimeout(callback(), 0)
                 }
 
-                for (var i = 0; i < this.outgoing().count(); i++) {
-                    var _sequence = this.outgoing().get(i).object();
-                    if (_sequence.hasCondition()) {
-                        var _scriptObject = this.createSequenceScriptObject(_sequence, callback);
+                if (this._hasUserSelectedNextNode()) {
+                    setTimeout(callback(), 0)
+                } else {
+                    for (var i = 0; i < this.outgoing().count(); i++) {
+                        var _sequence = this.outgoing().get(i).object();
+                        if (_sequence.hasCondition()) {
+                            var _scriptObject = this.createSequenceScriptObject(_sequence, callback);
 
-                        this.waitUserScriptAnswer();
-                        _sequence.checkConditionSatisfied(_scriptObject);
-                    }
-                    else {
-                        this.conditionsResult.addResult(_sequence, true);
-                        _sequence.check();
-                        if (this.isAllOutgoingChecked()) {
-                            //this.processInstance.wait();
-                            setTimeout(callback(null), 0)
+                            this.waitUserScriptAnswer();
+                            _sequence.checkConditionSatisfied(_scriptObject);
+                        }
+                        else {
+                            this.conditionsResult.addResult(_sequence, true);
+                            _sequence.check();
+                            if (this.isAllOutgoingChecked()) {
+                                //this.processInstance.wait();
+                                setTimeout(callback(), 0)
+                            }
                         }
                     }
                 }
             },
 
-            getOutgoingNodes : function() {
-                if (!this.isAllOutgoingChecked()) {
-                    throw 'Не все исходящие ветви проверены'
-                }
+            _hasUserSelectedNextNode: function(){
+                return false;
+            },
 
-                return this.conditionsResult.getConfirmedNodes();
+            _getUserSelectedNexNode : function () {
+                return null  
+            },
+
+            getOutgoingNodes : function() {
+                if (this._hasUserSelectedNextNode()) {
+                    return this._getUserSelectedNexNode()
+                } else {
+                    if (!this.isAllOutgoingChecked()) {
+                        throw 'Не все исходящие ветви проверены'
+                    }
+
+                    return this.conditionsResult.getConfirmedNodes();
+                }
             }
         });
 
         return Activity;
     }
-)
+);
 
 module.exports.state = ActivityState;

@@ -59,7 +59,7 @@ define([
                 {fname : 'IsDelivered', ftype : 'boolean'}
             ],
             metaCols: [
-                {'cname' : 'Parameters', 'ctype' : 'Parameter'},
+                {'cname' : 'Parameters', 'ctype' : 'WfeParameter'},
                 {'cname' : 'CorrelationKeyInstances', 'ctype' : 'CorrelationKeyInstance'},
             ],
             //</editor-fold>

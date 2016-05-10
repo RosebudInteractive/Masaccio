@@ -47,7 +47,7 @@ define([
                 }
             ],
             metaCols: [
-                {'cname' : 'Parameters', 'ctype' : 'Parameter'},
+                {'cname' : 'Parameters', 'ctype' : 'WfeParameter'},
                 {'cname' : 'NodesProps', 'ctype' : 'NodeProperties'},
                 {'cname' : 'NodeInstances', 'ctype' : 'FlowNode'},
                 {'cname' : 'SentMessages', 'ctype' : 'MessageInstance'},
@@ -125,11 +125,18 @@ define([
                         break;
                     }
 
+                    case (FlowNode.state.HasNewResponse) : {
+                        this.executeNode();
+                        EngineSingleton.getInstance().switchTokens(this);
+                        break;
+                    }
+
                     case (FlowNode.state.WaitingRequest) || (FlowNode.state.WaitingTokens) : {
                         /* Todo : возможно нужен callback*/
                         EngineSingleton.getInstance().deactivateProcess(this.processInstance());
                         /* Todo : Сохранение и выгрузка из памяти процесса */
-                        return 'Процесс ожидает ответ';
+                        // return 'Процесс ожидает ответ';
+                        break;
                     }
 
                     case (FlowNode.state.ExecutionComplete) : {
@@ -150,6 +157,11 @@ define([
 
                     case (FlowNode.state.WaitingUserScriptAnswer) : {
                         EngineSingleton.getInstance().deactivateProcess(this.processInstance());
+                        EngineSingleton.getInstance().switchTokens(this);
+                        break;
+                    }
+
+                    case (FlowNode.state.Saving) : {
                         EngineSingleton.getInstance().switchTokens(this);
                         break;
                     }
@@ -262,7 +274,8 @@ define([
                         requestID: _request.ID(),
                         requestName: _request.name(),
                         nodeName: this.currentNode().name(),
-                        request : _request.getParamsForMessage()
+                        params : _request.getParamsForMessage(),
+                        taskParams : _request.getSerializedTaskParams()
                     };
 
                     EngineSingleton.getInstance().exposeRequest(

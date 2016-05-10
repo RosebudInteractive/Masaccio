@@ -5,7 +5,7 @@ var MegaAnswer = 'XXX';
 
 var controls = [
     {className: 'Engine',                   component: './engine',                                  guid: '387e8d92-e2ca-4a94-9732-b4a479ff8bb8'},
-    {className: 'ProcessDefinition',        component: './processDefinition',                       guid: UCCELLO_CONFIG.classGuids.ProcessDefinition},//'acd97fff-93f9-47ed-84bb-e24ffdf28fc5'},
+    {className: 'ProcessDefinition',        component: './processDefinition',                       guid: '08b97860-179a-4292-a48d-bfb9535115d3'},
     {className: 'Process',                  component: './process',                                 guid: '74441683-a11f-4b59-9e04-0aefcc5bc18a'},
     {className: 'FlowNode',                 component: './flowNode',                                guid: '199a78b0-b555-4f97-9d8f-41234ae7f06f'},
     {className: 'SequenceFlow',             component: './sequenceFlow',                            guid: 'c7a6cd70-653f-4e12-b6dc-8a6085b7fc7f'},
@@ -31,7 +31,7 @@ var controls = [
 
     {className: 'Token',                    component: './token',                                   guid: 'd09117fc-b298-42f6-84fc-c8807e83ca12'},
     {className: 'Request',                  component: './request',                                 guid: '783cc459-0b03-4cbd-9960-6401a031537c'},
-    {className: 'Parameter',                component: './parameter',                               guid: '9232bbd5-e2f8-466a-877f-5bc6576b5d02'},
+    {className: 'WfeParameter',             component: './parameter',                               guid: '9232bbd5-e2f8-466a-877f-5bc6576b5d02'},
 
     {className: 'MessageFlow',              component: './Messages/messageFlow',                    guid: 'c10a9573-1274-4008-9353-d6c466fb0e35'},
     {className: 'MessageDefinition',        component: './Messages/messageDefinition',              guid: 'f24ec009-3e62-479b-935e-c9779655d548'},
@@ -47,8 +47,14 @@ var controls = [
     {className: 'TaskDef',                  component: './Task/taskDef',                            guid: 'ccbe0ea3-994d-4733-a8d6-64bb8c5ae2df'},
     {className: 'TaskDefStage',             component: './Task/taskDefStage',                       guid: '783d3c15-1c4d-4890-8a73-629b16d7c770'},
     {className: 'TaskStage',                component: './Task/taskStage',                          guid: 'c2f02b7a-1204-4dca-9ece-3400b4550c8d'},
-    {className: 'TaskParameter',            component: './Task/taskParameter',                      guid: 'b3746562-946f-46f6-b74f-a50eaff7a771'}
+    {className: 'TaskParameter',            component: './Task/taskParameter',                      guid: 'b3746562-946f-46f6-b74f-a50eaff7a771'},
+    {className: 'TaskRequestParameter',     component: './Task/taskRequestParameter',               guid: '31809e1f-a2c2-4dbb-b653-51e8bdf950a2'},
+    {className: 'ProcessVar',               component: './processVar',                              guid: 'b8fd05dc-08de-479e-8557-dba372e2b4b6'}
 
+];
+
+var masaccioContols = [
+    
 ];
 
 var guidOf = function(className) {
@@ -60,12 +66,27 @@ var guidOf = function(className) {
 };
 
 var register = function(constructHolder){
-    for (var i = 0; i < controls.length; i++) {
-        var Class = require(controls[i].component);
+    controls.forEach(function(control){
+        var _registeredGuid = UCCELLO_CONFIG.classGuids[control.className];
+        if (_registeredGuid && (_registeredGuid != control.guid)) {
+            throw new Error('Class [' + control.className + '] already registered with other guid')
+        } else {
+            UCCELLO_CONFIG.classGuids[control.className] = control.guid
+        }
+
+        var Class = require(control.component);
         if (Class) {
             constructHolder.addComponent(Class, {});
         }
-    }
+    });
+
+
+    masaccioContols.forEach(function(control){
+        var Class = require(control.component);
+        if (Class) {
+            constructHolder.addComponent(Class, {});
+        }
+    })
 };
 
 if (module) {

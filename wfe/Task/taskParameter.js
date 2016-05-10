@@ -8,11 +8,16 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './../controls'],
-    function(UObject, Controls){
-        return class Parameter extends UObject{
-            get className() {return "TaskParameter"}
-            get classGuid() { return Controls.guidOf('TaskParameter')}
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
+    function(UObject){
+        return class TaskParameter extends UObject {
+            get className() {
+                return "TaskParameter"
+            }
+
+            get classGuid() {
+                return UCCELLO_CONFIG.classGuids.TaskParameter
+            }
 
             get metaFields() {
                 return [
@@ -25,24 +30,24 @@ define(
 
             get metaCols() {
                 return [
-                    {'cname' : 'TaskStages', 'ctype' : 'TaskStage'}
+                    {'cname': 'TaskStages', 'ctype': 'TaskStage'}
                 ]
             }
 
             name(value) {
-                return this._genericSetter("Name",value);
+                return this._genericSetter("Name", value);
             }
 
             taskNumber(value) {
-                return this._genericSetter("taskNumber",value);
+                return this._genericSetter("TaskNumber", value);
             }
 
             specification(value) {
-                return this._genericSetter("Specification",value);
+                return this._genericSetter("Specification", value);
             }
 
             objId(value) {
-                return this._genericSetter("ObjId",value);
+                return this._genericSetter("ObjId", value);
             }
 
             taskStages() {
@@ -51,6 +56,12 @@ define(
 
             getControlManager() {
                 return this.pvt.controlMgr;
+            }
+
+            copy(source) {
+                this.taskNumber(source.taskNumber());
+                this.specification(source.specification());
+                this.objId(source.objId());
             }
         }
     }
