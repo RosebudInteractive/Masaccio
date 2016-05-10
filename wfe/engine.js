@@ -562,6 +562,12 @@ define([
             },
 
             getProcessDefParameters : function(definitionIdentifier, done){
+                if (typeof definitionIdentifier == 'object') {
+                    if (!definitionIdentifier.hasOwnProperty('resType')) {
+                        definitionIdentifier.resType = UCCELLO_CONFIG.classGuids.ProcessDefinition
+                    }
+                }
+                
                 this.processes.getDefinitionParameters(definitionIdentifier).
                 then(function(params){
                     Answer.success('Параметры найдены').add({params : params}).handle(done);

@@ -37,20 +37,31 @@ define([
                 return this._genericSetter("IsSystem", value);
             }
 
-            //getModelForProcess() {
-            //    return {
-            //        name: 'Task',
-            //        childs: [{
-            //            dataObject: {
-            //                name: 'Request', isStub : true
-            //            }
-            //        }]
-            //    }
-            //}
+            getModelForProcess() {
+                return {
+                    name: 'Task',
+                    childs: [
+                        {dataObject: {name: 'Request'}}
+                        // {dataObject: {name: 'Task'}}
+                    ]
+                }
+            }
 
-            //onSaveProcess(dbObject, params) {
-            //
-            //}
+            onSaveProcess(dbObject, params) {
+                return super.onSaveProcess(dbObject, params).then(function () {
+                    return new Promise(function(resolve){
+                        dbObject.number(params.processInstance.processVar().taskNumber());
+                        dbObject.specification(params.processInstance.processVar().specification());
+                        dbObject.objId(params.processInstance.processVar().objId());
+                        // Todo : Что делать со старыми состояниями процесса? Если они должны жить параллельно, то где хранить?
+                        // обязательно требует TaskStageLogId, пока поставил nullable
+                        dbObject.taskState('InProgress');
+                        resolve()
+                    })
+                }).catch(function (err) {
+                    return Promise.reject(err)
+                })
+            }
 
             getModelDescription() {
                 return {
