@@ -16,9 +16,14 @@ define([
         Controls,
         TaskStage
     ){
-        return class TaskDefStage extends UserTask{
-            get className() {return "TaskDefStage"}
-            get classGuid() { return Controls.guidOf('TaskDefStage')}
+        return class TaskDefStage extends UserTask {
+            get className() {
+                return "TaskDefStage"
+            }
+
+            get classGuid() {
+                return UCCELLO_CONFIG.classGuids.TaskDefStage
+            }
 
             get metaFields() {
                 return [
@@ -40,7 +45,7 @@ define([
                 return this._genericSetter("StageCode", value);
             }
 
-            createInstance(cm, params){
+            createInstance(cm, params) {
                 return TaskStage.createFromDefinition(this, params);
             }
         }

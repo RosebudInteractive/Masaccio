@@ -10,7 +10,7 @@ var EngineSingleton = require(PATH.engine + 'engineSingleton');
 var ProcessInfo = require('./processInfo');
 
 beforeEach(function() {
-    Definition.Messages.register();
+    // Definition.Messages.register();
 });
 
 beforeEach(function() {

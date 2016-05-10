@@ -68,7 +68,7 @@ describe('Task', function(){
                         requestID: result.requestInfo.requestID,
                         taskParams: serialize(_params)
                     };
-                    console.log(">>> Next node [%s]", [result.result, _params.selectedNode()]);
+                    console.log(">>> Next node [%s]", [_params.selectedNode()]);
 
                     EngineSingleton.getInstance().processResponse(responseObj, 0, function () {
                         EngineSingleton.getInstance().waitForRequest({processID : _process, requestName : 'TaskRequest'}, 0, function(result){
@@ -83,7 +83,7 @@ describe('Task', function(){
                                     requestID: result.requestInfo.requestID,
                                     taskParams: serialize(_params)
                                 };
-                                console.log(">>> Next node [%s]", [result.result, _params.selectedNode()]);
+                                console.log(">>> Next node [%s]", [_params.selectedNode()]);
 
                                 EngineSingleton.getInstance().processResponse(responseObj, 0, function () {
                                     EngineSingleton.getInstance().waitForRequest({processID : _process, requestName : 'TaskRequest'}, 0, function(result){
@@ -97,7 +97,7 @@ describe('Task', function(){
                                                 requestID: result.requestInfo.requestID,
                                                 taskParams: serialize(_params)
                                             };
-                                            console.log(">>> Next node [%s]", [result.result, _params.selectedNode()]);
+                                            console.log(">>> Next node [%s]", [_params.selectedNode()]);
 
                                             EngineSingleton.getInstance().processResponse(responseObj, 0, function () {
                                                 done()

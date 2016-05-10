@@ -1,50 +1,51 @@
 /**
  * Created by staloverov on 20.04.2015.
  */
+'use strict';
+
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define(
-    [UCCELLO_CONFIG.uccelloPath+'system/uobject', './controls'],
-    function(UObject, Controls){
-        var Parameter = UObject.extend({
+    [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
+    function(UObject) {
+        return class Parameter extends UObject {
 
-            className: "WfeParameter",
-            classGuid: UCCELLO_CONFIG.classGuids.WfeParameter,
-            metaFields: [
-                {fname : "Name"   , ftype : "string"},
-                {fname : "Value"  , ftype : "string"}
-            ],
+            get className() {
+                return "WfeParameter"
+            }
 
-            init: function(cm, params){
-                UccelloClass.super.apply(this, [cm, params]);
-                //if (!params) { return }
-            },
+            get classGuid() {
+                return UCCELLO_CONFIG.classGuids.WfeParameter
+            }
 
-            name: function(value) {
-                return this._genericSetter("Name",value);
-            },
+            get metaFields() {
+                return [
+                    {fname: "Name", ftype: "string"},
+                    {fname: "Value", ftype: "string"}
+                ]
+            }
 
-            value: function(value) {
-                return this._genericSetter("Value",value);
-            },
+            name(value) {
+                return this._genericSetter("Name", value);
+            }
 
-            clone : function(cm, params) {
+            value(value) {
+                return this._genericSetter("Value", value);
+            }
+
+            clone(cm, params) {
                 var _newParam = new Parameter(cm, params);
                 _newParam.name(this.name());
                 _newParam.value(this.value());
                 return _newParam;
-            },
-
-            addNewCopyTo : function(parent) {
-                return this.clone(parent.getControlManager(), {parent : parent, colName : 'Parameters'})
             }
 
-        });
-
-        return Parameter;
+            addNewCopyTo(parent) {
+                return this.clone(parent.getControlManager(), {parent: parent, colName: 'Parameters'})
+            }
+        }
     }
 );
 

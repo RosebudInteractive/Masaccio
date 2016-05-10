@@ -76,7 +76,11 @@ define(
                         if (_item.timer) {
                             clearInterval(_item.timer);
                         }
-                        _item.callback({result: 'OK', responseResult: result});
+
+                        setTimeout(function(){
+                            _item.callback({result: 'OK', responseResult: result});
+                        }, 0);
+
                         _item.state = State.EXECUTED;
                     }
                 } else {

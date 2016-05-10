@@ -24,7 +24,7 @@ define([
             }
 
             get classGuid() {
-                return Controls.guidOf('TaskDef')
+                return UCCELLO_CONFIG.classGuids.TaskDef
             }
 
             get metaFields() {
