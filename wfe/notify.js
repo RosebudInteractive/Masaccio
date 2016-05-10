@@ -22,7 +22,7 @@ define([],
                 var _item = {requestParams: requestParams, callback: callback, timeout: timeOut};
                 this.observers.push(_item);
 
-                if (timeOut) {
+                if ((timeOut) && (timeOut > 0) && (timeOut != Infinity)){
                     var that = this;
 
                     _item.timer = setInterval(function () {

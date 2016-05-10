@@ -83,7 +83,7 @@ define([
                         subject.processInstance().activate();
 
                         if ((_scriptObject.response) && (result)) {
-                            EngineSingleton.getInstance().responseStorage.executeResponseCallback(_scriptObject.response, result);
+                            EngineSingleton.getInstance().responseStorage.executeResponseCallback(_scriptObject.response.ID(), result);
                         }
 
                         callback();

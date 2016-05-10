@@ -5,11 +5,18 @@ var should  = require('chai').should();
 var expect = require('chai').expect;
 
 var Initiator = require("./initiator");
-// var Definition = require(PATH.definitions +'engine');
 var EngineSingleton = require(PATH.engine + 'engineSingleton');
 var TaskDefinition = require(PATH.definitions +'taskDef');
 var fs = require('fs');
 
+
+function deserialize(obj){
+    return EngineSingleton.getInstance().db.deserialize(obj, {}, EngineSingleton.getInstance().createComponentFunction);
+}
+
+function serialize(uObj){
+    return EngineSingleton.getInstance().db.serialize(uObj, true)
+}
 
 before(function(done) {
     Initiator.importData().
@@ -38,13 +45,83 @@ describe('Task', function(){
     describe('#startProcessInstanceAndWait', function(){
         var _inputTaskParams = fs.readFileSync(PATH.testDataPath + 'inputTaskParams.json');
         _inputTaskParams = JSON.parse(_inputTaskParams);
-        
-        it('Запуск процесса', function(done){
+
+        it('#startProcessInstanceAndWait', function(done){
+            var _options = {
+                taskParams : _inputTaskParams,
+                requestName : 'TaskRequest',
+                timeout : 0
+
+            };
+
+            EngineSingleton.getInstance().startProcessInstanceAndWait(TaskDefinition.names.forSimpleTaskDef, _options, function(result) {
+                var _process;
+
+                if (result.result === "OK") {
+                    _process = result.requestInfo.processID;
+                    var _serializedParams = result.requestInfo.taskParams;
+                    var _params = deserialize(_serializedParams);
+
+                    _params.selectedNode('task2');
+
+                    var responseObj = {
+                        requestID: result.requestInfo.requestID,
+                        taskParams: serialize(_params)
+                    };
+                    console.log(">>> Next node [%s]", [result.result, _params.selectedNode()]);
+
+                    EngineSingleton.getInstance().processResponse(responseObj, 0, function () {
+                        EngineSingleton.getInstance().waitForRequest({processID : _process, requestName : 'TaskRequest'}, 0, function(result){
+                            if (result.result === "OK") {
+                                _process = result.requestInfo.processID;
+                                var _serializedParams = result.requestInfo.taskParams;
+                                var _params = deserialize(_serializedParams);
+
+                                _params.selectedNode('task3');
+
+                                var responseObj = {
+                                    requestID: result.requestInfo.requestID,
+                                    taskParams: serialize(_params)
+                                };
+                                console.log(">>> Next node [%s]", [result.result, _params.selectedNode()]);
+
+                                EngineSingleton.getInstance().processResponse(responseObj, 0, function () {
+                                    EngineSingleton.getInstance().waitForRequest({processID : _process, requestName : 'TaskRequest'}, 0, function(result){
+                                        if (result.result === "OK") {
+                                            var _serializedParams = result.requestInfo.taskParams;
+                                            var _params = deserialize(_serializedParams);
+
+                                            _params.selectedNode(_params.availableNodes().get(1).value());
+
+                                            var responseObj = {
+                                                requestID: result.requestInfo.requestID,
+                                                taskParams: serialize(_params)
+                                            };
+                                            console.log(">>> Next node [%s]", [result.result, _params.selectedNode()]);
+
+                                            EngineSingleton.getInstance().processResponse(responseObj, 0, function () {
+                                                done()
+                                            })
+                                        } else {
+                                            done(new Error(result.message))
+                                        }
+                                    })
+                                })
+                            } else {
+                                done(new Error(result.message))
+                            }
+                        });
+                    });
+                }
+            });
+        });
+
+        xit('Запуск процесса', function(done){
             var _options = {
                 taskParams : _inputTaskParams,
                 // requestName : 'TaskRequest',
                 // timeout : 0
-                
+
             };
 
             EngineSingleton.getInstance().startProcessInstance(TaskDefinition.names.forSimpleTaskDef, _options, function(result) {
@@ -76,6 +153,6 @@ describe('Task', function(){
 
                 }, 1000)
             });
-        })
+        });
     })
 });

@@ -69,9 +69,8 @@ define(
                 });
             }
 
-            executeResponseCallback(response, result) {
-                var _responseID = response.ID();
-                var _item = this.getResponse(_responseID);
+            executeResponseCallback(responseID, result) {
+                var _item = this.getResponse(responseID);
                 if (_item) {
                     if (_item.state == State.NEW) {
                         if (_item.timer) {

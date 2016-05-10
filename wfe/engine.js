@@ -154,7 +154,7 @@ define([
                         console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), process.processID());
                         var _requestName = options.requestName;
                         var _timeout = options.timeout;
-                        that.waitForRequest(process.processID(), 1, _requestName, _timeout, callback);
+                        that.waitForRequest({processID : process.processID(), tokenID : 1, requestName : _requestName}, _timeout, callback);
                         setTimeout(function () {
                             that.runProcess(process);
                             console.log('[%s] : => процесс processID [%s] запущен', (new Date()).toLocaleTimeString(), process.processID());
@@ -288,16 +288,32 @@ define([
                     return instance.processID() == processID
                 });
             },
+            
+            _createRequestOptions : function (requestInfo) {
+                var _result ={};
+                
+                if (requestInfo.hasOwnProperty('requestID')){
+                    // Todo : искать реквест в памяти и базе!
+                } else {
+                    _result.processID = requestInfo.processID;
+                    if (requestInfo.hasOwnProperty('tokenID')) {
+                        _result.tokenID = requestInfo.tokenID
+                    } else {
+                        _result.tokenID = null;    
+                    }
+                    _result.requestName = requestInfo.requestName;
+                }  
+                
+                return _result;
+            },
 
-            waitForRequest : function(processID, tokenID, requestName, timeout, callback){
-                var _isNeedNotify = this.requestStorage.isActiveRequestExistsByName(requestName, processID);
+            waitForRequest : function(requestInfo, timeout, callback){
+                var _options = this._createRequestOptions(requestInfo);
+                
+                var _isNeedNotify = this.requestStorage.isActiveRequestExistsByName(_options.requestName, _options.processID);
 
                 this.notifier.registerObserverOnRequest(
-                    {
-                        processID: processID,
-                        tokenID: tokenID,
-                        requestName: requestName
-                    },
+                    _options,
                     timeout,
                     callback);
 
@@ -416,7 +432,7 @@ define([
             submitResponse : function(answer, callback) {
                 var _request = this.requestStorage.getRequest(answer.requestID);
                 if (_request && _request.isActive()) {
-                    var _processID = answer.processID;
+                    var _processID = _request.processID();
 
                     var that = this;
                     this.findOrUploadProcess(_processID).then(
@@ -425,17 +441,17 @@ define([
                                 _process.activate();
                             }
 
-                            var _token = _process.getToken(answer.tokenID);
+                            var _token = _process.getToken(_request.tokenID());
 
                             var _receivingNode = _token.currentNode();
 
-                            _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(answer.requestID);
+                            _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(_request.requestID());
                             if (!_request) {
                                 throw 'Error!'
                             }
 
-                            var response = _request.createResponse(_request.etParent());
-                            response.fillParams(answer.response);
+                            var response = _request.createResponse(_request.getParent());
+                            response.fillParams(answer);
 
                             that.responseStorage.addResponseCallback(response, 0, callback);
                             that.requestStorage.addForSave(_request);
@@ -474,23 +490,23 @@ define([
                 return Controls.MegaAnswer;
             },
 
-            processResponse : function(message, timeout, callback) {
-                var _request = this.requestStorage.getActiveRequest(message.requestID);
+            processResponse : function(answer, timeout, callback) {
+                var _request = this.requestStorage.getActiveRequest(answer.requestID);
 
                 if (!_request) {
-                    Answer.error('Реквест [%s] не найден среди активных', [message.requestID]).handle(callback);
+                    Answer.error('Реквест [%s] не найден среди активных', [answer.requestID]).handle(callback);
                 } else {
                     _request.responseReceived();
                 }
 
                 var that = this;
 
-                this.findOrUploadProcess(message.processID).then(
+                this.findOrUploadProcess(_request.processID()).then(
                     function(_process){
-                        var _token = _process.getToken(message.tokenID);
+                        var _token = _process.getToken(_request.tokenID());
                         var _receivingNode = _token.currentNode();
 
-                        _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(message.requestID);
+                        _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(_request.ID());
                         if (!_request) {
                             throw 'System Error!'
                         }
@@ -498,13 +514,21 @@ define([
                         _request.responseReceived();
 
                         var response = _request.createResponse(_request.getParent());
-                        response.fillParams(message.response);
+                        response.fillParams(answer);
 
-                        if ((_receivingNode instanceof UserTask) && (_receivingNode.hasScript())) {
+
+                        // _receivingNode.requests().count() == 0 - будет служебный request
+                        if ((_receivingNode instanceof UserTask) && ((_receivingNode.hasScript() || _receivingNode._hasUserSelectedNextNode()))) {
                             that.responseStorage.addResponseCallback(response, timeout, callback)
                         }
                         that.requestStorage.addForSave(_request);
                         that.responseStorage.addForSave(response);
+
+                        if (_receivingNode['handleResponse']){
+                            _receivingNode.handleResponse(function () {
+                                _token.execute();
+                            });
+                        }
 
                         if (_process.canContinue()) {
                             if (_process.isRunning()) {
@@ -524,7 +548,7 @@ define([
                         }
                     },
                     function(error) {
-                        Answer.error('Процесс [%s] не найден message [%s]', [message.processID, error.message]).handle(callback);
+                        Answer.error('Процесс [%s] не найден\n error : [%s]', [_request.processID(), error.message]).handle(callback);
                     }
                 );
 
@@ -532,6 +556,7 @@ define([
             },
 
             submitResponseAndWait : function(response, requestName, timeout, callback) {
+                // Todo : Исправить в waitForRequest передавать объект
                 this.waitForRequest(response.processID, response.tokenID, requestName, timeout, callback);
                 this.submitResponse(response, callback);
 

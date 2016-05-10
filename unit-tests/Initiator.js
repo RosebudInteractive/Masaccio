@@ -51,8 +51,8 @@ class Initiator {
 
         var TestClient = require('./../test/testClient');
         this.testClient = new TestClient();
-        EngineSingleton.getInstance().notifier.registerObserver(this.testClient, this.testClient.handleNewRequest);
-        this.testClient.setTimeout(UCCELLO_CONFIG.testClientTimeout);
+        // EngineSingleton.getInstance().notifier.registerObserver(this.testClient, this.testClient.handleNewRequest);
+        // this.testClient.setTimeout(UCCELLO_CONFIG.testClientTimeout);
     }
 
     static importData(){

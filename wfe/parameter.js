@@ -12,7 +12,7 @@ define(
         var Parameter = UObject.extend({
 
             className: "WfeParameter",
-            classGuid: Controls.guidOf('WfeParameter'),
+            classGuid: UCCELLO_CONFIG.classGuids.WfeParameter,
             metaFields: [
                 {fname : "Name"   , ftype : "string"},
                 {fname : "Value"  , ftype : "string"}

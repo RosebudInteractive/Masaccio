@@ -20,10 +20,11 @@ function getStageState(state){
 }
 
 define([
-        './../Activities/userTask'
+        './../Activities/userTask',
+        './../engineSingleton'
     ],
     function(
-        UserTask
+        UserTask, EngineSingleton
     ){
         return class TaskStage extends UserTask {
             get className() {
@@ -129,6 +130,13 @@ define([
                     }
                 } 
                 return _result
+            }
+
+            _doOnDone() {
+                if (!this.hasScript()) {
+                    var _serviceResponse = this._getServiceResponse();
+                    EngineSingleton.getInstance().responseStorage.executeResponseCallback(_serviceResponse.ID());
+                }
             }
         }
     });

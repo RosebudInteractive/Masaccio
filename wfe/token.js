@@ -274,7 +274,8 @@ define([
                         requestID: _request.ID(),
                         requestName: _request.name(),
                         nodeName: this.currentNode().name(),
-                        request : _request.getParamsForMessage()
+                        params : _request.getParamsForMessage(),
+                        taskParams : _request.getSerializedTaskParams()
                     };
 
                     EngineSingleton.getInstance().exposeRequest(

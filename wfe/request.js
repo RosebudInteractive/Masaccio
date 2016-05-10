@@ -1,9 +1,11 @@
 /**
  * Created by staloverov on 14.04.2015.
  */
+'use strict';
+
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
+    // var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 var requestState = {
@@ -20,31 +22,42 @@ define([
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
         './parameter',
         './controls',
-        './Task/taskRequestParameter'
+        './Task/taskRequestParameter',
+        './engineSingleton'
     ],
-    function(UObject, Utils, UUtils, Parameter, Controls, TaskParameter){
-        var Request = UObject.extend({
+    function(UObject, Utils, UUtils, Parameter, Controls, TaskRequestParameter, EngineSingleton){
+        return class Request extends UObject {
 
-            //<editor-fold desc="Class description">
-            className: "Request",
-            classGuid: Controls.guidOf('Request'),
-            metaFields: [
-                {fname: "Name", ftype: "string"},
-                {fname: "State", ftype: "integer"},
-                {fname: "TokenID", ftype: "string"},
-                {fname: "ProcessID", ftype: "string"},
-                {fname: "ID", ftype: "string"},
-                {fname: 'ResponseID', ftype: 'string'},
-                {fname: 'IsService', ftype: 'boolean'}
-            ],
-            metaCols: [
-                {'cname': 'Parameters', 'ctype': 'WfeParameter'},
-                {'cname': 'TaskParameters', 'ctype': 'TaskRequestParameter'}
-            ],
-            //</editor-fold>
+            get className() {
+                return "Request"
+            }
 
-            init: function (cm, params) {
-                UccelloClass.super.apply(this, [cm, params]);
+            get classGuid() {
+                return UCCELLO_CONFIG.classGuids.Request
+            }
+
+            get metaFields() {
+                return [
+                    {fname: "Name", ftype: "string"},
+                    {fname: "State", ftype: "integer"},
+                    {fname: "TokenID", ftype: "string"},
+                    {fname: "ProcessID", ftype: "string"},
+                    {fname: "ID", ftype: "string"},
+                    {fname: 'ResponseID', ftype: 'string'},
+                    {fname: 'IsService', ftype: 'boolean'}
+                ]
+            }
+
+            get metaCols() {
+                return [
+                    {'cname': 'Parameters', 'ctype': 'WfeParameter'},
+                    {'cname': 'TaskParameters', 'ctype': 'TaskRequestParameter'}
+                ]
+            }
+
+            constructor(cm, params) {
+                super(cm, params);
+
                 if (!params) {
                     return
                 }
@@ -56,61 +69,61 @@ define([
                     this.ID(UUtils.guid());
                 }
                 if (!this.taskParams()) {
-                    new TaskParameter(cm, {parent: this, colName: 'TaskParameters'});
+                    new TaskRequestParameter(cm, {parent: this, colName: 'TaskParameters'});
                 }
-            },
+            }
 
             //<editor-fold desc="MetaFields & MetaCols">
-            name: function (value) {
+            name(value) {
                 return this._genericSetter("Name", value);
-            },
+            }
 
-            state: function (value) {
+            state(value) {
                 return this._genericSetter("State", value);
-            },
+            }
 
-            tokenID: function (value) {
+            tokenID(value) {
                 return this._genericSetter("TokenID", value);
-            },
+            }
 
-            processID: function (value) {
+            processID(value) {
                 return this._genericSetter("ProcessID", value);
-            },
+            }
 
-            ID: function (value) {
+            ID(value) {
                 return this._genericSetter("ID", value);
-            },
+            }
 
-            responseID: function (value) {
+            responseID(value) {
                 return this._genericSetter("ResponseID", value);
-            },
+            }
 
-            isService: function(value) {
+            isService(value) {
                 return this._genericSetter("IsService", value);
-            },
+            }
 
-            parameters: function () {
+            parameters() {
                 return this.getCol('Parameters');
-            },
+            }
 
-            taskParams: function () {
+            taskParams() {
                 return this.getCol('TaskParameters').get(0);
-            },
+            }
             //</editor-fold>
 
-            addParameter: function (parameterName) {
+            addParameter(parameterName) {
                 var _param = new Parameter(this.getControlManager(), {parent: this, colName: 'Parameters'});
                 _param.name(parameterName);
                 _param.value(null);
 
                 return _param;
-            },
+            }
 
-            getControlManager: function () {
+            getControlManager() {
                 return this.getParent().getControlManager();
-            },
+            }
 
-            clone: function (cm, params) {
+            clone(cm, params) {
                 var _newRequest = new Request(cm, params);
 
                 _newRequest.name(this.name());
@@ -121,9 +134,9 @@ define([
                 Utils.copyCollection(this.parameters(), _newRequest.parameters());
 
                 return _newRequest;
-            },
+            }
 
-            createResponse: function (root) {
+            createResponse(root) {
                 var _response = new Request(root.getControlManager(), {parent: root, colName: 'Responses'});
 
                 _response.name(this.name());
@@ -136,34 +149,65 @@ define([
                 this.responseID(_response.ID());
 
                 return _response;
-            },
+            }
 
-            getParamsForMessage: function () {
+            getParamsForMessage() {
                 var _params = {};
                 for (var i = 0; i < this.parameters().count(); i++) {
                     _params[this.parameters().get(i).name()] = this.parameters().get(i).value();
                 }
 
                 return _params;
-            },
+            }
 
-            fillParams: function (paramsObject) {
+            getSerializedTaskParams() {
+                var _db = this.pvt.db ? this.pvt.db : this.getRoot().pvt.db;
+                return _db.serialize(this.taskParams(), true)
+            }
+
+            fillParams(paramsObject) {
                 for (var _prop in paramsObject) {
                     if (!paramsObject.hasOwnProperty(_prop)) continue;
 
-                    var _param = this.findParameter(_prop);
-                    if (_param) {
-                        _param.value(paramsObject[_prop])
+                    if (_prop == 'taskParams') {
+                        this._setTaskParams(paramsObject[_prop])
+                    } else {
+                        this._setWfeParamValue(_prop, paramsObject[_prop])
                     }
                 }
 
 
-                if (paramsObject.hasOwnProperty('selectedNode')){
+                if (paramsObject.hasOwnProperty('selectedNode')) {
                     this.taskParams().selectedNode(paramsObject['selectedNode'])
                 }
-            },
+            }
 
-            findParameter: function (parameterName) {
+            _setWfeParamValue(key, value) {
+                var _param = this.findParameter(key);
+                if (_param) {
+                    _param.value(value)
+                }
+            }
+
+            _setTaskParams(serializedTaskParams) {
+                this._clearTaskParamsGarbage();
+                
+                var _db = this.pvt.db ? this.pvt.db : this.getRoot().pvt.db;
+                _db.deserialize(serializedTaskParams, {obj: this, colName: 'TaskParameters'}, EngineSingleton.getInstance().createComponentFunction);
+                
+                var _answer = this.getCol('TaskParameters').get(1);
+
+                this.taskParams().selectedNode(_answer. selectedNode()) 
+            }
+
+            _clearTaskParamsGarbage() {
+                for (var i = this.getCol('TaskParameters').count() - 1; i > 0; i--) {
+                    var _obj = this.getCol('TaskParameters').get(i);
+                    this.getCol('TaskParameters')._del(_obj);
+                }
+            }
+
+            findParameter(parameterName) {
                 for (var i = 0; i < this.parameters().count(); i++) {
                     if (this.parameters().get(i).name() == parameterName) {
                         return this.parameters().get(i)
@@ -171,26 +215,24 @@ define([
 
                 }
                 return null;
-            },
+            }
 
-            cancel: function () {
+            cancel() {
                 this.state(requestState.Canceled);
-            },
+            }
 
-            responseReceived: function () {
+            responseReceived() {
                 this.state(requestState.ResponseReceived);
-            },
+            }
 
-            hasReceivedResponse: function () {
+            hasReceivedResponse() {
                 return (this.state() == requestState.ResponseReceived) && !(!this.responseID())
-            },
+            }
 
-            isActive: function () {
+            isActive() {
                 return !((this.state() == requestState.Canceled) || (this.state() == requestState.ResponseReceived))
             }
-        });
-
-        return Request;
+        };
     }
 );
 

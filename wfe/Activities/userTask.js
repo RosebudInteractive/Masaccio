@@ -111,6 +111,7 @@ define(
                             this.processInstance().enqueueCurrentToken();
                             console.log('[%s] : => Узел [%s] ждет выполнения скрипта', (new Date()).toLocaleTimeString(), this.name());
                         } else {
+                            this._doOnDone();
                             console.log('[%s] : => Узел отработал %s', (new Date()).toLocaleTimeString(), this.name());
                         }
                     } else {
@@ -130,6 +131,10 @@ define(
                 }
 
                 this.callExecuteCallBack(callback);
+            },
+
+            _doOnDone : function () {
+                // Empty
             },
 
             cancel : function() {
