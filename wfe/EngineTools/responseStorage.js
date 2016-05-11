@@ -78,7 +78,7 @@ define(
                         }
 
                         setTimeout(function(){
-                            _item.callback({result: 'OK', responseResult: result});
+                            _item.callback({result: 'OK', processID : _item.processID, responseResult: result});
                         }, 0);
 
                         _item.state = State.EXECUTED;

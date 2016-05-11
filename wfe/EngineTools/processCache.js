@@ -81,7 +81,7 @@ define(
                     if (_process) {
                         resolve(that.db.serialize(_process.processVar(), true))
                     } else {
-                        execSql('select Vars from Process where Guid = \'' + processID + '\'').
+                        execSql('select Vars from Process where Id = ' + processID).
                         then(function(object){
                             if ((!object.detail) || (object.detail.length == 0) || (!object.detail[0].Vars)) {
                                 reject(new Error('Can not find task vars'))

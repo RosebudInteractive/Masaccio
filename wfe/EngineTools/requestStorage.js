@@ -63,7 +63,7 @@ define(
                     if (_request) {
                         resolve(_request)
                     } else {
-                        execSql('select RequestBody from Request where Guid = \'' + requestID + '\'').
+                        execSql('select RequestBody from Request where Id = ' + requestID).
                         then(function(object){
                             if ((!object.detail) || (!object.detail[0].RequestBody)) {
                                 reject(new Error('Can not find request'))

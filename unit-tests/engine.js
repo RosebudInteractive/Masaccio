@@ -66,7 +66,7 @@ describe('Engine', function(){
                 };
 
                 it('Найти переменные - Ok', function(done) {
-                    EngineSingleton.getInstance().getProcessVars(guids.existing, function(result){
+                    EngineSingleton.getInstance().getProcessVars(14, function(result){
                         if (result.result !== 'OK'){
                             done(new Error(result.message));
                         } else {
@@ -114,7 +114,7 @@ describe('Engine', function(){
             });
 
             it('Получить request по ID - OK', function (done) {
-                EngineSingleton.getInstance().waitForRequest({requestID : '86f91827-2fe4-f29d-3aa2-c05b993b2e45'}, 0, function (result) {
+                EngineSingleton.getInstance().waitForRequest({requestId : 15}, 0, function (result) {
                     result.result.should.equal('OK');
                     expect(result.requestInfo).to.be.exist;
                     expect(result.message).to.be.not.exist;

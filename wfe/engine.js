@@ -296,7 +296,7 @@ define([
                 return new Promise(function(resolve, reject){
                     var _result ={};
 
-                    if (requestInfo.hasOwnProperty('requestID')) {
+                    if (requestInfo.hasOwnProperty('requestId')) {
                         that.requestStorage.findOrUpload(requestInfo.requestID).
                         then(function(request){
                             _result.processID = request.processID();
