@@ -8,10 +8,12 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [],
-    function() {
-        class RequestStorage {
-            constructor() {
+    ['./../engineSingleton'],
+    function(EngineSingleton) {
+        return class RequestStorage {
+            constructor(options) {
+                // checkOptions(options);
+
                 this.storage = [];
                 this.preparedForSave = [];
             }
@@ -45,11 +47,39 @@ define(
             }
 
             getRequest(requestID) {
-                for (var i = 0; i < this.storage.length; i++) {
-                    if (this.storage[i].request.ID() == requestID) {
-                        return this.storage[i].request
-                    }
+                var _item =  this.storage.find(function(item){
+                    return item.request.ID() == requestID
+                });
+
+                if (_item) {
+                    return _item.request
                 }
+            }
+
+            findOrUpload(requestID) {
+                var that = this;
+                return new Promise(function (resolve, reject) {
+                    var _request = that.getRequest(requestID);
+                    if (_request) {
+                        resolve(_request)
+                    } else {
+                        execSql('select RequestBody from Request where Guid = \'' + requestID + '\'').
+                        then(function(object){
+                            if ((!object.detail) || (!object.detail[0].RequestBody)) {
+                                reject(new Error('Can not find request'))
+                            } else {
+                                var _requestBody = object.detail[0].RequestBody;
+                                _requestBody = JSON.parse(_requestBody);
+                                _request = EngineSingleton.getInstance().db.deserialize(_requestBody, {}, EngineSingleton.getInstance().createComponentFunction);
+                                that.addRequest(_request, {});
+                                resolve(_request)
+                            }
+                        }).
+                        catch(function(err){
+                            reject(err)
+                        })
+                    }
+                })
             }
 
             getActiveRequest(requestID) {
@@ -141,9 +171,29 @@ define(
                     }
                 })
             }
+        };
+
+        function checkOptions(options){
+            if (!options) {
+                throw new Error('RequestStorage : Undefined options')
+            }
+
+            if (!options.db) {
+                throw new Error('RequestStorage : Undefined db')
+            }
         }
 
-        return RequestStorage;
+        function execSql(sql) {
+            return new Promise(function(resolve, reject) {
+                $data.execSql({cmd: sql}, {}, function (result) {
+                    if (result.result === "OK") {
+                        resolve(result)
+                    } else {
+                        reject(new Error(result.message))
+                    }
+                });
+            })
+        }
     }
 
 );

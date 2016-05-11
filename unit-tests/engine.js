@@ -22,7 +22,7 @@ beforeEach(function() {
     Initiator.clearTestClient();
 });
 
-xdescribe('Engine', function(){
+describe('Engine', function(){
 
     describe('#common', function() {
         beforeEach(function() {
@@ -34,12 +34,10 @@ xdescribe('Engine', function(){
                 var guids = {
                     existingDef: 'cbf35df0-8317-4f2f-8728-88736251ff0b',
                     nonexistentDef: '3fdd3c7e-196d-440c-982c-c33b7ca0ab4d',
-
-                    Type : '08b97860-179a-4292-a48d-bfb9535115d3'
                 };
 
                 it('Найти параметры по Guid TaskDef - Ok', function(done) {
-                    EngineSingleton.getInstance().getProcessDefParameters({resType : guids.Type, resName : TaskDefinition.names.forSimpleTaskDef}, function(result){
+                    EngineSingleton.getInstance().getProcessDefParameters({resName : TaskDefinition.names.forSimpleTaskDef}, function(result){
                     // EngineSingleton.getInstance().getProcessDefParameters('32d7a96c-6264-cd94-e8a9-672c9cea84ee', function(result){
                         if (result.result !== 'OK'){
                             done(new Error(result.message));
@@ -59,13 +57,47 @@ xdescribe('Engine', function(){
                         }
                     })
                 })
+            });
+
+            describe('#getProcessVars', function(){
+                var guids = {
+                    existing: '7bb49fe5-746e-4741-83f6-0b4e53d27358',
+                    nonexistent: '3fdd3c7e-196d-440c-982c-c33b7ca0ab4d'
+                };
+
+                it('Найти переменные - Ok', function(done) {
+                    EngineSingleton.getInstance().getProcessVars(guids.existing, function(result){
+                        if (result.result !== 'OK'){
+                            done(new Error(result.message));
+                        } else {
+                            result.vars.should.be.exists;
+                            done()
+                        }
+                    })
+                });
+
+                it('Искать по несуществующему Guid - Error', function(done){
+                    EngineSingleton.getInstance().getProcessVars(guids.nonexistent, function(result){
+                        if (result.result !== 'OK'){
+                            done();
+                        } else {
+                            done(new Error('Должна вернуться ошибка'))
+                        }
+                    })
+                })
             })
         });
 
-        xdescribe('#waitForRequest', function () {
-            it('Request должен быть получен', function (done) {
+        describe('#waitForRequest', function () {
+            xit('Request должен быть получен', function (done) {
                 EngineSingleton.getInstance().startProcessInstance(Definition.names.forTestWaitRequest, function(_result) {
-                    EngineSingleton.getInstance().waitForRequest(_result.processID, _result.tokenID, 'request1', 3000, function (result) {
+                    var _requestInfo = {
+                        processID: _result.processID,
+                        tokenID: _result.tokenID,
+                        requestName: 'request1'
+                    };
+
+                    EngineSingleton.getInstance().waitForRequest(_requestInfo, 3000, function (result) {
                         result.result.should.equal('OK');
                         expect(result.requestInfo).to.be.exist;
                         expect(result.message).to.be.not.exist;
@@ -78,6 +110,22 @@ xdescribe('Engine', function(){
 
                         done();
                     });
+                });
+            });
+
+            it('Получить request по ID - OK', function (done) {
+                EngineSingleton.getInstance().waitForRequest({requestID : '86f91827-2fe4-f29d-3aa2-c05b993b2e45'}, 0, function (result) {
+                    result.result.should.equal('OK');
+                    expect(result.requestInfo).to.be.exist;
+                    expect(result.message).to.be.not.exist;
+                    result.requestInfo.processID.should.equal(_result.processID);
+                    result.requestInfo.tokenID.should.equal(_result.tokenID);
+                    result.requestInfo.requestName.should.equal('request1');
+                    result.requestInfo.nodeName.should.equal('userTask');
+
+                    EngineSingleton.getInstance().deleteProcess(_result.processID);
+
+                    done();
                 });
             });
 
@@ -95,7 +143,7 @@ xdescribe('Engine', function(){
             })
         });
 
-        describe('#nodeStateWithTwoTokens', function () {
+        xdescribe('#nodeStateWithTwoTokens', function () {
             it('Должен быть запущен процесс с распараллеливанием токена и прохождением по одному узлу 2 токенов', function (done) {
                 EngineSingleton.getInstance().startProcessInstance(Definition.names.forTestNodeStateWithTwoTokens, function(result) {
                         var _process;

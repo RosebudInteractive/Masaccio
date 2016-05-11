@@ -71,7 +71,8 @@ define([
             submitResponseAndWait : "function",
             waitForRequest : "function",
             processResponse : 'function',
-            getProcessDefParameters : 'function'
+            getProcessDefParameters : 'function',
+            getProcessVars : 'function'
         };
 
         var Engine = UccelloClass.extend({
@@ -85,12 +86,12 @@ define([
                 this.adapter = new DbAdapter();
 
                 this.notifier = new Notify();
-                this.requestStorage = new RequestStorage();
+                this.requestStorage = new RequestStorage({db : this.db});
                 this.responseStorage = new ResponseStorage();
                 this.subprocesses = new SubProcessCallback();
                 this.messageCache = new MessageCache();
 
-                this.processes = new ProcessCache({resman : initParams.resman});
+                this.processes = new ProcessCache({resman : initParams.resman, db : this.db});
 
                 this.uploadedProcesses = [];
                 this.tokensArchive = [];
@@ -290,36 +291,55 @@ define([
             },
             
             _createRequestOptions : function (requestInfo) {
-                var _result ={};
-                
-                if (requestInfo.hasOwnProperty('requestID')){
-                    // Todo : искать реквест в памяти и базе!
-                } else {
-                    _result.processID = requestInfo.processID;
-                    if (requestInfo.hasOwnProperty('tokenID')) {
-                        _result.tokenID = requestInfo.tokenID
+                var that = this;
+
+                return new Promise(function(resolve, reject){
+                    var _result ={};
+
+                    if (requestInfo.hasOwnProperty('requestID')) {
+                        that.requestStorage.findOrUpload(requestInfo.requestID).
+                        then(function(request){
+                            _result.processID = request.processID();
+                            _result.tokenID = request.tokenID();
+                            _result.requestName = request.name();
+
+                            resolve(_result)
+                        }).
+                        catch(function (err) {
+                            reject(err)
+                        })
                     } else {
-                        _result.tokenID = null;    
+                        _result.processID = requestInfo.processID;
+                        if (requestInfo.hasOwnProperty('tokenID')) {
+                            _result.tokenID = requestInfo.tokenID
+                        } else {
+                            _result.tokenID = null;
+                        }
+                        _result.requestName = requestInfo.requestName;
+
+                        resolve(_result)
                     }
-                    _result.requestName = requestInfo.requestName;
-                }  
-                
-                return _result;
+                })
             },
 
             waitForRequest : function(requestInfo, timeout, callback){
-                var _options = this._createRequestOptions(requestInfo);
-                
-                var _isNeedNotify = this.requestStorage.isActiveRequestExistsByName(_options.requestName, _options.processID);
+                var that = this;
+                this._createRequestOptions(requestInfo).
+                then(function(options){
+                    var _isNeedNotify = that.requestStorage.isActiveRequestExistsByName(options.requestName, options.processID);
 
-                this.notifier.registerObserverOnRequest(
-                    _options,
-                    timeout,
-                    callback);
+                    that.notifier.registerObserverOnRequest(
+                        options,
+                        timeout,
+                        callback);
 
-                if (_isNeedNotify) {
-                    this.notifier.notify(this.requestStorage.getRequestParamsByName(requestName, processID))
-                }
+                    if (_isNeedNotify) {
+                        that.notifier.notify(that.requestStorage.getRequestParamsByName(requestName, processID))
+                    }
+                }).catch(function(err){
+                    Answer.error(err.message).handle(callback)
+                });
+
                 return Controls.MegaAnswer;
             },
 
@@ -599,6 +619,18 @@ define([
                 }).
                 catch(function(err){
                     Answer.error('Параметры не найдены message [%s]', [err.message]).handle(done);
+                });
+
+                return Controls.MegaAnswer;
+            },
+
+            getProcessVars : function(processID, done){
+                this.processes.getVars(processID).
+                then(function(vars){
+                    Answer.success('Переменные найдены').add({vars : vars}).handle(done);
+                }).
+                catch(function(err){
+                    Answer.error('Переменные не найдены message [%s]', [err.message]).handle(done);
                 });
 
                 return Controls.MegaAnswer;

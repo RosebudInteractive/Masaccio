@@ -15,6 +15,7 @@ define(
                 checkOptions(options);
 
                 this.resman = options.resman;
+                this.db = options.db;
                 this.definitions = [];
                 this.instances = [];
             }
@@ -55,7 +56,7 @@ define(
                             var _verId = result.datas[0].resVerId;
                             execSql('select Params from ProcessDef where ParentId = ' + _verId).
                             then(function(object){
-                                if ((!object.detail) || (!object.detail[0].Params)) {
+                                if ((!object.detail) || (object.detail.length == 0) || (!object.detail[0].Params)) {
                                     reject(new Error('Can not find task parameters'))
                                 } else {
                                     var _params = object.detail[0].Params;
@@ -67,14 +68,47 @@ define(
                             })
                         }
                     })
+                });
+            }
 
+            getVars(processID){
+                var that = this;
+                return new Promise(function(resolve, reject){
+                    var _process = that.instances.find(function(instance){
+                        return instance.processID() == processID
+                    });
+
+                    if (_process) {
+                        resolve(that.db.serialize(_process.processVar(), true))
+                    } else {
+                        execSql('select Vars from Process where Guid = \'' + processID + '\'').
+                        then(function(object){
+                            if ((!object.detail) || (object.detail.length == 0) || (!object.detail[0].Vars)) {
+                                reject(new Error('Can not find task vars'))
+                            } else {
+                                var _vars = object.detail[0].Vars;
+                                resolve(JSON.parse(_vars));
+                            }
+                        }).
+                        catch(function(err){
+                            reject(err)
+                        })
+                    }
                 });
             }
         };
 
         function checkOptions(options){
-            if ((!options) || (!options.resman)) {
+            if (!options) {
+                throw new Error('ProcessCache : Undefined options')
+            }
+
+            if (!options.resman) {
                 throw new Error('ProcessCache : Undefined resman')
+            }
+
+            if (!options.db) {
+                throw new Error('ProcessCache : Undefined db')
             }
         }
 

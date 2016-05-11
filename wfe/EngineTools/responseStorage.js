@@ -26,7 +26,7 @@ define(
 
             addResponseCallback(response, timeout, callback) {
                 if (!this.isResponseExists(response.ID())) {
-                    var _item = {responseID: response.ID(), callback: callback, state: State.NEW}
+                    var _item = {responseID: response.ID(), processID: response.processID(), callback: callback, state: State.NEW}
                     this.responses.push(_item);
 
                     if (timeout) {
