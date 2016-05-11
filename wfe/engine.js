@@ -297,7 +297,7 @@ define([
                     var _result ={};
 
                     if (requestInfo.hasOwnProperty('requestId')) {
-                        that.requestStorage.findOrUpload(requestInfo.requestID).
+                        that.requestStorage.findOrUpload(requestInfo.requestId).
                         then(function(request){
                             _result.processID = request.processID();
                             _result.tokenID = request.tokenID();
