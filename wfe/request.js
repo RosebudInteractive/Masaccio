@@ -44,7 +44,8 @@ define([
                     {fname: "ProcessID", ftype: "string"},
                     {fname: "ID", ftype: "string"},
                     {fname: 'ResponseID', ftype: 'string'},
-                    {fname: 'IsService', ftype: 'boolean'}
+                    {fname: 'IsService', ftype: 'boolean'},
+                    {fname: "dbId", ftype: "integer"}
                 ]
             }
 
@@ -94,6 +95,10 @@ define([
 
             ID(value) {
                 return this._genericSetter("ID", value);
+            }
+
+            dbId(value) {
+                return this._genericSetter("dbId", value);
             }
 
             responseID(value) {

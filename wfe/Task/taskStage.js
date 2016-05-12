@@ -95,7 +95,8 @@ define([
             _getInternalRequest() {
                 if (this.outgoing().count() > 0) {
                     var _request = this.addServiceRequest();
-                    _request.taskParams().addAvailableNode(this.name());
+                    _request.taskParams().selectedNode(this.name());
+                    // _request.taskParams().addAvailableNode(this.name());
                     for (var i = 0; i < this.outgoing().count(); i++) {
                         _request.taskParams().addAvailableNode(this.outgoing().get(i).object().target().name())
                     }

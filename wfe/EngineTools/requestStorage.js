@@ -71,6 +71,7 @@ define(
                                 var _requestBody = object.detail[0].RequestBody;
                                 _requestBody = JSON.parse(_requestBody);
                                 _request = EngineSingleton.getInstance().db.deserialize(_requestBody, {}, EngineSingleton.getInstance().createComponentFunction);
+                                _request.dbId(requestID);
                                 that.addRequest(_request, {});
                                 resolve(_request)
                             }
@@ -84,7 +85,14 @@ define(
 
             getActiveRequest(requestID) {
                 var _item = this.getItemByPredicate(function (element) {
-                    return (element.request.ID() == requestID) && element.request.isActive()
+                    if (typeof requestID === 'string'){
+                        return (element.request.ID() == requestID) && element.request.isActive()    
+                    } else {
+                        if (typeof requestID === 'number') {
+                            return (element.request.dbId() == requestID) && element.request.isActive()
+                        }
+                    }
+                    
                 });
 
                 if (_item) {
