@@ -62,14 +62,16 @@ define([
                     return
                 }
 
-                if (!this.state()) {
-                    this.state(requestState.Exposed);
-                }
-                if (!this.ID()) {
-                    this.ID(UUtils.guid());
-                }
-                if (!this.taskParams()) {
-                    new TaskRequestParameter(cm, {parent: this, colName: 'TaskParameters'});
+                if (!params.isDeserialize){
+                    if (!this.state()) {
+                        this.state(requestState.Exposed);
+                    }
+                    if (!this.ID()) {
+                        this.ID(UUtils.guid());
+                    }
+                    if (!this.taskParams()) {
+                        new TaskRequestParameter(cm, {parent: this, colName: 'TaskParameters'});
+                    }
                 }
             }
 
@@ -208,7 +210,9 @@ define([
                 
                 var _answer = this.getCol('TaskParameters').get(1);
 
-                this.taskParams().selectedNode(_answer. selectedNode()) 
+                this.taskParams().selectedNode(_answer. selectedNode());
+
+                this._clearTaskParamsGarbage();
             }
 
             _clearTaskParamsGarbage() {

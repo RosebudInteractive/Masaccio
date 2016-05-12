@@ -334,7 +334,7 @@ define([
                         callback);
 
                     if (_isNeedNotify) {
-                        that.notifier.notify(that.requestStorage.getRequestParamsByName(requestName, processID))
+                        that.notifier.notify(that.requestStorage.getRequestParamsByName(options.requestName, options.processID))
                     }
                 }).catch(function(err){
                     Answer.error(err.message).handle(callback)
