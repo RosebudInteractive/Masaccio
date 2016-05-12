@@ -440,13 +440,14 @@ define([
                 })
             },
 
-            exposeRequest : function(request, eventParams){
+            exposeRequest : function(request){
                 var _request = request.clone(this.controlManager, {});
                 _request.ID(request.ID());
-                this.requestStorage.addRequest(_request, eventParams);
+                // this.requestStorage.addRequest(_request, eventParams);
+                this.requestStorage.addRequest(_request);
                 this.requestStorage.addForSave(_request);
                 console.log('[%s] : => Выставлен request [%s]', (new Date()).toLocaleTimeString(), request.name());
-                this.notifier.notify(eventParams);
+                this.notifier.notify(_request.createEventParams());
             },
 
             submitResponse : function(answer, callback) {

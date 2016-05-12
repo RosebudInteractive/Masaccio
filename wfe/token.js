@@ -268,22 +268,17 @@ define([
                     var _request = nodeProps.requests().get(i);
                     _request.state(Request.state.Exposed);
 
-                    var _requestEventParams = {
-                        processID: this.processInstance().processID(),
-                        tokenID: this.tokenID(),
-                        requestID: _request.ID(),
-                        requestName: _request.name(),
-                        nodeName: this.currentNode().name(),
-                        params : _request.getParamsForMessage(),
-                        taskParams : _request.getSerializedTaskParams()
-                    };
+                    // var _requestEventParams = {
+                    //     processID: this.processInstance().processID(),
+                    //     tokenID: this.tokenID(),
+                    //     requestID: _request.ID(),
+                    //     requestName: _request.name(),
+                    //     nodeName: this.currentNode().name(),
+                    //     params : _request.getParamsForMessage(),
+                    //     taskParams : _request.getSerializedTaskParams()
+                    // };
 
-                    EngineSingleton.getInstance().exposeRequest(
-                        _request, _requestEventParams, function (token) {
-                            if (!token.processInstance().isWaitingScriptAnswer()) {
-                                token.execute();
-                            }
-                        });
+                    EngineSingleton.getInstance().exposeRequest(_request);
                 }
             },
 

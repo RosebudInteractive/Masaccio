@@ -40,9 +40,9 @@ define(
                 }
             }
 
-            addRequest(request, eventParams) {
+            addRequest(request) {
                 if (!this.isRequestExists(request.ID())) {
-                    this.storage.push({request: request, params: eventParams})
+                    this.storage.push({request: request})
                 }
             }
 
@@ -128,7 +128,7 @@ define(
                     return (element.request.name() == requestName) && (element.request.processID() == processID) && element.request.isActive()
                 });
                 if (_item) {
-                    return _item.params
+                    return _item.request.createEventParams()
                 }
             }
 

@@ -88,7 +88,7 @@ describe('Engine', function(){
             })
         });
 
-        describe('#waitForRequest', function () {
+        xdescribe('#waitForRequest', function () {
             xit('Request должен быть получен', function (done) {
                 EngineSingleton.getInstance().startProcessInstance(Definition.names.forTestWaitRequest, function(_result) {
                     var _requestInfo = {

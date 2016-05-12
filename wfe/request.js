@@ -150,6 +150,17 @@ define([
 
                 return _response;
             }
+            
+            createEventParams() {
+                return {
+                    processID: this.processID(),
+                    tokenID: this.tokenID(),
+                    requestID: this.ID(),
+                    requestName: this.name(),
+                    params : this.getParamsForMessage(),
+                    taskParams : this.getSerializedTaskParams()
+                };
+            }
 
             getParamsForMessage() {
                 var _params = {};
