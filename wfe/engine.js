@@ -253,18 +253,16 @@ define([
                                return element.processID == processID
                             });
 
-                            if (_index != -1) {
-                                that.adapter.deserialize(processID).then(
-                                    function(process){
-                                        that.processIntsances.push(process);
+                            that.adapter.deserialize(processID).then(
+                                function(process){
+                                    that.processIntsances.push(process);
+                                    if (_index != -1) {
                                         that.uploadedProcesses.splice(_index, 1);
-                                        resolve(process)
-                                    },
-                                    reject
-                                )
-                            } else {
-                                resolve(null)
-                            }
+                                    }
+                                    resolve(process)
+                                },
+                                reject
+                            )
                         }
                     });
                 },

@@ -135,6 +135,7 @@ define([
 
                 _newRequest.name(this.name());
                 _newRequest.processID(this.processID());
+                _newRequest.dbId(this.dbId());
                 _newRequest.tokenID(this.tokenID());
                 _newRequest.isService(this.isService());
                 _newRequest.taskParams().copy(this.taskParams());
