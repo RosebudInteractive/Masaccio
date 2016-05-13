@@ -164,6 +164,7 @@ define([
                     processID: this.processID(),
                     tokenID: this.tokenID(),
                     requestID: this.ID(),
+                    dbRequestId: this.dbId(),
                     requestName: this.name(),
                     params : this.getParamsForMessage(),
                     taskParams : this.getSerializedTaskParams()
