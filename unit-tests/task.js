@@ -62,7 +62,7 @@ describe('Task', function(){
                     var _serializedParams = result.requestInfo.taskParams;
                     var _params = deserialize(_serializedParams);
 
-                    _params.selectedNode('task2');
+                    _params.selectedNode('task1');
 
                     var responseObj = {
                         requestID: result.requestInfo.requestID,
@@ -77,7 +77,7 @@ describe('Task', function(){
                                 var _serializedParams = result.requestInfo.taskParams;
                                 var _params = deserialize(_serializedParams);
 
-                                _params.selectedNode('task3');
+                                _params.selectedNode('task2.1');
 
                                 var responseObj = {
                                     requestID: result.requestInfo.requestID,

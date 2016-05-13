@@ -35,7 +35,8 @@ define([],
             },
 
             notify: function (eventParams) {
-                this.observers.forEach(function (item, i, arr) {
+                var that = this;
+                this.observers.forEach(function (item, i) {
                     if (item.requestParams) {
                         var _isProcessEqual = item.requestParams.processID == eventParams.processID;
                         var _isTokenEqual = (!item.requestParams.tokenID) || ((item.requestParams.tokenID) && (item.requestParams.tokenID == eventParams.tokenID));
@@ -44,14 +45,19 @@ define([],
                             if (item.timer) {
                                 clearInterval(item.timer)
                             }
-                            item.callback({result: 'OK', requestInfo: eventParams});
-                            arr.splice(i, 1);
+                            setTimeout(function(){
+                                item.callback({result: 'OK', requestInfo: eventParams});
+                            }, 0)
+                            that.observers.splice(i, 1);
                         }
                     } else {
-                        item.callback({result: 'OK', requestInfo: eventParams});
+                        setTimeout(function(){
+                            item.callback({result: 'OK', requestInfo: eventParams});
+                        }, 0)
+
                         if (item.timer) {
                             clearInterval(item.timer);
-                            arr.splice(i, 1);
+                            that.observers.splice(i, 1);
                         }
                     }
                 })

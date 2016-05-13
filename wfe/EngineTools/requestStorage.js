@@ -18,42 +18,38 @@ define(
                 this.preparedForSave = [];
             }
 
-            getItemIndexByPredicate(predicate) {
-                var _index = -1;
-                this.storage.some(function (element, index) {
-                    if (predicate && predicate(element)) {
-                        _index = index;
-                        return true;
-                    }
-                });
+            // getItemIndexByPredicate(predicate) {
+            //     var _index = -1;
+            //     this.storage.some(function (element, index) {
+            //         if (predicate && predicate(element)) {
+            //             _index = index;
+            //             return true;
+            //         }
+            //     });
+            //
+            //     return _index
+            // }
 
-                return _index
-            }
-
-            getItemByPredicate(predicate) {
-                var _index = this.getItemIndexByPredicate(predicate);
-
-                if (_index > -1) {
-                    return this.storage[_index]
-                } else {
-                    return null
-                }
-            }
+            // getItemByPredicate(predicate) {
+            //     var _index = this.getItemIndexByPredicate(predicate);
+            //
+            //     if (_index > -1) {
+            //         return this.storage[_index]
+            //     } else {
+            //         return null
+            //     }
+            // }
 
             addRequest(request) {
                 if (!this.isRequestExists(request.ID())) {
-                    this.storage.push({request: request})
+                    this.storage.push(request)
                 }
             }
 
             getRequest(requestID) {
-                var _item =  this.storage.find(function(item){
-                    return item.request.ID() == requestID
+                return  this.storage.find(function(request){
+                    return request.ID() == requestID
                 });
-
-                if (_item) {
-                    return _item.request
-                }
             }
 
             findOrUpload(requestID) {
@@ -84,20 +80,16 @@ define(
             }
 
             getActiveRequest(requestID) {
-                var _item = this.getItemByPredicate(function (element) {
+                return this.storage.find(function (request) {
                     if (typeof requestID === 'string'){
-                        return (element.request.ID() == requestID) && element.request.isActive()    
+                        return (request.ID() == requestID) && request.isActive()
                     } else {
                         if (typeof requestID === 'number') {
-                            return (element.request.dbId() == requestID) && element.request.isActive()
+                            return (request.dbId() == requestID) && request.isActive()
                         }
                     }
                     
                 });
-
-                if (_item) {
-                    return _item.request
-                }
             }
 
             isRequestExists(requestID) {
@@ -105,16 +97,12 @@ define(
             }
 
             isActiveRequestExists(requestID) {
-                var _index = this.getItemIndexByPredicate(function (element) {
-                    return (element.request.ID() == requestID) && element.request.isActive()
-                });
-
-                return _index > -1;
+                return this.getActiveRequest() ? true : false;
             }
 
             isActiveRequestExistsByName(requestName, processID) {
-                var _index = this.getItemIndexByPredicate(function (element) {
-                    return (element.request.name() == requestName) && (element.request.processID() == processID) && element.request.isActive()
+                var _index = this.storage.findIndex(function (request) {
+                    return (request.name() == requestName) && (request.processID() == processID) && request.isActive()
                 });
 
                 return _index > -1;
@@ -122,9 +110,9 @@ define(
 
             getProcessRequests(processID) {
                 var _requests = [];
-                this.storage.forEach(function (item) {
-                    if (item.request.processID() == processID) {
-                        _requests.push(item.request);
+                this.storage.forEach(function (request) {
+                    if (request.processID() == processID) {
+                        _requests.push(request);
                     }
                 });
 
@@ -132,11 +120,11 @@ define(
             }
 
             getRequestParamsByName(requestName, processID) {
-                var _item = this.getItemByPredicate(function (element) {
-                    return (element.request.name() == requestName) && (element.request.processID() == processID) && element.request.isActive()
+                var _request = this.storage.find(function (request) {
+                    return (request.name() == requestName) && (request.processID() == processID) && request.isActive()
                 });
-                if (_item) {
-                    return _item.request.createEventParams()
+                if (_request) {
+                    return _request.createEventParams()
                 }
             }
 

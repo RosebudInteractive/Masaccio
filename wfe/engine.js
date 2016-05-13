@@ -155,7 +155,7 @@ define([
                         console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), process.processID());
                         var _requestName = options.requestName;
                         var _timeout = options.timeout;
-                        that.waitForRequest({processID : process.processID(), tokenID : 1, requestName : _requestName}, _timeout, callback);
+                        that.waitForRequest({processId : process.processID(), tokenID : 1, requestName : _requestName}, _timeout, callback);
                         setTimeout(function () {
                             that.runProcess(process);
                             console.log('[%s] : => процесс processID [%s] запущен', (new Date()).toLocaleTimeString(), process.processID());
@@ -307,7 +307,7 @@ define([
                             reject(err)
                         })
                     } else {
-                        _result.processID = requestInfo.processID;
+                        _result.processID = requestInfo.processId;
                         if (requestInfo.hasOwnProperty('tokenID')) {
                             _result.tokenID = requestInfo.tokenID
                         } else {
@@ -445,7 +445,8 @@ define([
                 this.requestStorage.addRequest(_request);
                 this.requestStorage.addForSave(_request);
                 console.log('[%s] : => Выставлен request [%s]', (new Date()).toLocaleTimeString(), request.name());
-                this.notifier.notify(_request.createEventParams());
+                var _eventParams = _request.createEventParams();
+                this.notifier.notify(_eventParams);
             },
 
             submitResponse : function(answer, callback) {
