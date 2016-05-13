@@ -407,6 +407,8 @@ define([
                                     if (result.result !== 'OK') {
                                         reject(new Error(result.message))
                                     } else {
+                                        var _created = _root.getDB().getObj(result.newObject);
+                                        request.dbId(_created.id());
                                         _count++;
                                         checkDone();
                                     }
