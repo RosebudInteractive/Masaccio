@@ -112,7 +112,7 @@ define([
 
                 _messageRequest.sourceProcessName(this.incomingMessage().sourceProcessName());
                 _messageRequest.sourceProcessId(this.processInstance().processID());
-                _messageRequest.sourceTokenId(this.token().tokenID());
+                _messageRequest.sourceTokenId(this.token().tokenId());
                 _messageRequest.sourceNodeId(this.guid());
                 _messageRequest.sourceNodeName(this.incomingMessage().sourceNodeName());
                 _messageRequest.targetProcessName(this.incomingMessage().targetProcessName());

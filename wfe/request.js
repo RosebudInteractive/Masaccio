@@ -5,15 +5,15 @@
 
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    // var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 var requestState = {
-    Exposed : 0,
-    Acquire : 1,
-    Canceled : 2,
-    ResponseReceived : 3,
-    Done : 4
+    New : 0,
+    Exposed : 1,
+    Acquire : 2,
+    Canceled : 3,
+    ResponseReceived : 4,
+    Done : 5
 };
 
 define([
@@ -65,7 +65,7 @@ define([
 
                 if (!params.isDeserialize){
                     if (!this.state()) {
-                        this.state(requestState.Exposed);
+                        this.state(requestState.New);
                     }
                     if (!this.ID()) {
                         this.ID(UUtils.guid());
@@ -85,7 +85,7 @@ define([
                 return this._genericSetter("State", value);
             }
 
-            tokenID(value) {
+            tokenId(value) {
                 return this._genericSetter("TokenID", value);
             }
 
@@ -127,7 +127,7 @@ define([
             }
 
             getControlManager() {
-                return this.getParent().getControlManager();
+                return this.getParent() ? this.getParent().getControlManager() : this.pvt.controlMgr;
             }
 
             clone(cm, params) {
@@ -136,11 +136,12 @@ define([
                 _newRequest.name(this.name());
                 _newRequest.processID(this.processID());
                 _newRequest.dbId(this.dbId());
-                _newRequest.tokenID(this.tokenID());
+                _newRequest.tokenId(this.tokenId());
                 _newRequest.isService(this.isService());
                 _newRequest.taskParams().copy(this.taskParams());
-                Utils.copyCollection(this.parameters(), _newRequest.parameters());
-
+                for (var i = 0; i < this.parameters().count(); i++){
+                    this.parameters().get(i).addNewCopyTo(_newRequest)
+                }
                 return _newRequest;
             }
 
@@ -149,9 +150,11 @@ define([
 
                 _response.name(this.name());
                 _response.processID(this.processID());
-                _response.tokenID(this.tokenID());
+                _response.tokenId(this.tokenId());
                 _response.isService(this.isService());
-                Utils.copyCollection(this.parameters(), _response.parameters());
+                for (var i = 0; i < this.parameters().count(); i++){
+                    this.parameters().get(i).addNewCopyTo(_response)
+                }
                 _response.state(requestState.ResponseReceived);
                 this.state(requestState.ResponseReceived);
                 this.responseID(_response.ID());
@@ -162,7 +165,7 @@ define([
             createEventParams() {
                 return {
                     processID: this.processID(),
-                    tokenID: this.tokenID(),
+                    tokenId: this.tokenId(),
                     requestID: this.ID(),
                     dbRequestId: this.dbId(),
                     requestName: this.name(),
@@ -181,8 +184,10 @@ define([
             }
 
             getSerializedTaskParams() {
-                var _db = this.pvt.db ? this.pvt.db : this.getRoot().pvt.db;
-                return _db.serialize(this.taskParams(), true)
+                if (this.taskParams()) {
+                    var _db = this.pvt.db ? this.pvt.db : this.getRoot().pvt.db;
+                    return _db.serialize(this.taskParams(), true)
+                }
             }
 
             fillParams(paramsObject) {
@@ -229,6 +234,10 @@ define([
                 }
             }
 
+            setNewId() {
+                this.ID(UUtils.guid())
+            }
+
             findParameter(parameterName) {
                 for (var i = 0; i < this.parameters().count(); i++) {
                     if (this.parameters().get(i).name() == parameterName) {
@@ -253,6 +262,18 @@ define([
 
             isActive() {
                 return !((this.state() == requestState.Canceled) || (this.state() == requestState.ResponseReceived))
+            }
+            
+            isNew() {
+                return this.state() == requestState.New;
+            }
+            
+            isDone() {
+                return this.state() == requestState.Done;
+            }
+            
+            done(){
+                this.state(requestState.Done)
             }
         };
     }

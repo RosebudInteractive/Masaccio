@@ -14,7 +14,6 @@ var Definitions = {
     simpleProcessWithOneActivity : function() {
         var _definition = EngineSingleton.getInstance().newProcessDefinition();
         _definition.definitionID('68c621d9-3168-4655-98e6-36ed7700efe4');
-        //_definition.name('Тестовый процесс - простейший процесс с одним узлом Activity');
         _definition.name(this.names.forSimpleProcessWithOneActivity);
         _definition.addActivity('start');
 

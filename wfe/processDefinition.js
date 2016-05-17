@@ -361,9 +361,9 @@ define([
                 }
 
                 return new Promise(function (resolve, reject) {
-                    var _processID = params.processInstance.processID();
-                    var _requests = EngineSingleton.getInstance().requestStorage.getProcessRequestsForSave(_processID);
-                    var _responses = EngineSingleton.getInstance().responseStorage.getProcessResponsesForSave(_processID);
+                    var _process = params.processInstance;
+                    var _requests = _process.getRequestsForSave();
+                    var _responses = _process.getResponsesForSave();
 
                     if ((_requests.length != 0) || (_responses.length != 0)) {
                         var _options = {};
@@ -397,7 +397,7 @@ define([
                                     $sys: {guid: request.ID()},
                                     fields: {
                                         ProcessId: dbObject.id(),
-                                        TokenId: request.tokenID(),
+                                        TokenId: request.tokenId(),
                                         Name: request.name(),
                                         State: request.state(),
                                         RequestBody: _requestBody,
@@ -453,9 +453,11 @@ define([
             },
 
             _saveProcessVar : function(dbObject, processInstance){
-                var _processVar = EngineSingleton.getInstance().db.serialize(processInstance.processVar(), true);
-                _processVar = JSON.stringify(_processVar);
-                dbObject.vars(_processVar);
+                if (processInstance.processVar()) {
+                    var _processVar = EngineSingleton.getInstance().db.serialize(processInstance.processVar(), true);
+                    _processVar = JSON.stringify(_processVar);
+                    dbObject.vars(_processVar);
+                }
             },
 
             applyInputTaskParams : function(){

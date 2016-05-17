@@ -118,20 +118,37 @@ define([
                     if (_response.isService() && _response.taskParams().selectedNode()) {
                         return _response
                     }
-                }    
+                }
+            }
+
+            _getServiceRequest() {
+                var _requestsCol = this.token().getPropertiesOfNode(this.name()).requests();
+                for (var i = 0; i < _requestsCol.count(); i++){
+                    var _request = _requestsCol.get(i);
+                    if (_request.isService()) {
+                        return _request
+                    }
+                }
             }
 
             _getUserSelectedNexNode() {
                 var _serviceResponse = this._getServiceResponse();
+                var _serviceRequest = this._getServiceRequest();
                 var _result = [];
-                if (_serviceResponse) {
-                    var _node = this.processInstance().findNodeByName(_serviceResponse.taskParams().selectedNode());
-                    if (_node) {
+                if  ((_serviceResponse) && (_serviceRequest)){
+                    var _nodeName = _serviceResponse.taskParams().selectedNode();
+                    _serviceRequest.taskParams().checkSelectedNode(_nodeName);
+
+                    var _node = this.processInstance().findNodeByName(_nodeName);
+                    if (!_node) {
+                        throw new Error('Can not find user selected node [' + _nodeName + ']')
+                    } else {
                         _result.push(_node)
                     }
-                } 
+                }
                 return _result
             }
+            
 
             _doOnDone() {
                 if (!this.hasScript()) {

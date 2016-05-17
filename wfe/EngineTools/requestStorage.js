@@ -18,28 +18,6 @@ define(
                 this.preparedForSave = [];
             }
 
-            // getItemIndexByPredicate(predicate) {
-            //     var _index = -1;
-            //     this.storage.some(function (element, index) {
-            //         if (predicate && predicate(element)) {
-            //             _index = index;
-            //             return true;
-            //         }
-            //     });
-            //
-            //     return _index
-            // }
-
-            // getItemByPredicate(predicate) {
-            //     var _index = this.getItemIndexByPredicate(predicate);
-            //
-            //     if (_index > -1) {
-            //         return this.storage[_index]
-            //     } else {
-            //         return null
-            //     }
-            // }
-
             addRequest(request) {
                 if (!this.isRequestExists(request.ID())) {
                     this.storage.push(request)

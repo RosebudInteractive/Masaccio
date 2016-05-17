@@ -10,7 +10,7 @@ if (typeof define !== 'function') {
 define(
     [UCCELLO_CONFIG.uccelloPath+'system/uobject'],
     function(UObject) {
-        return class Parameter extends UObject {
+        return class WfeParameter extends UObject {
 
             get className() {
                 return "WfeParameter"
@@ -36,7 +36,7 @@ define(
             }
 
             clone(cm, params) {
-                var _newParam = new Parameter(cm, params);
+                var _newParam = new WfeParameter(cm, params);
                 _newParam.name(this.name());
                 _newParam.value(this.value());
                 return _newParam;

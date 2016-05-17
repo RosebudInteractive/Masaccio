@@ -62,7 +62,7 @@ describe('Task', function(){
                     var _serializedParams = result.requestInfo.taskParams;
                     var _params = deserialize(_serializedParams);
 
-                    _params.selectedNode('task1');
+                    _params.selectedNode('task2.1');
 
                     var responseObj = {
                         requestID: result.requestInfo.requestID,
@@ -71,13 +71,13 @@ describe('Task', function(){
                     console.log(">>> Next node [%s]", [_params.selectedNode()]);
 
                     EngineSingleton.getInstance().processResponse(responseObj, 0, function () {
-                        EngineSingleton.getInstance().waitForRequest({processID : _process, requestName : 'TaskRequest'}, 0, function(result){
+                        EngineSingleton.getInstance().waitForRequest({processId : _process, requestName : 'TaskRequest'}, 0, function(result){
                             if (result.result === "OK") {
                                 _process = result.requestInfo.processID;
                                 var _serializedParams = result.requestInfo.taskParams;
                                 var _params = deserialize(_serializedParams);
 
-                                _params.selectedNode('task2.1');
+                                _params.selectedNode('task3');
 
                                 var responseObj = {
                                     requestID: result.requestInfo.requestID,
@@ -86,12 +86,12 @@ describe('Task', function(){
                                 console.log(">>> Next node [%s]", [_params.selectedNode()]);
 
                                 EngineSingleton.getInstance().processResponse(responseObj, 0, function () {
-                                    EngineSingleton.getInstance().waitForRequest({processID : _process, requestName : 'TaskRequest'}, 0, function(result){
+                                    EngineSingleton.getInstance().waitForRequest({processId : _process, requestName : 'TaskRequest'}, 0, function(result){
                                         if (result.result === "OK") {
                                             var _serializedParams = result.requestInfo.taskParams;
                                             var _params = deserialize(_serializedParams);
 
-                                            _params.selectedNode(_params.availableNodes().get(1).value());
+                                            _params.selectedNode(_params.availableNodes().get(0).value());
 
                                             var responseObj = {
                                                 requestID: result.requestInfo.requestID,

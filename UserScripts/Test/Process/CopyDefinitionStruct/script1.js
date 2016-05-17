@@ -22,7 +22,7 @@ define(
                         // Доступ к респонсу можно получить this.scriptObject.response
                         _param.value(_param.value() + 1);
                     }
-                    console.log('[token %s]->[%s] = [%s]', this.scriptObject.processFacade.currentToken().tokenID(), this.scriptObject.processFacade.currentToken().currentNode().name(), _param.value());
+                    console.log('[token %s]->[%s] = [%s]', this.scriptObject.processFacade.currentToken().tokenId(), this.scriptObject.processFacade.currentToken().currentNode().name(), _param.value());
                     this.scriptObject.returnResult(null);
                 } else {
                     throw 'scriptObject не определен'

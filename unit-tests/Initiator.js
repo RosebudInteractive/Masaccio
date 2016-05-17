@@ -5,6 +5,7 @@
 var Main = require('./main');
 var UccelloServ = require(PATH.Uccello + 'uccelloServ');
 var EngineSingleton = require(PATH.engine + 'engineSingleton');
+var TestClient = require(PATH.engine + '../test/testClient');
 
 var _instance = null;
 function getInstance(){
@@ -49,7 +50,7 @@ class Initiator {
 
         this.controlManager = EngineSingleton.getInstance().getControlManager();
 
-        var TestClient = require('./../test/testClient');
+
         this.testClient = new TestClient();
         // EngineSingleton.getInstance().notifier.registerObserver(this.testClient, this.testClient.handleNewRequest);
         // this.testClient.setTimeout(UCCELLO_CONFIG.testClientTimeout);
@@ -80,6 +81,14 @@ class Initiator {
 
     static clearTestClient() {
         getInstance().testClient.clear()
+    }
+
+    static enableTestClient() {
+        getInstance().testClient.enable()
+    }
+
+    static disableTestClient() {
+        getInstance().testClient.disable()
     }
 }
 

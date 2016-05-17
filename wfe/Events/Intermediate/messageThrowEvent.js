@@ -125,7 +125,7 @@ define([
                 _messageInstance.correlationKeyInstance(_ckInstance);
                 _messageInstance.sourceProcessName(this.outgoingMessage().sourceProcessName());
                 _messageInstance.sourceProcessId(this.processInstance().processID());
-                _messageInstance.sourceTokenId(this.token().tokenID());
+                _messageInstance.sourceTokenId(this.token().tokenId());
                 _messageInstance.sourceNodeName(this.outgoingMessage().sourceNodeName());
                 _messageInstance.targetProcessName(this.outgoingMessage().targetProcessName());
                 _messageInstance.targetNodeName(this.outgoingMessage().targetNodeName());

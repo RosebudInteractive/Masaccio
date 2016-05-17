@@ -91,7 +91,9 @@ define([
                 this.subprocesses = new SubProcessCallback();
                 this.messageCache = new MessageCache();
 
-                this.processes = new ProcessCache({resman : initParams.resman, db : this.db});
+                this.processes = new ProcessCache({
+                    resman: initParams.resman, db: this.db, adapterType: ProcessCache.AdapterType.db, notifier : this.notifier
+                });
 
                 this.uploadedProcesses = [];
                 this.tokensArchive = [];
@@ -138,11 +140,11 @@ define([
             /*  ----- Definitions ----- */
 
 
-            startProcessInstanceAndWait : function(definitionID, options, callback) {
+            startProcessInstanceAndWait : function(definitionName, options, callback) {
                 if (!options) {
-                    Answer.error('Не указаны параметры запуска процесса [%s]', [definitionID]).handle(callback)
+                    Answer.error('Не указаны параметры запуска процесса [%s]', [definitionName]).handle(callback)
                 }
-                console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
+                console.log('[%s] : => Создание процесса definitionName [%s]', (new Date()).toLocaleTimeString(), definitionName);
 
                 var _processOptions = {};
                 if (options.hasOwnProperty('taskParams')){
@@ -150,12 +152,13 @@ define([
                 }
 
                 var that = this;
-                this.createNewProcess1(definitionID, _processOptions).then(
+                // this.createNewProcess1(definitionName, _processOptions).then(
+                this.processes.createNewProcess(definitionName, _processOptions).then(
                     function(process) {
                         console.log('[%s] : => запуск процесса processID [%s]', (new Date()).toLocaleTimeString(), process.processID());
                         var _requestName = options.requestName;
                         var _timeout = options.timeout;
-                        that.waitForRequest({processId : process.processID(), tokenID : 1, requestName : _requestName}, _timeout, callback);
+                        that.waitForRequest({processId : process.processID(), tokenId : 1, requestName : _requestName}, _timeout, callback);
                         setTimeout(function () {
                             that.runProcess(process);
                             console.log('[%s] : => процесс processID [%s] запущен', (new Date()).toLocaleTimeString(), process.processID());
@@ -169,57 +172,26 @@ define([
                 return Controls.MegaAnswer;
             },
 
-            startProcessInstance : function(definitionID, options, callback) {
-                console.log('[%s] : => Создание процесса definitionID [%s]', (new Date()).toLocaleTimeString(), definitionID);
+            startProcessInstance : function(definitionName, options, callback) {
+                console.log('[%s] : => Создание процесса definitionName [%s]', (new Date()).toLocaleTimeString(), definitionName);
                 var _processOptions = {};
                 if (options.hasOwnProperty('taskParams')){
                     _processOptions.params = options.taskParams
                 }
 
                 var that = this;
-                this.createNewProcess1(definitionID, _processOptions).then(
+                this.processes.createNewProcess(definitionName, _processOptions).then(
                     function(process) {
                         that.runProcess(process);
-                        var _answer = Answer.success('Процесс processID [%s] запущен',  process.processID());
-                        _answer.processID = process.processID();
-                        _answer.tokenID = process.currentToken().tokenID();
-                        _answer.handle(callback);
+                        Answer.success('Процесс processID [%s] запущен',  process.processID()).
+                            add({processId : process.processID()}).
+                            add({tokenId : process.currentToken().tokenId()}).
+                            handle(callback);
                     },
                     function(reason){
                         Answer.error('Не удалось создать процесс [%s]', [reason.message]).handle(callback);
                     }
                 );
-            },
-
-            createNewProcess1 : function(definitionName, options) {
-                var that = this;
-                return new Promise(promiseBody);
-
-                function promiseBody(resolve, reject){
-                    var _def = that.processDefinitions.find(function(definition){
-                        return definition.name() == definitionName
-                    });
-
-                    if (!_def) {
-                        that.resman.loadRes([{resName : definitionName, resType : '08b97860-179a-4292-a48d-bfb9535115d3'}], function(result){
-                            if ((result.result) && (result.result == 'ERROR')) {
-                                reject(new Error(result.message))
-                            } else {
-                                var _defResource = result.datas[0].resource;
-                                var _options = {
-                                    definitionResourceID : result.datas[0].resVerId
-                                };
-                                if (options) {
-                                    _options.params = options.params
-                                }
-                                var _process = new Process(that.controlManager, _options, _defResource);
-                                resolve(_process);
-                            }
-                        })
-                    } else {
-                        resolve(new Process(that.controlManager, {}, _def))
-                    }
-                }
             },
 
                 createNewProcess: function (definitionID) {
@@ -232,6 +204,7 @@ define([
 
                 runProcess : function(processInstance) {
                     this.processIntsances.push(processInstance);
+
 
                     this.defineTokens(processInstance);
 
@@ -297,8 +270,8 @@ define([
                     if (requestInfo.hasOwnProperty('requestId')) {
                         that.requestStorage.findOrUpload(requestInfo.requestId).
                         then(function(request){
-                            _result.processID = request.processID();
-                            _result.tokenID = request.tokenID();
+                            _result.processId = request.processID();
+                            _result.tokenId = request.tokenId();
                             _result.requestName = request.name();
 
                             resolve(_result)
@@ -307,11 +280,11 @@ define([
                             reject(err)
                         })
                     } else {
-                        _result.processID = requestInfo.processId;
-                        if (requestInfo.hasOwnProperty('tokenID')) {
-                            _result.tokenID = requestInfo.tokenID
+                        _result.processId = requestInfo.processId;
+                        if (requestInfo.hasOwnProperty('tokenId')) {
+                            _result.tokenId = requestInfo.tokenId
                         } else {
-                            _result.tokenID = null;
+                            _result.tokenId = null;
                         }
                         _result.requestName = requestInfo.requestName;
 
@@ -324,17 +297,32 @@ define([
                 var that = this;
                 this._createRequestOptions(requestInfo).
                 then(function(options){
-                    var _isNeedNotify = that.requestStorage.isActiveRequestExistsByName(options.requestName, options.processID);
+                    that.processes.findOrUpload(options.processId).
+                    then(function(process){
+                        if (!process) {
+                            throw new Error('Can not find process of request "' + options.requestName + '"')
+                        }
 
-                    that.notifier.registerObserverOnRequest(
-                        options,
-                        timeout,
-                        callback);
+                        if (process.isFinished()) {
+                            throw new Error('Process of request "' + options.requestName + '" has finished')
+                        }
 
-                    if (_isNeedNotify) {
-                        that.notifier.notify(that.requestStorage.getRequestParamsByName(options.requestName, options.processID))
-                    }
-                }).catch(function(err){
+                        var _isNeedNotify = that.requestStorage.isActiveRequestExistsByName(options.requestName, options.processId);
+
+                        that.notifier.registerObserverOnRequest(
+                            options,
+                            timeout,
+                            callback);
+
+                        if (_isNeedNotify) {
+                            that.notifier.notify(that.requestStorage.getRequestParamsByName(options.requestName, options.processId))
+                        }
+                    }).
+                    catch(function(err){
+                        Answer.error(err.message).handle(callback)
+                    })
+                })
+                .catch(function(err){
                     Answer.error(err.message).handle(callback)
                 });
 
@@ -362,7 +350,7 @@ define([
                     if (!processInstance.isWaitingScriptAnswer())
                         processInstance.wait();
                 } else {
-                    processInstance.finish();
+                    this.processes.finish(processInstance)
                 }
 
             },
@@ -443,7 +431,7 @@ define([
                 _request.ID(request.ID());
                 // this.requestStorage.addRequest(_request, eventParams);
                 this.requestStorage.addRequest(_request);
-                this.requestStorage.addForSave(_request);
+                // this.requestStorage.addForSave(_request);
                 console.log('[%s] : => Выставлен request [%s]', (new Date()).toLocaleTimeString(), request.name());
                 var _eventParams = _request.createEventParams();
                 this.notifier.notify(_eventParams);
@@ -461,7 +449,7 @@ define([
                                 _process.activate();
                             }
 
-                            var _token = _process.getToken(_request.tokenID());
+                            var _token = _process.getToken(_request.tokenId());
 
                             var _receivingNode = _token.currentNode();
 
@@ -474,8 +462,8 @@ define([
                             response.fillParams(answer);
 
                             that.responseStorage.addResponseCallback(response, 0, callback);
-                            that.requestStorage.addForSave(_request);
-                            that.responseStorage.addForSave(response);
+                            // that.requestStorage.addForSave(_request);
+                            // that.responseStorage.addForSave(response);
 
                             if (_process.isRunning()) {
                                 /* Todo ТОКЕN!!!  Может быть много токенов, возможно надо передавать токен в execute() */
@@ -523,7 +511,7 @@ define([
 
                 this.findOrUploadProcess(_request.processID()).then(
                     function(_process){
-                        var _token = _process.getToken(_request.tokenID());
+                        var _token = _process.getToken(_request.tokenId());
                         var _receivingNode = _token.currentNode();
 
                         _request = _token.getPropertiesOfNode(_receivingNode.name()).findRequest(_request.ID());
@@ -536,13 +524,11 @@ define([
                         var response = _request.createResponse(_request.getParent());
                         response.fillParams(answer);
 
-
-                        // _receivingNode.requests().count() == 0 - будет служебный request
                         if ((_receivingNode instanceof UserTask) && ((_receivingNode.hasScript() || _receivingNode._hasUserSelectedNextNode()))) {
                             that.responseStorage.addResponseCallback(response, timeout, callback)
                         }
-                        that.requestStorage.addForSave(_request);
-                        that.responseStorage.addForSave(response);
+                        // that.requestStorage.addForSave(_request);
+                        // that.responseStorage.addForSave(response);
 
                         if (_receivingNode['handleResponse']){
                             _receivingNode.handleResponse(function () {
@@ -577,7 +563,7 @@ define([
 
             submitResponseAndWait : function(response, requestName, timeout, callback) {
                 // Todo : Исправить в waitForRequest передавать объект
-                this.waitForRequest(response.processID, response.tokenID, requestName, timeout, callback);
+                this.waitForRequest(response.processID, response.tokenId, requestName, timeout, callback);
                 this.submitResponse(response, callback);
 
                 return Controls.MegaAnswer;

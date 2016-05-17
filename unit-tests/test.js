@@ -20,9 +20,9 @@ copyFile(
 var _engine = EngineSingleton.getInstance();
 _engine.uploadedProcesses.push({processID : 'testProcess1', isFinished : false});
 var _process = _engine.findOrUploadProcess('testProcess1');
-console.log('Здесь все ОК, ID = [%s]', _process.currentToken().tokenID());
+console.log('Здесь все ОК, ID = [%s]', _process.currentToken().tokenId());
 var _ID = _process.processID();
 _engine.saveAndUploadProcess(_ID);
 _process = _engine.findOrUploadProcess(_ID);
 
-console.log(_process.currentToken().tokenID());*/
+console.log(_process.currentToken().tokenId());*/

@@ -322,6 +322,10 @@ define([
             isWaitingRequest : function() {
                 return this.state() == flowNodeState.WaitingRequest;
             },
+            
+            waitingRequest : function() {
+                this.state(flowNodeState.WaitingRequest);    
+            },
 
             canStartProcess : function() {
                 return false

@@ -23,7 +23,7 @@ define(
                     } else {
                         _result = false;
                     }
-                    console.log('[%s]:[%s] = [%s]', this.scriptObject.processFacade.currentToken().tokenID(), this.scriptObject.subject.name(), _result);
+                    console.log('[%s]:[%s] = [%s]', this.scriptObject.processFacade.currentToken().tokenId(), this.scriptObject.subject.name(), _result);
 
                     this.scriptObject.returnResult(_result);
                 } else {

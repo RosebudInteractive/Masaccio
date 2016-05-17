@@ -7,7 +7,7 @@ if (typeof define !== 'function') {
 }
 
 define(
-    [PATH.Masaccio + 'public/logger'],
+    [PATH.Masaccio + 'public/logger.js'],
     function (Logger){
         return UccelloClass.extend({
             init: function () {

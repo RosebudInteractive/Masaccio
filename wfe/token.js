@@ -65,7 +65,7 @@ define([
                 return this._genericSetter("State",value);
             },
 
-            tokenID: function(value) {
+            tokenId: function(value) {
                 return this._genericSetter("TokenID",value);
             },
 
@@ -116,7 +116,9 @@ define([
                         this.doOnInitialized();
 
                         this.currentNode().state(FlowNode.state.Executing);
-                        return this.execute();
+                        // return this.execute();
+                        EngineSingleton.getInstance().switchTokens(this);
+                        break;
                     }
 
                     case (FlowNode.state.Executing) : {
@@ -200,7 +202,7 @@ define([
             die : function() {
                 if (this.state() == tokenState.Alive) {
                     this.state(tokenState.Dead);
-                    console.log('[%s] : XX Token [%s] закончил выполнение', (new Date()).toLocaleTimeString(), this.tokenID());
+                    console.log('[%s] : XX Token [%s] закончил выполнение', (new Date()).toLocaleTimeString(), this.tokenId());
                     EngineSingleton.getInstance().archiveToken(this);
                 }
             },
@@ -216,8 +218,7 @@ define([
                         function(process){
                             if (process.canContinue()) {
                                 process.activate();
-                                //EngineSingleton.getInstance().activateProcess(process.processID());
-                                var _token = process.getToken(that.tokenID());
+                                var _token = process.getToken(that.tokenId());
                                 EngineSingleton.getInstance().switchTokens(_token);
                             } else {
                                 EngineSingleton.getInstance().switchTokens(that);
@@ -228,30 +229,31 @@ define([
                         }
                     );
 
+                    if (that.hasNewRequest() && that.currentNode().isWaitingRequest()) {
+                        var _nodeProps = that.getPropertiesOfNode(that.currentNode().name());
+                        if (_nodeProps) {
+                            that.exposeRequests(_nodeProps);
+                        }
+                    }
+
+                    if (that.hasNewMessageInstances()) {
+                        for (var i = that.sentMessages().count() - 1; i >= 0; i--){
+                            var _message = that.sentMessages().get(i);
+                            EngineSingleton.getInstance().messageCache.addMessageInstance(_message);
+                            that.sentMessages()._del(_message);
+                        }
+                    }
+
+                    if (that.hasNewMessageRequest()) {
+                        for (var i = that.requestedMessages().count() - 1; i >= 0; i--){
+                            var _request = that.requestedMessages().get(i);
+                            EngineSingleton.getInstance().messageCache.addMessageRequest(_request);
+                            that.requestedMessages()._del(_request);
+                        }
+                    }
+
+                    EngineSingleton.getInstance().switchTokens(that);
                 });
-
-                if (this.hasNewRequest() && this.currentNode().isWaitingRequest()) {
-                    var _nodeProps = this.getPropertiesOfNode(this.currentNode().name());
-                    if (_nodeProps) {
-                        this.exposeRequests(_nodeProps);
-                    }
-                }
-
-                if (this.hasNewMessageInstances()) {
-                    for (var i = this.sentMessages().count() - 1; i >= 0; i--){
-                        var _message = this.sentMessages().get(i);
-                        EngineSingleton.getInstance().messageCache.addMessageInstance(_message);
-                        this.sentMessages()._del(_message);
-                    }
-                }
-
-                if (this.hasNewMessageRequest()) {
-                    for (var i = this.requestedMessages().count() - 1; i >= 0; i--){
-                        var _request = this.requestedMessages().get(i);
-                        EngineSingleton.getInstance().messageCache.addMessageRequest(_request);
-                        this.requestedMessages()._del(_request);
-                    }
-                }
             },
 
             hasNewMessageInstances : function() {
@@ -266,19 +268,10 @@ define([
                 for (var i = 0; i < nodeProps.requests().count(); i++) {
 
                     var _request = nodeProps.requests().get(i);
-                    _request.state(Request.state.Exposed);
-
-                    // var _requestEventParams = {
-                    //     processID: this.processInstance().processID(),
-                    //     tokenID: this.tokenID(),
-                    //     requestID: _request.ID(),
-                    //     requestName: _request.name(),
-                    //     nodeName: this.currentNode().name(),
-                    //     params : _request.getParamsForMessage(),
-                    //     taskParams : _request.getSerializedTaskParams()
-                    // };
-
-                    EngineSingleton.getInstance().exposeRequest(_request);
+                    if (_request.isNew()) {
+                        _request.state(Request.state.Exposed);
+                        EngineSingleton.getInstance().exposeRequest(_request);
+                    }
                 }
             },
 
@@ -286,10 +279,10 @@ define([
                 return (this.currentNode().getOutgoingNodes().length != 0);
             },
 
-            clearNodeResponses: function (nodeName) {
+            clearNodeProps: function (nodeName) {
                 var _nodeProps = this.getPropertiesOfNode(nodeName);
                 if (_nodeProps) {
-                    _nodeProps.clearResponses()
+                    _nodeProps.clear()
                 }
             },
 
@@ -328,7 +321,7 @@ define([
                     //this.nodesProps()._add(_nodeProps)
                 }
 
-                this.clearNodeResponses(this.currentNode().name());
+                this.clearNodeProps(this.currentNode().name());
             },
 
             copyNodePropsFromToken : function(token) {

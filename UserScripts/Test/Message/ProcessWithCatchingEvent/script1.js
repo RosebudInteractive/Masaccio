@@ -25,7 +25,7 @@ define(
                     }
                     console.log('[%s] : ES [token %s]->[%s] = [%s]',
                         (new Date()).toLocaleTimeString(),
-                        this.scriptObject.processFacade.currentToken().tokenID(),
+                        this.scriptObject.processFacade.currentToken().tokenId(),
                         this.scriptObject.processFacade.currentToken().currentNode().name(),
                         _param.value());
                     this.scriptObject.returnResult(null);

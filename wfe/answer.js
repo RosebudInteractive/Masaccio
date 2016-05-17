@@ -7,7 +7,7 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
     //var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
     //var Util = require('util');
-    //var Logger = require('./../public/logger');
+    //var Logger = require('./../public/logger.js');
 }
 
 var Result = {
@@ -16,32 +16,6 @@ var Result = {
     WARNING : 'WARNING',
     ERROR : 'ERROR'
 };
-
-//function success(message) {
-//    var _instance = new Answer();
-//    _instance.result = Result.OK;
-//    if (arguments.length > 1) {
-//        var _arg = Array.prototype.slice.call(arguments, 1);
-//        _instance.message = Util.format(message, _arg);
-//    } else {
-//        _instance.message = message;
-//    }
-//
-//    return _instance;
-//}
-
-//function error(message) {
-//    var _instance = new Answer();
-//    _instance.result = Result.ERROR;
-//    if (arguments.length > 1) {
-//        var _arg = Array.prototype.slice.call(arguments, 1);
-//        _instance.message = Util.format(message, _arg);
-//    } else {
-//        _instance.message = message;
-//    }
-//
-//    return _instance;
-//}
 
 define(
     ['util', './../public/logger'],

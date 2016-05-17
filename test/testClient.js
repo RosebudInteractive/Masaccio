@@ -1,9 +1,10 @@
 /**
  * Created by staloverov on 23.04.2015.
  */
+'use strict';
+
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var UccelloClass = require(PATH.Uccello + 'system/uccello-class');
 }
 
 var _timeout = 3000;
@@ -21,36 +22,49 @@ var _clearResponses = function() {
 define(
     ['./../wfe/engineSingleton'],
     function(EngineSingleton){
-        var TestClient = UccelloClass.extend({
+        return class TestClient {
 
-            init : function() {
+            constructor() {
                 this.responses = [];
                 this.customizeResponse = null;
-            },
+                this.enabled = false;
+            }
+            
+            enable(){
+                this.enabled = true;
+            }
+            
+            disable(){
+                this.enabled = false;
+            }
 
-            setTimeout : function(valueInSecond) {
+            setTimeout(valueInSecond) {
                 _setTimeout(valueInSecond)
-            },
+            }
 
-            clear : function() {
+            clear() {
                 _clearResponses();
                 _customizeResponse = null;
-            },
+            }
 
-            setResponseCustomizer : function(callback) {
+            setResponseCustomizer(callback) {
                 _customizeResponse = callback;
-            },
+            }
 
-            createResponse : function(request) {
+            createResponse(request) {
                 var _response = {};
                 for (var param in request) {
                     _response[param] = 'Test answer';
                 }
 
                 return _response;
-            },
+            }
 
-            handleNewRequest : function (eventParams) {
+            handleNewRequest (eventParams) {
+                if (!this.enabled) {
+                    return
+                }
+                
                 if (eventParams.result != 'OK') {
                     console.log('[%s] : !! Ошибка при обработке request [%s]', (new Date()).toLocaleTimeString(), eventParams.message);
                     return
@@ -75,7 +89,7 @@ define(
                     name : requestInfo.requestName,
                     processID : requestInfo.processID,
                     requestID : requestInfo.requestID,
-                    tokenID : requestInfo.tokenID,
+                    tokenId : requestInfo.tokenId,
                     response : _response
                 };
 
@@ -88,9 +102,7 @@ define(
                 }, _timeout * _responses.length);
 
             }
-        });
-
-        return TestClient;
+        }
     }
-)
+);
 

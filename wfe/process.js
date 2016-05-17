@@ -82,21 +82,19 @@ define([
                 UccelloClass.super.apply(this, [cm, params]);
                 if (!params) { return }
 
-                // Todo : Костыль!!!!
-                if (!this.processID()) {
+                if (!params.isDeserialize) {
                     this.pvt.db.deserialize(definition, {obj: this, colName: 'Definitions'}, EngineSingleton.getInstance().createComponentFunction);
                     if (params.hasOwnProperty('definitionResourceID')) {
                         this.definitionResourceID(params.definitionResourceID)
                     }
                     
-                    if (params.hasOwnProperty('params')) {
+                    if (params.hasOwnProperty('params') && (params.params)) {
                         this.definition().setInputParams(params.params);
-                    }
 
-                    if (this.checkInputParams()) {
-                        this.definition().applyInputTaskParams();
-                        this.createProcessVar();
-                        
+                        if (this.checkInputParams()) {
+                            this.definition().applyInputTaskParams();
+                            this.createProcessVar();
+                        }
                     }
 
                     this.processID(UUtils.guid());
@@ -239,7 +237,7 @@ define([
 
             isTokenInQueue : function(token) {
                 for (var i = 0; i < this.tokenQueue().count(); i++) {
-                    if (this.tokenQueue().get(i).object().tokenID() == token.tokenID()) return true;
+                    if (this.tokenQueue().get(i).object().tokenId() == token.tokenId()) return true;
                 }
 
                 return false;
@@ -247,17 +245,17 @@ define([
 
             getToken : function(tokenID) {
                 for (var i = 0; i < this.tokens().count(); i++) {
-                    if (this.tokens().get(i).tokenID() == tokenID) {return this.tokens().get(i)}
+                    if (this.tokens().get(i).tokenId() == tokenID) {return this.tokens().get(i)}
                 }
 
                 return null;
             },
 
             enqueueToken : function(token) {
-                if (!token.tokenID()) {
+                if (!token.tokenId()) {
                     var _tokenID = this.sequenceValue() + 1;
                     this.sequenceValue(_tokenID);
-                    token.tokenID(_tokenID);
+                    token.tokenId(_tokenID);
                 }
 
                 token.newLink(this, 'TokenQueue');
@@ -465,17 +463,51 @@ define([
             },
 
             deleteRequest : function(request) {
-                var _token = this.getToken(request.tokenID());
+                var _token = this.getToken(request.tokenId());
                 if (_token) {
                     _token.deleteRequest(request)
                 }
             },
 
             deleteResponse : function(response){
-                var _token = this.getToken(response.tokenID());
+                var _token = this.getToken(response.tokenId());
                 if (_token) {
                     _token.deleteResponse(response)
                 }
+            },
+
+            getRequestsForSave : function(){
+                var _requests = [];
+                for (var i = 0; i < this.tokens().count(); i++){
+                    var _token = this.tokens().get(i);
+                    if (_token.isLive()) {
+                        for (var j = 0; j < _token.nodesProps().count(); j++){
+                            var _nodeProp = _token.nodesProps().get(j);
+                            for (var k = 0; k < _nodeProp.requests().count(); k++){
+                                _requests.push(_nodeProp.requests().get(k))       
+                            }
+                        }
+                    }
+                }
+                
+                return _requests;
+            },
+
+            getResponsesForSave : function(){
+                var _responses = [];
+                for (var i = 0; i < this.tokens().count(); i++){
+                    var _token = this.tokens().get(i);
+                    if (_token.isLive()) {
+                        for (var j = 0; j < _token.nodesProps().count(); j++){
+                            var _nodeProp = _token.nodesProps().get(j);
+                            for (var k = 0; k < _nodeProp.responses().count(); k++){
+                                _responses.push(_nodeProp.responses().get(k))
+                            }
+                        }
+                    }
+                }
+
+                return _responses;
             }
         });
 

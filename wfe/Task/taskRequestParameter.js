@@ -9,7 +9,7 @@ if (typeof define !== 'function') {
 
 define(
     [UCCELLO_CONFIG.uccelloPath+'system/uobject', '../../public/utils', './../parameter'],
-    function(UObject, Utils, Parameter){
+    function(UObject, Utils, WfeParameter){
         return class TaskRequestParameter extends UObject {
             get className() {
                 return "TaskRequestParameter"
@@ -40,7 +40,7 @@ define(
             }
             
             addAvailableNode(nodeName) {
-                var _param = new Parameter(this.getControlManager(), {parent : this, colName : 'AvailableNodes'});
+                var _param = new WfeParameter(this.getControlManager(), {parent : this, colName : 'AvailableNodes'});
                 _param.name('Node');
                 _param.value(nodeName);
                 return _param;
@@ -52,7 +52,26 @@ define(
 
             copy(source) {
                 this.selectedNode(source.selectedNode());
-                Utils.copyCollection(source.availableNodes(), this.availableNodes());
+                this.availableNodes().clear();
+                for (var i = 0; i < source.availableNodes().count(); i++) {
+                    this.addAvailableNode(source.availableNodes().get(i).value())
+                }
+            }
+
+            checkSelectedNode(nodeName) {
+                if (!nodeName) {
+                    console.error('Selected node is empty');
+                    throw new Error('Selected node is empty')
+                }
+
+                for (var i = 0; i < this.availableNodes().count(); i++) {
+                    if (nodeName === this.availableNodes().get(i).value()) {
+                        return true
+                    }
+                }
+
+                console.error('Selected node is not match to available nodes');
+                throw new Error('Selected node is not match to available nodes')
             }
         }
     }

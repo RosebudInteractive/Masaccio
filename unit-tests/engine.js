@@ -59,7 +59,7 @@ describe('Engine', function(){
                 })
             });
 
-            describe('#getProcessVars', function(){
+            xdescribe('#getProcessVars', function(){
                 var guids = {
                     existing: '7bb49fe5-746e-4741-83f6-0b4e53d27358',
                     nonexistent: '3fdd3c7e-196d-440c-982c-c33b7ca0ab4d'
@@ -88,12 +88,12 @@ describe('Engine', function(){
             })
         });
 
-        xdescribe('#waitForRequest', function () {
+        describe('#waitForRequest', function () {
             xit('Request должен быть получен', function (done) {
                 EngineSingleton.getInstance().startProcessInstance(Definition.names.forTestWaitRequest, function(_result) {
                     var _requestInfo = {
                         processID: _result.processID,
-                        tokenID: _result.tokenID,
+                        tokenId: _result.tokenId,
                         requestName: 'request1'
                     };
 
@@ -102,7 +102,7 @@ describe('Engine', function(){
                         expect(result.requestInfo).to.be.exist;
                         expect(result.message).to.be.not.exist;
                         result.requestInfo.processID.should.equal(_result.processID);
-                        result.requestInfo.tokenID.should.equal(_result.tokenID);
+                        result.requestInfo.tokenId.should.equal(_result.tokenId);
                         result.requestInfo.requestName.should.equal('request1');
                         result.requestInfo.nodeName.should.equal('userTask');
 
@@ -113,13 +113,66 @@ describe('Engine', function(){
                 });
             });
 
-            it('Получить request по ID - OK', function (done) {
+            it('Запрос request-а у завершенного процесса', function (done) {
+                var _options = {
+                    requestName : 'request1',
+                    timeout : 0
+                };
+
+                EngineSingleton.getInstance().startProcessInstanceAndWait(Definition.names.forTestWaitRequest, _options, function(result) {
+                    if (result.result !== 'OK') {
+                        done(result.message)
+                    } else {
+                        var responseObj = {
+                            requestID: result.requestInfo.requestID
+                        };
+                        EngineSingleton.getInstance().processResponse(responseObj, 0, function (result) {
+                            if (result.result !== 'OK') {
+                                done(result.message)
+                            } else {
+                                EngineSingleton.getInstance().waitForRequest({processId : result.processId, requestName : 'request1'}, 0, function(result){
+                                    result.result.should.equal('ERROR');
+                                    EngineSingleton.getInstance().deleteProcess(result.processId);
+                                    done()
+                                })
+                            }
+                        })
+                    }
+                });
+            });
+
+            it('Оповещение о завершении процесса', function (done) {
+                EngineSingleton.getInstance().startProcessInstance(Definition.names.forTestWaitRequest, {}, function(result) {
+                    if (result.result !== 'OK') {
+                        done(result.message)
+                    } else {
+                        EngineSingleton.getInstance().waitForRequest({processId : result.processId, requestName : 'Test'}, 0, function(result){
+                            result.result.should.equal('ERROR');
+                            result.message.should.equal('Process has been finished');
+                            done()
+                        });
+
+                        EngineSingleton.getInstance().waitForRequest({processId : result.processId, requestName : 'request1'}, 0, function(result){
+                            var responseObj = {
+                                requestID: result.requestInfo.requestID
+                            };
+                            EngineSingleton.getInstance().processResponse(responseObj, 0, function (result) {
+                                if (result.result !== 'OK') {
+                                    done(result.message)
+                                }
+                            })
+                        });
+                    }
+                });
+            });
+            
+            xit('Получить request по ID - OK', function (done) {
                 EngineSingleton.getInstance().waitForRequest({requestId : 15}, 0, function (result) {
                     result.result.should.equal('OK');
                     expect(result.requestInfo).to.be.exist;
                     expect(result.message).to.be.not.exist;
                     result.requestInfo.processID.should.equal(_result.processID);
-                    result.requestInfo.tokenID.should.equal(_result.tokenID);
+                    result.requestInfo.tokenId.should.equal(_result.tokenId);
                     result.requestInfo.requestName.should.equal('request1');
                     result.requestInfo.nodeName.should.equal('userTask');
 
@@ -129,9 +182,9 @@ describe('Engine', function(){
                 });
             });
 
-            it('Ошибка оп таймауту', function (done) {
+            xit('Ошибка оп таймауту', function (done) {
                 EngineSingleton.getInstance().startProcessInstance(Definition.names.forTestWaitRequest, function(startResult) {
-                    EngineSingleton.getInstance().waitForRequest(startResult.processID, startResult.tokenID, 'ERROR', 3000, function (result) {
+                    EngineSingleton.getInstance().waitForRequest(startResult.processID, startResult.tokenId, 'ERROR', 3000, function (result) {
                         result.result.should.equal('ERROR');
                         expect(result.requestInfo).to.be.not.exist;
                         expect(result.message).to.be.exist;
@@ -217,7 +270,7 @@ describe('Engine', function(){
                     startResult.should.exist;
                     startResult.result.should.equal('OK');
                     startResult.processID.should.exist;
-                    startResult.tokenID.should.equal(1);
+                    startResult.tokenId.should.equal(1);
                     startResult.message.should.exist;
 
                     EngineSingleton.getInstance().deleteProcess(startResult.processID);
@@ -256,7 +309,7 @@ describe('Engine', function(){
                     expect(result.message).to.be.not.exist;
                     _processID = result.requestInfo.processID;
                     expect(result.requestInfo.processID).to.be.exist;
-                    expect(result.requestInfo.tokenID).to.be.exist;
+                    expect(result.requestInfo.tokenId).to.be.exist;
                     result.requestInfo.requestName.should.equal('request1');
                     result.requestInfo.nodeName.should.equal('userTask');
 

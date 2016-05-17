@@ -37,9 +37,9 @@ var Definitions = {
         _definition.connect(_start, _task1);
         _definition.connect(_task1, _task1);
         _definition.connect(_task1, _task21);
-        // _definition.connect(_task1, _task22);
+        _definition.connect(_task1, _task22);
         _definition.connect(_task21, _task3);
-        // _definition.connect(_task22, _task3);
+        _definition.connect(_task22, _task3);
         _definition.connect(_task3, _end);
 
         return _definition;

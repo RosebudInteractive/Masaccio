@@ -1,86 +1,106 @@
 /**
  * Created by staloverov on 14.04.2015.
  */
+'use strict';
+
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    //var Class = require('class.extend');
-    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define(
-    ['./scriptTask', './../request', './../flowNode', './../controls', './activity'],
-    function(ScriptTask, Request, FlowNode, Controls, Activity){
-        var UserTask = ScriptTask.extend({
+    ['./scriptTask', './../request', './../flowNode', './activity', './../engineSingleton', './../../public/logger'],
+    function(ScriptTask, Request, FlowNode, Activity, EngineSingleton, Logger) {
+        return class UserTask extends ScriptTask {
 
-            className: "UserTask",
-            classGuid: Controls.guidOf('UserTask'),
-            metaCols: [
-                {'cname' : 'Requests', 'ctype' : 'Request'},
-                {'cname' : 'Responses', 'ctype' : 'Request'}
-            ],
+            get className() {
+                return "UserTask"
+            }
 
-            requests : function(){
+            get classGuid() {
+                return UCCELLO_CONFIG.classGuids.UserTask
+            }
+
+            get metaCols() {
+                return [
+                    {'cname': 'Requests', 'ctype': 'Request'},
+                    {'cname': 'Responses', 'ctype': 'Request'}
+                ]
+            }
+
+            requests() {
                 return this.getCol('Requests');
-            },
+            }
 
-            responses : function(){
+            responses() {
                 return this.getCol('Responses');
-            },
+            }
 
-            createInstance : function(cm, params){
+            createInstance(cm, params) {
                 return new UserTask(cm, params);
-            },
+            }
 
-            getUnhandledResponse : function() {
+            getUnhandledResponse() {
                 var _responses = this.token().getPropertiesOfNode(this.name()).responses();
                 for (var i = 0; i < _responses.count(); i++) {
-                    if (_responses.get(i).state() != Request.state.Done) {
+                    if (!_responses.get(i).isDone()) {
                         return _responses.get(i)
                     }
                 }
 
                 return null;
-            },
+            }
 
-            copyCollectionDefinitions : function(source, process) {
-                UccelloClass.super.apply(this, [source, process]);
+            copyCollectionDefinitions(source, process) {
+                super.copyCollectionDefinitions(source, process);
 
-                for (var i = 0; i < source.requests().count(); i++){
-                    this.requests()._add(source.requests().get(i).clone(process.getControlManager(), {parent : process, colName : 'Requests'}));
+                for (var i = 0; i < source.requests().count(); i++) {
+                    this.requests()._add(source.requests().get(i).clone(process.getControlManager(), {
+                        parent: process,
+                        colName: 'Requests'
+                    }));
                 }
 
-                for (var i = 0; i < source.responses().count(); i++){
-                    this.responses()._add(source.responses().get(i).clone(process.getControlManager(), {parent : process, colName : 'Responses'}))
+                for (var i = 0; i < source.responses().count(); i++) {
+                    this.responses()._add(source.responses().get(i).clone(process.getControlManager(), {
+                        parent: process,
+                        colName: 'Responses'
+                    }))
                 }
-            },
+            }
 
-            addCollectionInstances : function(nodeDefinition) {
-                UccelloClass.super.apply(this, [nodeDefinition]);
+            addCollectionInstances(nodeDefinition) {
+                super.addCollectionInstances(nodeDefinition);
 
-                for (var i = 0; i < nodeDefinition.requests().count(); i++){
-                    this.requests()._add(nodeDefinition.requests().get(i).clone(this.getControlManager(), {parent : this.processInstance(), colName : 'Requests'}));
+                for (var i = 0; i < nodeDefinition.requests().count(); i++) {
+                    this.requests()._add(nodeDefinition.requests().get(i).clone(this.getControlManager(), {
+                        parent: this.processInstance(),
+                        colName: 'Requests'
+                    }));
                 }
 
-                for (var i = 0; i < nodeDefinition.responses().count(); i++){
-                    this.responses()._add(nodeDefinition.responses().get(i).clone(this.getControlManager(), {parent : this.processInstance(), colName : 'Responses'}))
+                for (var i = 0; i < nodeDefinition.responses().count(); i++) {
+                    this.responses()._add(nodeDefinition.responses().get(i).clone(this.getControlManager(), {
+                        parent: this.processInstance(),
+                        colName: 'Responses'
+                    }))
                 }
-            },
+            }
 
-            hasUnhandledResponse: function () {
+            hasUnhandledResponse() {
                 return this.getUnhandledResponse() ? true : false;
-            },
+            }
 
-            handleResponse : function(done){
+            handleResponse(done) {
                 this.state(FlowNode.state.HasNewResponse);
                 done();
-            },
+            }
 
-            execute : function(callback) {
+            execute(callback) {
                 if (this.processInstance().isSaving()) {
                     this.saving();
                     this.callExecuteCallBack(callback);
                 }
-                
+
                 var that = this;
 
                 function logResponses() {
@@ -91,23 +111,14 @@ define(
                 }
 
                 if (this.state() == FlowNode.state.Executing) {
-                    console.log('[%s] : => Выполняется узел %s', (new Date()).toLocaleTimeString(), this.name());
-                    var _activityState = this.exposeRequests();
-                    if (_activityState == Activity.state.Waiting) {
-                        this.state(FlowNode.state.WaitingRequest);
-                        this.needSave = true;
-                        this.processInstance().enqueueCurrentToken();
-                    }
-                    else if (_activityState == Activity.state.Executing) {
-                        this.completeExecution();
-                    }
+                    this._handleRequests();
                 }
                 else if ((this.state() == FlowNode.state.WaitingRequest) || (this.state() == FlowNode.state.HasNewResponse)) {
                     logResponses.call(this);
 
-                    if (this.token().getPropertiesOfNode(this.name()).isAllResponseReceived()){
+                    if (this.token().getPropertiesOfNode(this.name()).isAllResponseReceived()) {
                         this.completeExecution();
-                        if (this.processInstance().isWaitingScriptAnswer()){
+                        if (this.processInstance().isWaitingScriptAnswer()) {
                             this.processInstance().enqueueCurrentToken();
                             console.log('[%s] : => Узел [%s] ждет выполнения скрипта', (new Date()).toLocaleTimeString(), this.name());
                         } else {
@@ -120,7 +131,7 @@ define(
 
                     if (this.hasScript() && this.hasUnhandledResponse()) {
                         var _state = this.state();
-                        UccelloClass.super.apply(this, [callback]);
+                        super.execute(callback);
                         this.state(_state);
                         return;
                     }
@@ -131,61 +142,83 @@ define(
                 }
 
                 this.callExecuteCallBack(callback);
-            },
+            }
 
-            _doOnDone : function () {
-                // Empty
-            },
+            _handleRequests() {
+                Logger.info('Выполняется узел %s', this.name());
+                var _activityState = this.exposeRequests();
+                if (_activityState == Activity.state.Waiting) {
+                    this.waitingRequest();
+                    this.needSave = true;
+                    this.processInstance().enqueueCurrentToken();
+                }
+                else if (_activityState == Activity.state.Executing) {
+                    this.completeExecution();
+                }
+            }
 
-            cancel : function() {
+            _doOnDone() {
+                if (!this.hasScript()) {
+                    var _responseCol = this.token().getPropertiesOfNode(this.name()).responses();
 
-            },
+                    for (var i = 0; i < _responseCol.count(); i++) {
+                        EngineSingleton.getInstance().responseStorage.executeResponseCallback(_responseCol.get(i).ID());
+                    }
+                }
+            }
 
-            createScriptObject : function(callback) {
-                var _scriptObject = UccelloClass.super.apply(this, [callback]);
+            cancel() {
+
+            }
+
+            createScriptObject(callback) {
+                var _scriptObject = super.createScriptObject(callback);
                 var _response = this.getUnhandledResponse();
-                _response.state(Request.state.Done);
+                _response.done();
                 _scriptObject.response = _response;
 
                 return _scriptObject;
-            },
+            }
 
-            addRequest : function(name) {
-                var _request = new Request(this.getControlManager(), {parent  : this.getParent(), colName : 'Requests'});
+            addRequest(name) {
+                var _request = new Request(this.getControlManager(), {parent: this.getParent(), colName: 'Requests'});
                 _request.name(name);
                 _request.isService(false);
                 this.requests()._add(_request);
                 return _request;
-            },
-            
-            addServiceRequest : function() {
-                var _request = new Request(this.getControlManager(), {parent  : this.processInstance().definition(), colName : 'Requests'});
+            }
+
+            addServiceRequest() {
+                var _request = new Request(this.getControlManager(), {
+                    parent: this.processInstance().definition(),
+                    colName: 'Requests'
+                });
                 _request.name('TaskRequest');
                 _request.isService(true);
                 this.requests()._add(_request);
-                return _request;    
-            },
+                return _request;
+            }
 
-            close : function() {
-                if (this.token().getPropertiesOfNode(this.name()).isAllResponseReceived()){
-                    UccelloClass.super.apply(this, []);
+            close() {
+                if (this.token().getPropertiesOfNode(this.name()).isAllResponseReceived()) {
+                    super.close();
                 }
-            },
+            }
 
 
-            exposeRequests : function() {
+            exposeRequests() {
                 var _requests = this._getRequests();
 
-                if (_requests.length > 0){
+                if (_requests.length > 0) {
                     var _process = this.processInstance();
                     var _token = _process.currentToken();
                     var _props = _token.getPropertiesOfNode(this.name());
 
                     var that = this;
-                    _requests.forEach(function(request){
-                        var _request = request.clone(that.getControlManager(), {parent : _props, colName : 'Requests'});
+                    _requests.forEach(function (request) {
+                        var _request = request.clone(that.getControlManager(), {parent: _props, colName: 'Requests'});
                         _request.processID(_process.processID());
-                        _request.tokenID(_token.tokenID())
+                        _request.tokenId(_token.tokenId());
                     });
 
                     return Activity.state.Waiting
@@ -193,9 +226,9 @@ define(
                 else {
                     return Activity.state.Executing
                 }
-            },
+            }
 
-            _getRequests : function(){
+            _getRequests() {
                 var _result = [];
 
                 if (this.requests().count() > 0) {
@@ -210,14 +243,14 @@ define(
                 }
 
                 return _result;
-            },
+            }
 
-            _getInternalRequest: function() {
+            _getInternalRequest() {
                 // переопределяется для Task
                 return null
-            },
+            }
 
-            hasNewRequests : function() {
+            hasNewRequests() {
                 for (var i = 0; i < this.requests().count(); i++) {
                     if (this.requests().get(i).isActive()) {
                         return true
@@ -226,9 +259,7 @@ define(
 
                 return false
             }
-        });
-
-        return UserTask;
+        }
     }
-)
+);
 
