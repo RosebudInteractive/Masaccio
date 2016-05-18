@@ -1,17 +1,16 @@
 /**
  * Created by staloverov on 11.03.2015.
  */
+'use strict';
+
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 define([
-        UCCELLO_CONFIG.uccelloPath+'system/uobject',
         UCCELLO_CONFIG.uccelloPath + 'resman/dataTypes/resource',
         '../public/utils',
         './parameter',
-        './controls',
         './Activities/activity',
         './Activities/userTask',
         './Activities/scriptTask',
@@ -30,11 +29,9 @@ define([
         './Task/taskParameter'
     ],
     function(
-        UObject,
         Resource,
         Utils,
         Parameter,
-        Controls,
         Activity,
         UserTask,
         ScriptTask,
@@ -52,35 +49,51 @@ define([
         EngineSingleton,
         TaskParameter
     ) {
-        var ProcessDefinition = Resource.extend({
+        return class ProcessDefinition extends Resource{
 
             //<editor-fold desc="Class description">
-            className: "ProcessDefinition",
-            classGuid: Controls.guidOf('ProcessDefinition'),
-            metaFields: [
-                {fname: 'DefinitionID', ftype: 'string'}
-            ],
-            metaCols: [
-                {'cname': 'Parameters', 'ctype': 'WfeParameter'},
-                {'cname': 'InputParameters', 'ctype': 'WfeParameter'},
-                {'cname': 'Connectors', 'ctype': 'SequenceFlow'},
-                {'cname': 'Nodes', 'ctype': 'FlowNode'},
+            get className() {
+                return "ProcessDefinition"
+            }
 
-                {'cname': 'Requests', 'ctype': 'Request'},
-                {'cname': 'Scripts', 'ctype': 'UserScript'},
+            get classGuid() {
+                return UCCELLO_CONFIG.classGuids.ProcessDefinition
+            }
 
-                {'cname': 'MessageFlows', 'ctype': 'MessageFlow'},
-                {'cname': 'CorrelationKeys', 'ctype': 'CorrelationKey'},
+            get metaFields() {
+                return [
+                    {fname: 'DefinitionID', ftype: 'string'},
+                    {fname: "dbId", ftype: "integer"}
+                ]
+            }
 
-                {'cname': 'TaskParams', 'ctype': 'TaskParameter'}
-            ],
+            get metaCols() {
+                return [
+                    {'cname': 'Parameters', 'ctype': 'WfeParameter'},
+                    {'cname': 'InputParameters', 'ctype': 'WfeParameter'},
+                    {'cname': 'Connectors', 'ctype': 'SequenceFlow'},
+                    {'cname': 'Nodes', 'ctype': 'FlowNode'},
 
-            elemNamePrefix: "Field",
-            queryGuid: '1811166b-b719-4bf1-8527-8db9f8a8c67e',
+                    {'cname': 'Requests', 'ctype': 'Request'},
+                    {'cname': 'Scripts', 'ctype': 'UserScript'},
+
+                    {'cname': 'MessageFlows', 'ctype': 'MessageFlow'},
+                    {'cname': 'CorrelationKeys', 'ctype': 'CorrelationKey'},
+
+                    {'cname': 'TaskParams', 'ctype': 'TaskParameter'}
+                ]
+            }
+
+            get elemNamePrefix() {
+                return "Field"
+            } 
+            get queryGuid() {
+                return '1811166b-b719-4bf1-8527-8db9f8a8c67e'
+            }
             //</editor-fold>
 
-            init: function(cm, params){
-                UccelloClass.super.apply(this, [cm, params]);
+            constructor(cm, params){
+                super(cm, params);
                 if (!params) { return }
 
                 if (!params.isDeserialize){
@@ -88,71 +101,71 @@ define([
                         new TaskParameter(this.getControlManager(), {parent: this, colName: 'TaskParams'});
                     }
                 }
-            },
+            }
 
-            getModelDescription: function () {
+            getModelDescription() {
                 return {name: "ProcessDef"};
-            },
+            }
 
             //<editor-fold desc="MetaFields & MetaCols">
-            name: function (value) {
+            name (value) {
                 return this._genericSetter("ResName", value);
-            },
+            }
 
-            definitionID: function (value) {
+            definitionId (value) {
                 return this._genericSetter("DefinitionID", value);
-            },
+            }
 
-            parameters: function () {
+            dbId(value) {
+                return this._genericSetter("dbId", value);
+            }
+
+            parameters () {
                 return this.getCol('Parameters');
-            },
+            }
 
-            inputParameters: function () {
+            inputParameters () {
                 return this.getCol('InputParameters');
-            },
+            }
 
-            connectors: function () {
+            connectors () {
                 return this.getCol('Connectors');
-            },
+            }
 
-            nodes: function () {
+            nodes () {
                 return this.getCol('Nodes');
-            },
+            }
 
-            taskParams: function () {
+            taskParams () {
                 return this.getCol('TaskParams').get(0);
-            },
+            }
             
-            inputTaskParams: function() {
+            inputTaskParams() {
                 return this.getCol('TaskParams').get(1);
-            },
+            }
 
-            //messageDefinitions : function() {
-            //    return this.getCol('MessageDefinitions');
-            //},
-
-            messageFlows: function () {
+            messageFlows () {
                 return this.getCol('MessageFlows');
-            },
+            }
 
-            correlationKeys: function () {
+            correlationKeys () {
                 return this.getCol('CorrelationKeys');
-            },
+            }
+
+            scripts () {
+                return this.getCol('Scripts');
+            }
             //</editor-fold>
 
-            getControlManager: function () {
+            getControlManager () {
                 return this.pvt.controlMgr;
-            },
+            }
 
-            scripts: function () {
-                return this.getCol('Scripts');
-            },
-
-            getRootObj: function () {
+            getRootObj () {
                 return this;
-            },
+            }
 
-            getOrCreateScript: function (script) {
+            getOrCreateScript (script) {
                 var _script;
 
                 for (var i = 0; i < this.scripts().count(); i++) {
@@ -165,43 +178,43 @@ define([
                 _script = new UserScript(this.getControlManager(), {parent: this, colName: 'Scripts'});
                 _script.parse(script);
                 return _script;
-            },
+            }
 
-            addParameter: function (parameterName) {
+            addParameter (parameterName) {
                 var _param = new Parameter(this.getControlManager(), {parent: this, colName: 'Parameters'});
                 _param.name(parameterName);
                 return _param;
-            },
+            }
 
-            clone: function () {
+            clone () {
                 var _newDefinition = new ProcessDefinition(this.pvt.controlMgr, {});
 
-                _newDefinition.definitionID(this.definitionID());
+                _newDefinition.definitionId(this.definitionId());
                 _newDefinition.name(this.name());
                 Utils.copyCollection(this.nodes(), _newDefinition.nodes());
                 Utils.copyCollection(this.connectors(), _newDefinition.connectors());
 
                 return _newDefinition;
-            },
+            }
 
-            findNode: function (node) {
+            findNode (node) {
                 for (var i = 0; i < this.nodes().count(); i++) {
                     var _node = this.nodes().get(i);
                     if ((_node instanceof node.constructor) && (_node.name() == node.name())) {
                         return _node;
                     }
                 }
-            },
+            }
 
-            addActivity: function (activityName) {
+            addActivity (activityName) {
                 var _node = new Activity(this.getControlManager(), {parent: this, colName: 'Nodes'});
                 if (activityName) {
                     _node.name(activityName)
                 }
                 return _node;
-            },
+            }
 
-            addUserTask: function (taskName, script) {
+            addUserTask (taskName, script) {
                 var _node = new UserTask(this.getControlManager(), {parent: this, colName: 'Nodes'});
                 if (taskName) {
                     _node.name(taskName)
@@ -211,9 +224,9 @@ define([
                     _node.setUserScript(script)
                 }
                 return _node;
-            },
+            }
 
-            addScriptTask: function (taskName, script) {
+            addScriptTask (taskName, script) {
                 if (!script) {
                     throw 'Не указан скрипт'
                 }
@@ -222,25 +235,25 @@ define([
                     _node.name(taskName)
                 }
                 return _node;
-            },
+            }
 
-            addInclusiveGateway: function (gatewayName) {
+            addInclusiveGateway (gatewayName) {
                 var _node = new InclusiveGateway(this.getControlManager(), {parent: this, colName: 'Nodes'});
                 if (gatewayName) {
                     _node.name(gatewayName)
                 }
                 return _node;
-            },
+            }
 
-            addExclusiveGateway: function (gatewayName) {
+            addExclusiveGateway (gatewayName) {
                 var _node = new ExclusiveGateway(this.getControlManager(), {parent: this, colName: 'Nodes'});
                 if (gatewayName) {
                     _node.name(gatewayName)
                 }
                 return _node;
-            },
+            }
 
-            addCallActivity: function (activityName, definitionID) {
+            addCallActivity (activityName, definitionID) {
                 var _node = new CallActivity(this.getControlManager(), {parent: this, colName: 'Nodes'});
                 if (activityName) {
                     _node.name(activityName)
@@ -249,44 +262,44 @@ define([
                     _node.definitionID(definitionID)
                 }
                 return _node;
-            },
+            }
 
-            addStartEvent: function (eventName) {
+            addStartEvent (eventName) {
                 var _node = new StartEvent(this.getControlManager(), {parent: this, colName: 'Nodes'});
                 if (eventName) {
                     _node.name(eventName)
                 }
                 return _node;
-            },
+            }
 
-            addEndEvent: function (eventName) {
+            addEndEvent (eventName) {
                 var _node = new EndEvent(this.getControlManager(), {parent: this, colName: 'Nodes'});
                 if (eventName) {
                     _node.name(eventName)
                 }
                 return _node;
-            },
+            }
 
-            connect: function (source, target, script) {
+            connect (source, target, script) {
                 var _sequence = new SequenceFlow(this.getControlManager(), {parent: this, colName: 'Connectors'});
                 _sequence.connect(source, target, script);
                 return _sequence;
-            },
+            }
 
-            validate: function () {
+            validate () {
                 return Answer.success();
-            },
+            }
 
-            findNodeByName: function (nodeName) {
+            findNodeByName (nodeName) {
                 for (var i = 0; i < this.nodes().count(); i++) {
                     var _node = this.nodes().get(i);
                     if (_node.name() == nodeName) {
                         return _node;
                     }
                 }
-            },
+            }
 
-            addEvent: function (eventType, eventName) {
+            addEvent (eventType, eventName) {
                 var _constructor = EventRef.constructor.getForType(eventType);
                 if (_constructor) {
                     var _node = new _constructor(this.getControlManager(), {parent: this, colName: 'Nodes'});
@@ -295,30 +308,30 @@ define([
                     }
                     return _node;
                 }
-            },
+            }
 
-            addMessageFlow: function () {
+            addMessageFlow () {
                 var _flow = new MessageFlow(this.getControlManager(), {parent: this, colName: 'MessageFlows'});
                 var _correlationKey = this.addCorrelationKey();
                 _flow.correlationKey(_correlationKey);
                 return _flow;
-            },
+            }
 
-            addCorrelationKey: function (name) {
+            addCorrelationKey (name) {
                 var _ck = new CorrelationKey(this.getControlManager(), {parent: this, colName: 'CorrelationKeys'});
                 if (name) {
                     _ck.name(name);
                 }
                 return _ck
-            },
+            }
 
-            addInputParameters: function (parameterName) {
+            addInputParameters (parameterName) {
                 var _param = new Parameter(this.getControlManager(), {parent: this, colName: 'InputParameters'});
                 _param.name(parameterName);
                 return _param;
-            },
+            }
 
-            getModelForProcess: function () {
+            getModelForProcess () {
                 return {
                     name: 'Process',
                     childs: [{
@@ -327,9 +340,9 @@ define([
                         }
                     }]
                 }
-            },
+            }
 
-            onSaveProcess: function (dbObject, params) {
+            onSaveProcess (dbObject, params) {
                 var that = this;
                 return new Promise(function (resolve, reject) {
                     if ((!params) || (!params.processInstance)) {
@@ -338,7 +351,6 @@ define([
 
                     that._saveRequests(dbObject, params)
                         .then(function () {
-                            that._deleteSavedRequests(params.processInstance);
                             that._saveProcessVar(dbObject, params.processInstance);
                         })
                         .then(resolve)
@@ -346,10 +358,10 @@ define([
                             throw error
                         });
                 });
-            },
+            }
 
 
-            _saveRequests: function (dbObject, params) {
+            _saveRequests (dbObject, params) {
 
                 function getRequestObject(request){
                     var _collection = dbObject.getDataRoot('Request').getCol('DataElements');
@@ -433,43 +445,26 @@ define([
                         resolve()
                     }
                 })
-            },
+            }
 
-            _deleteSavedRequests: function (processInstance) {
-                var _processID = processInstance.processID();
-                var _requests = EngineSingleton.getInstance().requestStorage.getProcessRequestsForSave(_processID);
-                var _responses = EngineSingleton.getInstance().responseStorage.getProcessResponsesForSave(_processID);
-
-                //_requests.forEach(function (request) {
-                //    processInstance.deleteRequest(request)
-                //});
-                //
-                //_responses.forEach(function (response) {
-                //    processInstance.deleteResponse(response)
-                //});
-
-                EngineSingleton.getInstance().requestStorage.deleteProcessRequestsForSave(_processID);
-                EngineSingleton.getInstance().responseStorage.deleteProcessResponsesForSave(_processID);
-            },
-
-            _saveProcessVar : function(dbObject, processInstance){
+            _saveProcessVar (dbObject, processInstance){
                 if (processInstance.processVar()) {
                     var _processVar = EngineSingleton.getInstance().db.serialize(processInstance.processVar(), true);
                     _processVar = JSON.stringify(_processVar);
                     dbObject.vars(_processVar);
                 }
-            },
+            }
 
-            applyInputTaskParams : function(){
+            applyInputTaskParams (){
                 // Only Task definition can use task parameters
                 // implementation in TaskDef
-            },
+            }
 
-            checkInputParams: function(params){
+            checkInputParams(params){
                 return true
-            },
+            }
 
-            setInputParams: function(params){
+            setInputParams(params){
                 var _inputParam = this.inputTaskParams();
                 if (_inputParam) {
                     this.getCol('TaskParams')._del(_inputParam)
@@ -477,8 +472,6 @@ define([
                 var _db = this.pvt.db ? this.pvt.db : this.getRoot().pvt.db;
                 _db.deserialize(params, {obj: this, colName: 'TaskParams'}, EngineSingleton.getInstance().createComponentFunction);
             }
-        });
-
-        return ProcessDefinition;
+        }
     }
 );

@@ -18,10 +18,9 @@ Object.freeze(State);
 define(
     ['./../answer'],
     function(Answer) {
-        class ResponseStorage {
+        return class ResponseStorage {
             constructor() {
                 this.responses = [];
-                this.preparedForSave = [];
             }
 
             addResponseCallback(response, timeout, callback) {
@@ -87,39 +86,6 @@ define(
                     throw 'Err';
                 }
             }
-
-            addForSave(response) {
-                var _existResponse = this.preparedForSave.find(function (element) {
-                    return element.ID() == response.ID()
-                });
-
-                if (!_existResponse) {
-                    this.preparedForSave.push(response)
-                }
-            }
-
-            getProcessResponsesForSave(processID) {
-                var _resultArray = [];
-                this.preparedForSave.forEach(function(element){
-                    if (element.processID() == processID) {
-                        _resultArray.push(element)
-                    }
-                });
-
-                return _resultArray;
-            }
-
-            deleteProcessResponsesForSave(processID) {
-                this.preparedForSave.forEach(function(element, index, array) {
-                    if (element.processID() == processID){
-                        array.splice(index, 1)
-                    }
-                })
-            }
-
         }
-
-        return ResponseStorage;
     }
-
 );

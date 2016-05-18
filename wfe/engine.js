@@ -122,12 +122,12 @@ define([
             /*  ----- Definitions ----- */
             findDefinition: function (definitionID) {
                 return this.processDefinitions.find(function(definition) {
-                   return definition.definitionID() == definitionID
+                   return definition.definitionId() == definitionID
                 });
             },
 
             addProcessDefinition : function(definition, callback) {
-                var _def = this.findDefinition(definition.definitionID())
+                var _def = this.findDefinition(definition.definitionId())
                 if (!_def) {
                     this.processDefinitions.push(definition);
                     console.log('[%s] : => Добавлено описание процесса [%s]', (new Date()).toLocaleTimeString(), definition.name())
@@ -669,7 +669,7 @@ define([
 
             newProcessDefinition : function() {
                 var _definition = new ProcessDefinition(this.getControlManager(), {});
-                _definition.definitionID(UUtils.guid());
+                _definition.definitionId(UUtils.guid());
                 return _definition;
             },
 
@@ -703,12 +703,12 @@ define([
 
             addMessageDefinition : function(definition, callback) {
                 if (this.messageDefinitions.every(function(element) {
-                        return element.definitionID() != definition.definitionID()
+                        return element.definitionId() != definition.definitionId()
                     })) {
                     this.messageDefinitions.push(definition);
                     Answer.success('Добавлено описание сообщения [%s]', definition.name()).handle(callback);
                 } else {
-                    Answer.error('Описание сообщения [%s] уже существует', definition.definitionID()).handle(callback);
+                    Answer.error('Описание сообщения [%s] уже существует', definition.definitionId()).handle(callback);
                 }
             },
 

@@ -28,7 +28,7 @@ class Generator{
         }
 
         if (_obj) {
-            fs.writeFileSync(this.savePath + definition.definitionID() + '.json', JSON.stringify(_obj));
+            fs.writeFileSync(this.savePath + definition.definitionId() + '.json', JSON.stringify(_obj));
             console.log('[%s] : {{ Process definition [%s] saved', (new Date()).toLocaleTimeString(), definition.name())
         }
     }

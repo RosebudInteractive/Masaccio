@@ -13,9 +13,7 @@ define(
         return class RequestStorage {
             constructor(options) {
                 // checkOptions(options);
-
                 this.storage = [];
-                this.preparedForSave = [];
             }
 
             addRequest(request) {
@@ -111,37 +109,6 @@ define(
                 _requests.forEach(function (item) {
                     if (item.isActive()) {
                         item.cancel();
-                    }
-                })
-            }
-
-            addForSave(request) {
-                var _index = this.preparedForSave.findIndex(function (element) {
-                    return element.ID() == request.ID()
-                });
-
-                if (_index == -1) {
-                    this.preparedForSave.push(request)
-                } else {
-                    this.preparedForSave[_index] = request
-                }
-            }
-
-            getProcessRequestsForSave(processID) {
-                var _resultArray = [];
-                this.preparedForSave.forEach(function(element){
-                    if (element.processID() == processID) {
-                        _resultArray.push(element)
-                    }
-                });
-
-                return _resultArray;
-            }
-
-            deleteProcessRequestsForSave(processID){
-                this.preparedForSave.forEach(function(element, index, array) {
-                    if (element.processID() == processID){
-                        array.splice(index, 1)
                     }
                 })
             }

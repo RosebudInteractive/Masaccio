@@ -122,4 +122,4 @@ console.log('[%s] : => Сервер запущен на http://127.0.0.1:1328/ma
 //EngineSingleton.getInstance().addProcessDefinition(_def1);
 //EngineSingleton.getInstance().addProcessDefinition(_def2);
 //
-//EngineSingleton.getInstance().startProcessInstance(_def2.definitionID);
+//EngineSingleton.getInstance().startProcessInstance(_def2.definitionId);

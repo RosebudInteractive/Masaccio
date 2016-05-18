@@ -24,7 +24,7 @@ xdescribe('CallActivity', function(){
 
            var _def = Definition.Process.callSimpleSubProcess();
            EngineSingleton.getInstance().addProcessDefinition(_def);
-           var _processID = EngineSingleton.getInstance().startProcessInstance(_def.definitionID()).processID;
+           var _processID = EngineSingleton.getInstance().startProcessInstance(_def.definitionId()).processID;
            var _process;
 
            var _interval = setInterval(function () {

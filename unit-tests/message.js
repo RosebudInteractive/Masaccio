@@ -27,7 +27,7 @@ xdescribe('Message', function(){
                 var _def2 = Definition.process_with_start_and_catch_event();
                 EngineSingleton.getInstance().addProcessDefinition(_def2);
 
-                var _processID = EngineSingleton.getInstance().startProcessInstance(_def1.definitionID()).processID;
+                var _processID = EngineSingleton.getInstance().startProcessInstance(_def1.definitionId()).processID;
                 var _process;
 
                 var _interval = setInterval(function () {
@@ -64,8 +64,8 @@ xdescribe('Message', function(){
                 var _def2 = Definition.process_with_catchingEvent_and_userTask();
                 EngineSingleton.getInstance().addProcessDefinition(_def2);
 
-                var _processID1 = EngineSingleton.getInstance().startProcessInstance(_def1.definitionID()).processID;
-                var _processID2 = EngineSingleton.getInstance().startProcessInstance(_def2.definitionID()).processID;
+                var _processID1 = EngineSingleton.getInstance().startProcessInstance(_def1.definitionId()).processID;
+                var _processID2 = EngineSingleton.getInstance().startProcessInstance(_def2.definitionId()).processID;
                 var _process;
 
                 var _interval = setInterval(function () {
@@ -94,10 +94,10 @@ xdescribe('Message', function(){
             var _catchProcessDef = Definition.process_with_catchingEvent();
             EngineSingleton.getInstance().addProcessDefinition(_catchProcessDef);
 
-            var _catch1 = new ProcessInfo(EngineSingleton.getInstance().startProcessInstance(_catchProcessDef.definitionID()).processID);
-            var _catch2 = new ProcessInfo(EngineSingleton.getInstance().startProcessInstance(_catchProcessDef.definitionID()).processID);
+            var _catch1 = new ProcessInfo(EngineSingleton.getInstance().startProcessInstance(_catchProcessDef.definitionId()).processID);
+            var _catch2 = new ProcessInfo(EngineSingleton.getInstance().startProcessInstance(_catchProcessDef.definitionId()).processID);
 
-            var _throw = new ProcessInfo(EngineSingleton.getInstance().startProcessInstance(_throwProcessDef.definitionID()).processID);
+            var _throw = new ProcessInfo(EngineSingleton.getInstance().startProcessInstance(_throwProcessDef.definitionId()).processID);
 
             var _interval = setInterval(function () {
                 _catch1.instance = EngineSingleton.getInstance().getProcessInstance(_catch1.processID);
@@ -125,7 +125,7 @@ xdescribe('Message', function(){
             var _catchProcessDef = Definition.process_with_start_and_catch_event();
             EngineSingleton.getInstance().addProcessDefinition(_catchProcessDef);
 
-            var _throw = new ProcessInfo(EngineSingleton.getInstance().startProcessInstance(_throwProcessDef.definitionID()).processID);
+            var _throw = new ProcessInfo(EngineSingleton.getInstance().startProcessInstance(_throwProcessDef.definitionId()).processID);
 
             var _interval = setInterval(function () {
                 var _process1 = EngineSingleton.getInstance().findProcessByPredicate(

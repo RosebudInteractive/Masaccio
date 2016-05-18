@@ -15,7 +15,7 @@ var SubProcessDefinitions = {
          */
 
         var _definition = EngineSingleton.getInstance().newProcessDefinition();
-        _definition.definitionID(this.guids.simpleProcess);
+        _definition.definitionId(this.guids.simpleProcess);
         _definition.name('Тестовый подпроцесс - простейший процесс с одним узлом Activity');
         var _start = _definition.addStartEvent('start_Subprocess');
         var _activity = _definition.addActivity('activity_Subprocess');
@@ -39,7 +39,7 @@ var Definitions = {
          */
 
         var _definition = EngineSingleton.getInstance().newProcessDefinition();
-        _definition.definitionID(this.guids.callSimpleSubProcess);
+        _definition.definitionId(this.guids.callSimpleSubProcess);
         _definition.name('Тестовый процесс для CallActivity');
         var _start = _definition.addStartEvent('start');
         var _activity = _definition.addCallActivity('callActivity', SubProcessDefinitions.guids.simpleProcess);

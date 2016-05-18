@@ -3,8 +3,6 @@
  */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    //var Class = require('class.extend');
-    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 var flowNodeState = {
@@ -50,7 +48,8 @@ define([
             metaFields: [
                 {fname : 'Name',  ftype : 'string'},
                 {fname : 'State', ftype : 'integer'},
-                {fname : 'Guid',    ftype : 'string'}
+                {fname : 'Guid',  ftype : 'string'},
+                {fname : "dbId",  ftype : "integer"}
             ],
             metaCols: [
                 {'cname' : 'Incoming', 'ctype' : 'ObjectRef'},
@@ -74,6 +73,10 @@ define([
             //<editor-fold desc="MetaFields & MetaCols">
             guid : function(value) {
                 return this._genericSetter("Guid",value);
+            },
+
+            dbId : function(value) {
+                return this._genericSetter("dbId", value);
             },
 
             name: function(value) {

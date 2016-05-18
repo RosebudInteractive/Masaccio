@@ -59,6 +59,7 @@ define(
             }
 
             copy(source) {
+                this.name(source.name());
                 this.taskNumber(source.taskNumber());
                 this.specification(source.specification());
                 this.objId(source.objId());

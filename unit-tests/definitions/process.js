@@ -8,7 +8,7 @@ var EngineSingleton = require(PATH.engine + 'engineSingleton');
 var Definitions = {
     forCreateNewProcessTest : function () {
         var _definition = EngineSingleton.getInstance().newProcessDefinition();
-        _definition.definitionID("8349600e-3d0e-4d4e-90c8-93d42c443ab3");
+        _definition.definitionId("8349600e-3d0e-4d4e-90c8-93d42c443ab3");
         _definition.name('Тестовый процесс - Создание нового процесса');
         _definition.addParameter('param1').value(3);
         _definition.addParameter('param2');
@@ -32,7 +32,7 @@ var Definitions = {
         */
 
         var _definition = EngineSingleton.getInstance().newProcessDefinition();
-        _definition.definitionID("1c27b462-ad68-422e-b4f9-2740b16b60f4");
+        _definition.definitionId("1c27b462-ad68-422e-b4f9-2740b16b60f4");
         _definition.name('Тестовый процесс - Копирование структуры definition в процесс');
 
         _definition.addParameter('param1').value(3);
@@ -70,7 +70,7 @@ var Definitions = {
          */
 
         var _definition = EngineSingleton.getInstance().newProcessDefinition();
-        _definition.definitionID('219612b1-259c-4af6-8bba-959db2526ad7');
+        _definition.definitionId('219612b1-259c-4af6-8bba-959db2526ad7');
         _definition.name('Тестовый процесс с петлей');
 
         // Добавим параметр процесса, который будем потом изменять и контролировать

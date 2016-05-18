@@ -161,7 +161,7 @@ define([
             //{
             //    var _newDefinition = new MessageDefinition(this.getControlManager(), {});
             //
-            //    _newDefinition.definitionID = this.definitionID;
+            //    _newDefinition.definitionId = this.definitionId;
             //    _newDefinition.name(this.name());
             //    Utils.copyCollection(this.nodes(), _newDefinition.nodes());
             //    Utils.copyCollection(this.connectors(), _newDefinition.connectors());

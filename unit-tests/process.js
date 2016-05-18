@@ -101,7 +101,7 @@ xdescribe('Process', function(){
         it('Запустить процесс и отработать петлю', function (done) {
             var _def = Definition.testDefinitionWithLoop();
             EngineSingleton.getInstance().addProcessDefinition(_def);
-            var _processID = EngineSingleton.getInstance().startProcessInstance(_def.definitionID()).processID;
+            var _processID = EngineSingleton.getInstance().startProcessInstance(_def.definitionId()).processID;
             var _process;
 
             var _interval = setInterval(function () {

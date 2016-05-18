@@ -23,10 +23,10 @@ define([
         UCCELLO_CONFIG.uccelloPath + 'system/utils',
         './sequenceFlow',
         './engineSingleton',
-        './controls',
         './userScript',
         './../public/logger',
-        './processVar'
+        './processVar',
+        './controls'
     ],
     function(
         UObject,
@@ -34,10 +34,10 @@ define([
         UUtils,
         SequenceFlow,
         EngineSingleton,
-        Controls,
         UserScript,
         Logger,
-        ProcessVar
+        ProcessVar,
+        Controls
     ){
         var Process = UObject.extend({
 
@@ -51,6 +51,7 @@ define([
                 {fname : 'ProcessID', ftype : 'string'},
                 {fname : 'DefinitionID', ftype : 'string'},
                 {fname : 'DefinitionResourceID', ftype : 'integer'},
+                {fname: "dbId", ftype: "integer"},
                 {
                     fname : 'CurrentToken',
                     ftype : {
@@ -87,19 +88,22 @@ define([
                     if (params.hasOwnProperty('definitionResourceID')) {
                         this.definitionResourceID(params.definitionResourceID)
                     }
-                    
+
+                    this.copyDefinition();
+
                     if (params.hasOwnProperty('params') && (params.params)) {
                         this.definition().setInputParams(params.params);
 
                         if (this.checkInputParams()) {
                             this.definition().applyInputTaskParams();
+                            this.name(this.definition().taskParams().name());
                             this.createProcessVar();
                         }
                     }
 
                     this.processID(UUtils.guid());
                     this.sequenceValue(0);
-                    this.copyDefinition();
+
                     this.state(processStates.Initialized);
                 }
             },
@@ -129,7 +133,7 @@ define([
             copyDefinition: function () {
                 var definition = this.definition();
                 this.name(definition.name());
-                this.definitionID(definition.definitionID());
+                this.definitionID(definition.definitionId());
                 this.copyCorrelations(definition);
                 this.copyMessages(definition);
             },
@@ -161,6 +165,10 @@ define([
 
             processID : function(value) {
                 return this._genericSetter("ProcessID",value);
+            },
+
+            dbId: function(value) {
+                return this._genericSetter("dbId", value);
             },
 
             sequenceValue : function(value) {

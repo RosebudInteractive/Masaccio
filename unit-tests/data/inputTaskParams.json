@@ -5,7 +5,7 @@
   },
   "ver": 3,
   "fields": {
-    "Name": "Simple Task Definition",
+    "Name": "Test Name",
     "TaskNumber": "1205",
     "Specification": "Спецификация",
     "ObjId": "1"

@@ -280,7 +280,7 @@ describe('Engine', function(){
 
                 var _def = Definition.simpleProcessWithOneActivity();
                 EngineSingleton.getInstance().addProcessDefinition(_def);
-                EngineSingleton.getInstance().startProcessInstance(_def.definitionID(), testBody);
+                EngineSingleton.getInstance().startProcessInstance(_def.definitionId(), testBody);
             });
 
             it('Должна вернуться ошибка', function(done) {
@@ -348,7 +348,7 @@ describe('Engine', function(){
                 var _definition = EngineSingleton.getInstance().newMessageDefinition();
 
                 _definition.should.be.exists;
-                _definition.definitionID().should.be.exists;
+                _definition.definitionId().should.be.exists;
                 EngineSingleton.getInstance().messageDefinitions.should.have.length(0);
             });
 
@@ -366,7 +366,7 @@ describe('Engine', function(){
                 _definition1.name('Test1');
                 var _definition2 = EngineSingleton.getInstance().newMessageDefinition();
                 _definition2.name('Test2');
-                _definition2.definitionID(_definition1.definitionID());
+                _definition2.definitionId(_definition1.definitionId());
                 EngineSingleton.getInstance().addMessageDefinition(_definition1);
                 EngineSingleton.getInstance().addMessageDefinition(_definition2, function(answer) {
                     answer.result.should.equal('ERROR');

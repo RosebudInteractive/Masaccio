@@ -15,7 +15,7 @@ class Builder{
         var wfe = this.wfe;
         var def = wfe.newProcessDefinition();
         def.name('First test process');
-        def.definitionID("8349600e-3d0e-4d4e-90c8-93d42c443ab3");
+        def.definitionId("8349600e-3d0e-4d4e-90c8-93d42c443ab3");
         def.addParameter("CurrentObj").value("");
         def.addParameter("IsDone").value(false);
 
@@ -68,7 +68,7 @@ class Builder{
         }
 
         if (_obj) {
-            fs.writeFileSync(UCCELLO_CONFIG.savePath + definition.definitionID() + '.json', JSON.stringify(_obj));
+            fs.writeFileSync(UCCELLO_CONFIG.savePath + definition.definitionId() + '.json', JSON.stringify(_obj));
             console.log('[%s] : {{ Процесс [%s] сохранен', (new Date()).toLocaleTimeString(), definition.name())
         }
     }

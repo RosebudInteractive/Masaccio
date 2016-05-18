@@ -90,7 +90,7 @@ var Definitions = {
         }
 
         var _processDef = EngineSingleton.getInstance().newProcessDefinition();
-        _processDef.definitionID(this.guids.process_with_throwEvent);
+        _processDef.definitionId(this.guids.process_with_throwEvent);
         _processDef.name(this.names.process_with_throwEvent);
 
         var _start = _processDef.addStartEvent('startEvent');
@@ -112,7 +112,7 @@ var Definitions = {
 
     process_with_startMessage_and_throwEvent : function() {
         var _processDef = EngineSingleton.getInstance().newProcessDefinition();
-        _processDef.definitionID(this.guids.process_with_startMessage_and_throwEvent);
+        _processDef.definitionId(this.guids.process_with_startMessage_and_throwEvent);
         _processDef.name(this.names.process_with_startMessage_and_throwEvent);
 
         _processDef.addParameter('ProcessID').value(1);
@@ -213,7 +213,7 @@ var Definitions = {
         */
 
         var _processDef = EngineSingleton.getInstance().newProcessDefinition();
-        _processDef.definitionID(this.guids.process_with_start_and_catch_event);
+        _processDef.definitionId(this.guids.process_with_start_and_catch_event);
         _processDef.name(this.names.process_with_start_and_catch_event);
 
         _processDef.addParameter('ProcessIDFromParent');
@@ -255,7 +255,7 @@ var Definitions = {
          */
 
         var _processDef = EngineSingleton.getInstance().newProcessDefinition();
-        _processDef.definitionID(this.guids.process_with_catchingEvent_and_userTask);
+        _processDef.definitionId(this.guids.process_with_catchingEvent_and_userTask);
         _processDef.name(this.names.process_with_catchingEvent_and_userTask);
         var _start = _processDef.addEvent(EventRef.types.start.none, 'startEvent');
 
@@ -314,7 +314,7 @@ var Definitions = {
          */
 
         var _processDef = EngineSingleton.getInstance().newProcessDefinition();
-        _processDef.definitionID(this.guids.process_with_catchingEvent);
+        _processDef.definitionId(this.guids.process_with_catchingEvent);
         _processDef.name(this.names.process_with_catchingEvent);
         var _start = _processDef.addEvent(EventRef.types.start.none, 'startEvent');
 

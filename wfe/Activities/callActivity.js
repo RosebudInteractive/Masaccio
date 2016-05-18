@@ -48,7 +48,7 @@ define([
 
             assign : function(source){
                 UccelloClass.super.apply(this, [source]);
-                this.definitionID(source.definitionID());
+                this.definitionID(source.definitionId());
             },
 
             execute : function(callback) {

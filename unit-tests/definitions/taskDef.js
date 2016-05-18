@@ -25,7 +25,7 @@ var Definitions = {
 
 
         var _definition = EngineSingleton.getInstance().newTaskDefinition();
-        _definition.definitionID('cbf35df0-8317-4f2f-8728-88736251ff0b');
+        _definition.definitionId('cbf35df0-8317-4f2f-8728-88736251ff0b');
         _definition.name(this.names.forSimpleTaskDef);
         var _start = _definition.addStartEvent('start');
         var _task1 = _definition.addTaskStage('task1');
