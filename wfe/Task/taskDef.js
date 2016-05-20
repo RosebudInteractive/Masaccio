@@ -41,8 +41,8 @@ define([
                 return {
                     name: 'Task',
                     childs: [
-                        {dataObject: {name: 'Request'}}
-                        // {dataObject: {name: 'Task'}}
+                        {dataObject: {name: 'Request'}},
+                        {dataObject: {name: 'Task'}}
                     ]
                 }
             }

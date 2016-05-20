@@ -37,7 +37,7 @@ define([
 
             get metaFields() {
                 return [
-                    {fname: 'Id', ftype: 'integer'},
+                    // {fname: 'Id', ftype: 'integer'},
                     {fname: 'TaskId', ftype: 'integer'},
                     {fname: 'TaskDefStageId', ftype: 'integer'},
                     {fname: 'StageCode', ftype: 'string'},
@@ -45,9 +45,9 @@ define([
                 ]
             }
 
-            id(value) {
-                return this._genericSetter("Id", value);
-            }
+            // id(value) {
+            //     return this._genericSetter("Id", value);
+            // }
 
             taskId(value) {
                 return this._genericSetter("TaskId", value);
@@ -71,7 +71,7 @@ define([
 
             addNewCopyTo(parent) {
                 var _newStage = new TaskStage(parent.getControlManager(), {parent : parent, colName : 'TaskStages'});
-                _newStage.id(this.id());
+                _newStage.dbId(this.dbId());
                 _newStage.taskId(this.taskId());
                 _newStage.taskDefStageId(this.taskDefStageId());
                 _newStage.stageCode(this.stageCode());
@@ -96,7 +96,6 @@ define([
                 if (this.outgoing().count() > 0) {
                     var _request = this.addServiceRequest();
                     _request.taskParams().selectedNode(this.name());
-                    // _request.taskParams().addAvailableNode(this.name());
                     for (var i = 0; i < this.outgoing().count(); i++) {
                         _request.taskParams().addAvailableNode(this.outgoing().get(i).object().target().name())
                     }
