@@ -86,7 +86,7 @@ define([
                             EngineSingleton.getInstance().responseStorage.executeResponseCallback(_scriptObject.response.ID(), result);
                         }
 
-                        callback();
+                        setTimeout(callback(), 0)
                     }
                 );
 

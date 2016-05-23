@@ -14,12 +14,6 @@ var handleMessage = function(messageArgs){
 
 Logger.info = function(message) {
   if (typeof message === 'string') {
-      //var _message = '';
-      //if (arguments.length > 1) {
-      //    _message = Util.format.apply(message, arguments);
-      //} else {
-      //    _message = message
-      //}
       console.log('[%s] : => %s', (new Date()).toLocaleTimeString(), handleMessage.apply(message, arguments));
   } else {
       if ((typeof message === 'object') && (message.hasOwnProperty('message'))) {
@@ -29,6 +23,19 @@ Logger.info = function(message) {
           throw 'undefined message type'
       }
   }
+};
+
+Logger.error = function(message) {
+    if (typeof message === 'string') {
+        console.error('[%s] : => %s', (new Date()).toLocaleTimeString(), handleMessage.apply(message, arguments));
+    } else {
+        if ((typeof message === 'object') && (message.hasOwnProperty('message'))) {
+            console.error('[%s] : => %s', (new Date()).toLocaleTimeString(), message.message);
+        }
+        else {
+            throw 'undefined message type'
+        }
+    }
 };
 
 Logger.scriptExecuted = function(message) {

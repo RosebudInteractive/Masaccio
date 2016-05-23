@@ -121,6 +121,15 @@ define([
                 this.needSave = true;
             },
 
+            copyNodeDefinition : function(process, params){
+                var _node = this.createInstance(process.getControlManager(), params);
+                _node.assign(this, process);
+                _node.guid(this.guid());
+                _node.copyCollectionDefinitions(this, process);
+
+                return _node;
+            },
+
             createInstance : function(){
                 throw 'NotImplementedException';
             },
@@ -238,7 +247,9 @@ define([
             callExecuteCallBack : function(callback) {
                 if (callback) {
                     if (!this.needSave) {
-                        callback()
+                        setTimeout(function(){
+                            callback()        
+                        }, 0);
                     } else {
                         var that = this;
                         var _state = this.processInstance().state();
@@ -247,7 +258,10 @@ define([
                         then(function () {
                             that.needSave = false;
                             that.processInstance().state(_state);
-                            callback()
+                            // callback()
+                            setTimeout(function(){
+                                callback()
+                            }, 0);
                         }).
                         catch(function (err) {
                             that.needSave = false;

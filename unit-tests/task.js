@@ -58,14 +58,14 @@ describe('Task', function(){
                 var _process;
 
                 if (result.result === "OK") {
-                    _process = result.requestInfo.processID;
+                    _process = result.requestInfo.processGuid;
                     var _serializedParams = result.requestInfo.taskParams;
                     var _params = deserialize(_serializedParams);
 
                     _params.selectedNode('task2.1');
 
                     var responseObj = {
-                        requestID: result.requestInfo.requestID,
+                        requestId: result.requestInfo.requestId,
                         taskParams: serialize(_params)
                     };
                     console.log(">>> Next node [%s]", [_params.selectedNode()]);
@@ -73,14 +73,14 @@ describe('Task', function(){
                     EngineSingleton.getInstance().processResponse(responseObj, 0, function () {
                         EngineSingleton.getInstance().waitForRequest({processId : _process, requestName : 'TaskRequest'}, 0, function(result){
                             if (result.result === "OK") {
-                                _process = result.requestInfo.processID;
+                                _process = result.requestInfo.processGuid;
                                 var _serializedParams = result.requestInfo.taskParams;
                                 var _params = deserialize(_serializedParams);
 
                                 _params.selectedNode('task3');
 
                                 var responseObj = {
-                                    requestID: result.requestInfo.requestID,
+                                    requestId: result.requestInfo.requestId,
                                     taskParams: serialize(_params)
                                 };
                                 console.log(">>> Next node [%s]", [_params.selectedNode()]);
@@ -94,7 +94,7 @@ describe('Task', function(){
                                             _params.selectedNode(_params.availableNodes().get(0).value());
 
                                             var responseObj = {
-                                                requestID: result.requestInfo.requestID,
+                                                requestId: result.requestInfo.requestId,
                                                 taskParams: serialize(_params)
                                             };
                                             console.log(">>> Next node [%s]", [_params.selectedNode()]);

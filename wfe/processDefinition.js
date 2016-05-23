@@ -449,6 +449,9 @@ define([
 
             _saveProcessVar (dbObject, processInstance){
                 if (processInstance.processVar()) {
+                    processInstance.processVar().taskId(processInstance.dbId());
+                    processInstance.processVar().taskGuid(processInstance.processID());
+
                     var _processVar = EngineSingleton.getInstance().db.serialize(processInstance.processVar(), true);
                     _processVar = JSON.stringify(_processVar);
                     dbObject.vars(_processVar);

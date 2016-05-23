@@ -37,9 +37,7 @@ define([
 
             createNewProcess(definitionName, options) {
                 var that = this;
-                return new Promise(promiseBody);
-
-                function promiseBody(resolve, reject) {
+                return new Promise(function(resolve, reject) {
 
                     that.resman.loadRes([{
                         resName: definitionName,
@@ -57,12 +55,11 @@ define([
                                 _options.params = options.params
                             }
                             var _process = new Process(that.db, _options, _defResource);
-                            that._register(_process);
-                            resolve(_process);
+                            that._register(_process).then(resolve, reject);
+                            // resolve(_process);
                         }
                     })
-
-                }
+                })
             }
 
             finish(processInstance){
@@ -71,13 +68,22 @@ define([
             }
             
             _register(process) {
-                var _instance = this.instances.find(function(instance){
-                    return instance.processID() === process.processID()
+                var that = this;
+                return new Promise(function(resolve, reject){
+                    var _instance = that._findProcessInstance(process.processID());
+
+                    if (!_instance) {
+                        that.instances.push(process);
+                        that.justSaveProcess(process).then(function(){
+                            resolve(process)
+                        }, reject).
+                        catch(function(err){
+                            reject(err)
+                        })
+                    } else {
+                        resolve(process)
+                    }
                 });
-                
-                if (!_instance) {
-                   this.instances.push(process); 
-                }
             }
 
             getDefinitionParameters(definitionIdentifier){
@@ -131,15 +137,15 @@ define([
                 });
             }
             
-            findOrUpload(processId){
+            findOrUpload(processGuid){
                 var that = this;
 
                 return new Promise(function(resolve, reject){
-                    var _process = that._findProcessInstance(processId);
+                    var _process = that._findProcessInstance(processGuid);
                     if (_process) {
                         resolve(_process)
                     } else {
-                        that.adapter.deserialize(processId).
+                        that.adapter.deserialize(processGuid).
                         then(function(process) {
                                 that.instances.push(process);
                                 resolve(process)
@@ -152,9 +158,21 @@ define([
                 });
             }
 
-            _findProcessInstance (processId) {
+            justSaveProcess(processInstance) {
+                var that = this;
+
+                return new Promise(function(resolve, reject){
+                    if (processInstance) {
+                        that.adapter.serialize(processInstance).then(resolve,reject)
+                    } else {
+                        reject(new Error('Can not save undefined process'))
+                    }
+                });
+            }
+
+            _findProcessInstance (processGuid) {
                 return this.instances.find(function(instance){
-                    return instance.processID() == processId
+                    return instance.processID() == processGuid
                 });
             }
         };

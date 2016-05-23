@@ -34,7 +34,7 @@ xdescribe('Process', function(){
         })
     });
 
-    describe('#copyDefinition', function(){
+    describe('#_copyDefinition', function(){
         it('Новый процесс должен иметь копию структуры processDefinition', function(){
             var _def = Definition.forCopyDefinitionStruct();
             var _process = new Process(Main.Config.getControlManager(), {}, _def);

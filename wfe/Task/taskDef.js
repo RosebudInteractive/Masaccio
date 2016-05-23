@@ -42,12 +42,14 @@ define([
                     name: 'Task',
                     childs: [
                         {dataObject: {name: 'Request'}},
-                        {dataObject: {name: 'Task'}}
+                        {dataObject: {name: 'TaskStage'}}
                     ]
                 }
             }
 
             onSaveProcess(dbObject, params) {
+                var that = this;
+
                 return super.onSaveProcess(dbObject, params).then(function () {
                     return new Promise(function(resolve){
                         dbObject.number(params.processInstance.processVar().taskNumber());
@@ -56,11 +58,35 @@ define([
                         // Todo : Что делать со старыми состояниями процесса? Если они должны жить параллельно, то где хранить?
                         // обязательно требует TaskStageLogId, пока поставил nullable
                         dbObject.taskState('InProgress');
+
+                        
+
                         resolve()
                     })
                 }).catch(function (err) {
                     return Promise.reject(err)
                 })
+            }
+
+            _saveTaskStages(dbObject, params) {
+                var that = this;
+
+                return new Promise(function(resolve, reject){
+                    var _processInstance = params.processInstance;
+                    var _stages = _getTaskStages(_processInstance);
+
+                    if (_stages.length == 0) {
+                        resolve()
+                    } else {
+                        var _root = dbObject.getDataRoot('TaskStage');
+
+                        _stages.forEach(function(stage){
+
+                            stage.taskId(_processInstance.dbId());
+
+                        })
+                    }
+                });
             }
 
             getModelDescription() {
@@ -189,6 +215,19 @@ define([
                     _params.specification() &&
                     _params.objId()
             }
+        };
+
+        function _getTaskStages(processInstance) {
+            var _stages = [];
+
+            for (var i = 0; i < processInstance.nodes().count(); i++) {
+                var _node = processInstance.nodes().get(i);
+                if (_node instanceof TaskStage) {
+                    _stages.push()
+                }
+            }
+
+            return _stages;
         }
 
     });

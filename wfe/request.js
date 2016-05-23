@@ -163,15 +163,42 @@ define([
             }
             
             createEventParams() {
-                return {
-                    processID: this.processID(),
-                    tokenId: this.tokenId(),
-                    requestID: this.ID(),
-                    dbRequestId: this.dbId(),
-                    requestName: this.name(),
-                    params : this.getParamsForMessage(),
-                    taskParams : this.getSerializedTaskParams()
-                };
+                var that = this;
+                
+                return new Promise(function(resolve, reject){
+                    EngineSingleton.getInstance().processes.findOrUpload(that.processID()).then(function(_process) {
+                        if (!_process) {
+                            reject(new Error('Can not find process ' + that.processID()))
+                        } else {
+                            var _params = {
+                                requestId: that.dbId(),
+                                requestGuid: that.ID(),
+                                processId: _process.dbId(),
+                                processGuid: that.processID(),
+                                tokenId: that.tokenId(),
+                                requestName: that.name(),
+                                params: that.getParamsForMessage(),
+                                taskParams: that.getSerializedTaskParams()
+                            };
+                            
+                            resolve(_params)
+                        }
+                    }).catch(function(err){
+                        reject(err)
+                    })    
+                });
+                
+                
+
+                // return {
+                //     processID: this.processID(),
+                //     tokenId: this.tokenId(),
+                //     requestID: this.ID(),
+                //     dbRequestId: this.dbId(),
+                //     requestName: this.name(),
+                //     params : this.getParamsForMessage(),
+                //     taskParams : this.getSerializedTaskParams()
+                // };
             }
 
             getParamsForMessage() {
@@ -232,10 +259,6 @@ define([
                     var _obj = this.getCol('TaskParameters').get(i);
                     this.getCol('TaskParameters')._del(_obj);
                 }
-            }
-
-            setNewId() {
-                this.ID(UUtils.guid())
             }
 
             findParameter(parameterName) {

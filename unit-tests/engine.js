@@ -124,7 +124,7 @@ describe('Engine', function(){
                         done(result.message)
                     } else {
                         var responseObj = {
-                            requestID: result.requestInfo.requestID
+                            requestId: result.requestInfo.requestId
                         };
                         EngineSingleton.getInstance().processResponse(responseObj, 0, function (result) {
                             if (result.result !== 'OK') {
@@ -154,7 +154,7 @@ describe('Engine', function(){
 
                         EngineSingleton.getInstance().waitForRequest({processId : result.processId, requestName : 'request1'}, 0, function(result){
                             var responseObj = {
-                                requestID: result.requestInfo.requestID
+                                requestId: result.requestInfo.requestId
                             };
                             EngineSingleton.getInstance().processResponse(responseObj, 0, function (result) {
                                 if (result.result !== 'OK') {

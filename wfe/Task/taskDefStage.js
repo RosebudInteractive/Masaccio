@@ -46,7 +46,17 @@ define([
             }
 
             createInstance(cm, params) {
-                return TaskStage.createFromDefinition(this, params);
+                throw new Error('Task definition can not create instance')
+            }
+
+            copyNodeDefinition(process, params){
+                var _taskStage = TaskStage.createFromDefinition(this, params);
+                _taskStage.assign(this, process);
+                _taskStage.guid(this.guid());
+                _taskStage.copyCollectionDefinitions(this, process);
+                _taskStage.taskDefStageId(this.id());
+
+                return _taskStage;
             }
         }
     });

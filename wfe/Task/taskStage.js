@@ -69,6 +69,10 @@ define([
                 return this.pvt.controlMgr;
             }
 
+            createInstance(cm, params) {
+                return new TaskStage(cm, params);
+            }
+
             addNewCopyTo(parent) {
                 var _newStage = new TaskStage(parent.getControlManager(), {parent : parent, colName : 'TaskStages'});
                 _newStage.dbId(this.dbId());

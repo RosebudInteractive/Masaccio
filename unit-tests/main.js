@@ -65,7 +65,7 @@ var _config = {
 
     testClientTimeout : 3,
 
-    needRecreateDB : true,
+    needRecreateDB : false,
 
     dataman: {
         connection: USE_MSSQL_SERVER ? mssql_connection : mysql_connection,

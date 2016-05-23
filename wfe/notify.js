@@ -39,7 +39,7 @@ define(['./answer'],
                 var that = this;
                 this.observers.forEach(function (item, i) {
                     if (item.requestParams) {
-                        var _isProcessEqual = item.requestParams.processId == eventParams.processID;
+                        var _isProcessEqual = item.requestParams.processGuid == eventParams.processGuid;
                         var _isTokenEqual = (!item.requestParams.tokenId) || ((item.requestParams.tokenId) && (item.requestParams.tokenId == eventParams.tokenId));
                         var _isRequestNameEqual = item.requestParams.requestName == eventParams.requestName;
                         if (_isProcessEqual && _isTokenEqual && _isRequestNameEqual) {
@@ -51,11 +51,11 @@ define(['./answer'],
                 })
             }
 
-            notifyFinishProcess(processId){
+            notifyFinishProcess(processGuid){
                 var that = this;
                 this.observers.forEach(function (item, i) {
                     if (item.requestParams) {
-                        if (item.requestParams.processId == processId) {
+                        if (item.requestParams.processGuid == processGuid) {
                             if (item.timer) {
                                 clearInterval(item.timer)
                             }

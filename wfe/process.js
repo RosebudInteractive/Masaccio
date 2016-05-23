@@ -1,9 +1,11 @@
 /**
  * Created by staloverov on 28.03.2015.
  */
+
+'use strict';
+
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
-    var UccelloClass = require(UCCELLO_CONFIG.uccelloPath + '/system/uccello-class');
 }
 
 var processStates = {
@@ -38,66 +40,85 @@ define([
         Logger,
         ProcessVar,
         Controls
-    ){
-        var Process = UObject.extend({
+    ) {
+        return class Process extends UObject {
 
             //<editor-fold desc="Class description">
-            className: "Process",
-            classGuid: Controls.guidOf('Process'),
-            metaFields: [
-                {fname : 'Name', ftype : 'string'},
-                {fname : 'State', ftype : 'integer'},
-                {fname : 'SequenceValue', ftype : 'integer'},
-                {fname : 'ProcessID', ftype : 'string'},
-                {fname : 'DefinitionID', ftype : 'string'},
-                {fname : 'DefinitionResourceID', ftype : 'integer'},
-                {fname: "dbId", ftype: "integer"},
-                {
-                    fname : 'CurrentToken',
-                    ftype : {
-                        type : 'ref',
-                        res_elem_type : Controls.guidOf('Token')
+            get className() {
+                return "Process"
+            }
+
+            get classGuid() {
+                return Controls.guidOf('Process')
+            }
+
+            get metaFields() {
+                return [
+                    {fname: 'Name', ftype: 'string'},
+                    {fname: 'State', ftype: 'integer'},
+                    {fname: 'SequenceValue', ftype: 'integer'},
+                    {fname: 'ProcessID', ftype: 'string'},
+                    {fname: 'DefinitionID', ftype: 'string'},
+                    {fname: 'DefinitionResourceID', ftype: 'integer'},
+                    {fname: "dbId", ftype: "integer"},
+                    {
+                        fname: 'CurrentToken',
+                        ftype: {
+                            type: 'ref',
+                            res_elem_type: Controls.guidOf('Token')
+                        }
                     }
+                ]
+            }
+
+            get metaCols() {
+                return [
+                    {'cname': 'Tokens', 'ctype': 'Token'},
+                    {'cname': 'TokenQueue', 'ctype': 'ObjectRef'},
+                    {'cname': 'Requests', 'ctype': 'Request'},
+
+                    {'cname': 'Connectors', 'ctype': 'SequenceFlow'},
+                    {'cname': 'Nodes', 'ctype': 'FlowNode'},
+
+                    {'cname': 'CorrelationKeys', 'ctype': 'CorrelationKey'},
+                    {'cname': 'CorrelationKeyInstances', 'ctype': 'CorrelationKeyInstance'},
+
+                    {'cname': 'MessageInstances', 'ctype': 'MessageInstance'},
+                    {'cname': 'MessageFlows', 'ctype': 'MessageFlow'},
+                    {'cname': 'MessageRequests', 'ctype': 'MessageInstance'},
+                    {'cname': 'Definitions', 'ctype': 'ProcessDefinition'},
+                    {'cname': 'Vars', 'ctype': 'ProcessVar'}
+                ]
+            }
+
+            //</editor-fold>
+
+
+            constructor(cm, params, definition) {
+                super(cm, params);
+
+                if (!params) {
+                    return
                 }
 
-            ],
-            metaCols: [
-                {'cname' : 'Tokens', 'ctype' : 'Token'},
-                {'cname' : 'TokenQueue', 'ctype' : 'ObjectRef'},
-                {'cname' : 'Requests', 'ctype' : 'Request'},
-
-                {'cname' : 'CorrelationKeys', 'ctype' : 'CorrelationKey'},
-                {'cname' : 'CorrelationKeyInstances', 'ctype' : 'CorrelationKeyInstance'},
-
-                {'cname' : 'MessageInstances', 'ctype' : 'MessageInstance'},
-                {'cname' : 'MessageFlows', 'ctype' : 'MessageFlow'},
-                {'cname' : 'MessageRequests', 'ctype' : 'MessageInstance'},
-                {'cname' : 'Definitions', 'ctype' : 'ProcessDefinition'},
-                {'cname' : 'Vars', 'ctype' : 'ProcessVar'}
-            ],
-            //</editor-fold>
-            
-            
-
-            init: function(cm, params, definition){
-                UccelloClass.super.apply(this, [cm, params]);
-                if (!params) { return }
-
                 if (!params.isDeserialize) {
-                    this.pvt.db.deserialize(definition, {obj: this, colName: 'Definitions'}, EngineSingleton.getInstance().createComponentFunction);
+                    this.pvt.db.deserialize(definition, {
+                        obj: this,
+                        colName: 'Definitions'
+                    }, EngineSingleton.getInstance().createComponentFunction);
                     if (params.hasOwnProperty('definitionResourceID')) {
                         this.definitionResourceID(params.definitionResourceID)
                     }
 
-                    this.copyDefinition();
+                    this._copyDefinition();
 
                     if (params.hasOwnProperty('params') && (params.params)) {
                         this.definition().setInputParams(params.params);
 
-                        if (this.checkInputParams()) {
+                        if (this._checkInputParams()) {
                             this.definition().applyInputTaskParams();
                             this.name(this.definition().taskParams().name());
-                            this.createProcessVar();
+                            this._createProcessVar();
                         }
                     }
 
@@ -106,160 +127,191 @@ define([
 
                     this.state(processStates.Initialized);
                 }
-            },
+            }
 
-            checkInputParams : function(params) {
+            _checkInputParams(params) {
                 return this.definition().checkInputParams(params)
-            },
+            }
 
-            createProcessVar: function () {
+            _createProcessVar() {
                 var _taskParameter = this.definition().taskParams();
                 var _processVar = new ProcessVar(this.getControlManager(), {parent: this, colName: 'Vars'});
                 _processVar.copy(_taskParameter);
-            },
-            
-            copyMessages: function (definition) {
-                for (var i = 0; i < definition.messageFlows().count(); i++) {
-                    definition.messageFlows().get(i).addNewCopyTo(this);
-                }
-            },
+            }
 
-            copyCorrelations: function (definition) {
-                for (var i = 0; i < definition.correlationKeys().count(); i++) {
-                    definition.correlationKeys().get(i).addNewCopyTo(this);
-                }
-            },
-
-            copyDefinition: function () {
+            _copyDefinition() {
                 var definition = this.definition();
                 this.name(definition.name());
                 this.definitionID(definition.definitionId());
-                this.copyCorrelations(definition);
-                this.copyMessages(definition);
-            },
+                this._copyCorrelations(definition);
+                this._copyMessages(definition);
+                this._copyNodes();
+                this._copyConnectors();
+            }
 
-            getCorrelationKey : function(correlationKey) {
+            _copyMessages(definition) {
+                for (var i = 0; i < definition.messageFlows().count(); i++) {
+                    definition.messageFlows().get(i).addNewCopyTo(this);
+                }
+            }
+
+            _copyCorrelations(definition) {
+                for (var i = 0; i < definition.correlationKeys().count(); i++) {
+                    definition.correlationKeys().get(i).addNewCopyTo(this);
+                }
+            }
+
+            _copyNodes() {
+                for (var i = 0; i < this.definition().nodes().count(); i++){
+                    var _defNode = this.definition().nodes().get(i);
+                    _defNode.copyNodeDefinition(this, {parent  : this, colName : 'Nodes'});
+                }
+            }
+
+            _copyConnectors() {
+                var _definition = this.definition();
+                
+                for (var i = 0; i < _definition.connectors().count(); i++){
+                    var _defConnector = _definition.connectors().get(i);
+                    var _source = this.findNode(_defConnector.source());
+                    var _target = this.findNode(_defConnector.target());
+                    var _script = _defConnector.getUserScript();
+
+                    if ((_source) && (_target)) {
+                        var _connector = new SequenceFlow(this.getControlManager(), {parent  : this, colName : 'Connectors'});
+                        _connector.name(_defConnector.name());
+                        _connector.connect(_source, _target, _script)
+                    }
+                }    
+            }
+
+            getCorrelationKey(correlationKey) {
                 for (var i = 0; this.correlationKeys().count(); i++) {
                     if (correlationKey.name() == this.correlationKeys().get(i).name()) {
                         return this.correlationKeys().get(i);
                     }
                 }
-            },
+            }
 
             //<editor-fold desc="MetaFields & MetaCols">
-            processVar : function(){
+            processVar() {
                 return this.getCol('Vars').get(0);
-            },
-            
-            definition : function(){
+            }
+
+            definition() {
                 return this.getCol('Definitions').get(0);
-            },
+            }
 
-            name : function(value) {
-                return this._genericSetter("Name",value);
-            },
+            name(value) {
+                return this._genericSetter("Name", value);
+            }
 
-            state: function(value) {
-                return this._genericSetter("State",value);
-            },
+            state(value) {
+                return this._genericSetter("State", value);
+            }
 
-            processID : function(value) {
-                return this._genericSetter("ProcessID",value);
-            },
+            processID(value) {
+                return this._genericSetter("ProcessID", value);
+            }
 
-            dbId: function(value) {
+            dbId(value) {
                 return this._genericSetter("dbId", value);
-            },
+            }
 
-            sequenceValue : function(value) {
-                return this._genericSetter("SequenceValue",value);
-            },
+            sequenceValue(value) {
+                return this._genericSetter("SequenceValue", value);
+            }
 
-            definitionID : function(value) {
-                return this._genericSetter("DefinitionID",value);
-            },
+            definitionID(value) {
+                return this._genericSetter("DefinitionID", value);
+            }
 
-            definitionResourceID : function(value) {
-                return this._genericSetter("DefinitionResourceID",value);
-            },
+            definitionResourceID(value) {
+                return this._genericSetter("DefinitionResourceID", value);
+            }
 
-            currentToken : function(value) {
-                return this._genericSetter("CurrentToken",value);
-            },
+            currentToken(value) {
+                return this._genericSetter("CurrentToken", value);
+            }
 
-            tokens : function() {
+            tokens() {
                 return this.getCol('Tokens');
-            },
+            }
 
-            tokenQueue : function() {
+            tokenQueue() {
                 return this.getCol('TokenQueue');
-            },
+            }
 
-            parameters : function() {
+            parameters() {
                 return this.definition().parameters();
-            },
+            }
 
-            inputParameters : function() {
+            inputParameters() {
                 return this.definition().inputParameters();
-            },
+            }
 
-            nodes : function(){
-                return this.definition().nodes();
-            },
+            nodes() {
+                return this.getCol('Nodes');
+                // return this.definition().nodes();
+            }
 
-            messageDeclarations : function() {
+            messageDeclarations() {
                 return this.getCol('MessageDeclarations');
-            },
+            }
 
-            scripts : function(){
+            scripts() {
                 return this.definition().scripts();
-            },
+            }
 
-            connectors : function(){
-                return this.definition().connectors();
-            },
+            connectors() {
+                return this.getCol('Connectors');
+                // return this.definition().connectors();
+            }
 
-            messageFlows : function() {
+            messageFlows() {
                 return this.getCol('MessageFlows');
-            },
+            }
 
-            correlationKeys : function() {
+            correlationKeys() {
                 return this.getCol('CorrelationKeys');
-            },
+            }
 
-            requests : function() {
+            requests() {
                 return this.getCol('Requests');
-            },
+            }
+
             //</editor-fold>
 
-            getControlManager : function() {
+            getControlManager() {
                 return this.pvt.controlMgr;
-            },
+            }
 
-            getStartNode : function() {
-                for (var i = 0; i < this.nodes().count(); i++){
+            getStartNode() {
+                for (var i = 0; i < this.nodes().count(); i++) {
                     if (this.nodes().get(i).incoming().count() == 0)
                         return this.nodes().get(i);
                 }
-            },
+            }
 
-            isTokenInQueue : function(token) {
+            isTokenInQueue(token) {
                 for (var i = 0; i < this.tokenQueue().count(); i++) {
                     if (this.tokenQueue().get(i).object().tokenId() == token.tokenId()) return true;
                 }
 
                 return false;
-            },
+            }
 
-            getToken : function(tokenID) {
+            getToken(tokenID) {
                 for (var i = 0; i < this.tokens().count(); i++) {
-                    if (this.tokens().get(i).tokenId() == tokenID) {return this.tokens().get(i)}
+                    if (this.tokens().get(i).tokenId() == tokenID) {
+                        return this.tokens().get(i)
+                    }
                 }
 
                 return null;
-            },
+            }
 
-            enqueueToken : function(token) {
+            enqueueToken(token) {
                 if (!token.tokenId()) {
                     var _tokenID = this.sequenceValue() + 1;
                     this.sequenceValue(_tokenID);
@@ -267,24 +319,26 @@ define([
                 }
 
                 token.newLink(this, 'TokenQueue');
-            },
+            }
 
-            enqueueCurrentToken : function() {
+            enqueueCurrentToken() {
                 if (this.currentToken() && !this.isTokenInQueue(this.currentToken())) {
                     this.enqueueToken(this.currentToken())
                 }
-            },
+            }
 
-            dequeueToken : function() {
+            dequeueToken() {
                 if (this.tokenQueue().count() != 0) {
                     var _tokenRef = this.tokenQueue().get(0);
                     this.tokenQueue()._del(_tokenRef);
                     return _tokenRef.object();
                 }
-                else {return null}
-            },
+                else {
+                    return null
+                }
+            }
 
-            getNodeTokens : function(node) {
+            getNodeTokens(node) {
                 var _nodeTokens = [];
                 for (var i = 0; i < this.tokens().count(); i++) {
                     if (this.tokens().get(i).currentNode() == node) {
@@ -293,9 +347,9 @@ define([
                 }
 
                 return _nodeTokens;
-            },
+            }
 
-            isAllTokensDead : function() {
+            isAllTokensDead() {
                 for (var i = 0; i < this.tokens().count(); i++) {
                     if (this.tokens().get(i).isLive()) {
                         return false;
@@ -303,72 +357,71 @@ define([
                 }
 
                 return true;
-            },
+            }
 
-            finish : function() {
+            finish() {
                 if (this.state() != processStates.Finished) {
                     var that = this;
                     that.state(processStates.Finished);
                     EngineSingleton.getInstance().justSaveProcess(this.processID()).then(function () {
                         Logger.info('Процесс [%s] id [%s] закончил выполнение', that.name(), that.processID());
 
-                    }).
-                    catch(function (error) {
+                    }).catch(function (error) {
                         throw error
                     });
                 }
-            },
+            }
 
-            getFacade : function() {
+            getFacade() {
                 /* Todo : Необходиом определиться какой доступ пользовательскому коду мы даем к процессу */
                 return this
-            },
+            }
 
-            getRootObj : function() {
+            getRootObj() {
                 return this;
-            },
+            }
 
-            canContinue : function() {
-                return (this.state() != processStates.WaitingScriptAnswer) 
+            canContinue() {
+                return (this.state() != processStates.WaitingScriptAnswer)
                     && (this.state() != processStates.Finished)
                     && (this.state() != processStates.Saving)
-            },
+            }
 
-            activate : function() {
+            activate() {
                 if (this.state() != processStates.Running) {
                     clearInterval(this.idleTimer);
                     console.log('[%s] : => Процесс [%s] активирован', (new Date()).toLocaleTimeString(), this.processID());
                     this.state(processStates.Running);
                 }
-            },
+            }
 
-            saving : function(){
+            saving() {
                 this.state(processStates.Saving);
-            },
+            }
 
-            isSaving : function(){
+            isSaving() {
                 return this.state() == processStates.Saving;
-            },
+            }
 
-            isWaitingScriptAnswer : function() {
+            isWaitingScriptAnswer() {
                 return this.state() == processStates.WaitingScriptAnswer;
-            },
+            }
 
-            isWaiting : function() {
+            isWaiting() {
                 return (this.state() == processStates.WaitingScriptAnswer)
                     || (this.state() == processStates.Waiting)
                     || (this.state() == processStates.Saving);
-            },
+            }
 
-            isRunning : function() {
+            isRunning() {
                 return (this.state() == processStates.Running)
-            },
+            }
 
-            isFinished : function() {
+            isFinished() {
                 return (this.state() == processStates.Finished);
-            },
+            }
 
-            findParameter : function(parameterName) {
+            findParameter(parameterName) {
                 for (var i = 0; i < this.parameters().count(); i++) {
                     if (this.parameters().get(i).name() == parameterName) {
                         return this.parameters().get(i)
@@ -376,9 +429,9 @@ define([
 
                 }
                 return null;
-            },
+            }
 
-            findInputParameter : function(parameterName) {
+            findInputParameter(parameterName) {
                 for (var i = 0; i < this.inputParameters().count(); i++) {
                     if (this.inputParameters().get(i).name() == parameterName) {
                         return this.inputParameters().get(i)
@@ -386,9 +439,9 @@ define([
 
                 }
                 return null;
-            },
+            }
 
-            wait : function() {
+            wait() {
                 if (this.state() != processStates.Saving) {
                     this.state(processStates.Waiting);
                     var that = this;
@@ -399,116 +452,133 @@ define([
                         }, UCCELLO_CONFIG.wfe.idleTimeout)
                     }
                 }
-            },
+            }
 
-            waitScriptAnswer : function(){
+            waitScriptAnswer() {
                 this.state(processStates.WaitingScriptAnswer);
-            },
+            }
 
-            findNode : function(node) {
-                return this.definition().findNode(node);
-            },
+            // findNode(node) {
+            //     return this.definition().findNode(node);
+            // }
 
-            findNodeByName : function(nodeName) {
-                return this.definition().findNodeByName(nodeName);
-            },
-
-            findNodeByID : function(nodeID) {
+            findNode(node) {
                 for (var i = 0; i < this.nodes().count(); i++) {
                     var _node = this.nodes().get(i);
-                    if (_node.guid() == nodeID){
+                    if ((_node.name() == node.name()) && (_node.guid() == node.guid())){
                         return _node;
                     }
                 }
-            },
+            }
 
-            getOrCreateScript : function(script) {
+            findNodeByName(nodeName) {
+                // return this.definition().findNodeByName(nodeName);
+                for (var i = 0; i < this.nodes().count(); i++) {
+                    var _node = this.nodes().get(i);
+                    if (_node.name() == nodeName){
+                        return _node;
+                    }
+                }
+            }
+
+            findNodeByID(nodeID) {
+                for (var i = 0; i < this.nodes().count(); i++) {
+                    var _node = this.nodes().get(i);
+                    if (_node.guid() == nodeID) {
+                        return _node;
+                    }
+                }
+            }
+
+            getOrCreateScript(script) {
                 return this.definition().getOrCreateScript(script);
-            },
+            }
 
-            findConnector : function(connector) {
+            findConnector(connector) {
                 for (var i = 0; i < this.connectors().count(); i++) {
                     var _connector = this.connectors().get(i);
-                    if ((_connector.guid() == connector.guid()) && (_connector.name() == connector.name())){
+                    if ((_connector.guid() == connector.guid()) && (_connector.name() == connector.name())) {
                         return _connector;
                     }
                 }
-            },
+            }
 
-            addNewReceivedMessage : function(messageInstance, targetNode){
-                if (typeof targetNode.incomingInstance == 'function'){
+            addNewReceivedMessage(messageInstance, targetNode) {
+                if (typeof targetNode.incomingInstance == 'function') {
                     targetNode.incomingInstance(messageInstance);
                 }
-            },
+            }
 
-            getMessageFlow : function(messageFlow) {
+            getMessageFlow(messageFlow) {
                 for (var i = 0; i < this.messageFlows().count(); i++) {
                     if (this.messageFlows().get(i).guid() == messageFlow.guid()) {
                         return this.messageFlows().get(i);
                     }
                 }
-            },
+            }
 
-            clearFinishedTokens : function() {
+            clearFinishedTokens() {
                 for (var i = this.tokens().count() - 1; i >= 0; i--) {
                     var _token = this.tokens().get(i);
                     if (_token.isDead()) {
                         this.tokens()._del(_token);
                     }
                 }
-            },
+            }
 
-            getModel : function(){
+            getModel() {
                 return this.definition().getModelForProcess()
-            },
+            }
 
-            onSave : function(dbObject, params) {
+            onSave(dbObject, params) {
                 if (!params) {
                     params = {}
                 }
+
+                this.dbId(dbObject.id());
                 params.processInstance = this;
                 return this.definition().onSaveProcess(dbObject, params)
-            },
+            }
 
-            deleteRequest : function(request) {
+            deleteRequest(request) {
                 var _token = this.getToken(request.tokenId());
                 if (_token) {
                     _token.deleteRequest(request)
                 }
-            },
+            }
 
-            deleteResponse : function(response){
+            deleteResponse(response) {
                 var _token = this.getToken(response.tokenId());
                 if (_token) {
                     _token.deleteResponse(response)
                 }
-            },
+            }
 
-            getRequestsForSave : function(){
+            getRequestsForSave() {
                 var _requests = [];
-                for (var i = 0; i < this.tokens().count(); i++){
+                for (var i = 0; i < this.tokens().count(); i++) {
                     var _token = this.tokens().get(i);
                     if (_token.isLive()) {
-                        for (var j = 0; j < _token.nodesProps().count(); j++){
+                        for (var j = 0; j < _token.nodesProps().count(); j++) {
                             var _nodeProp = _token.nodesProps().get(j);
-                            for (var k = 0; k < _nodeProp.requests().count(); k++){
-                                _requests.push(_nodeProp.requests().get(k))       
+                            for (var k = 0; k < _nodeProp.requests().count(); k++) {
+                                _requests.push(_nodeProp.requests().get(k))
                             }
                         }
                     }
                 }
-                
-                return _requests;
-            },
 
-            getResponsesForSave : function(){
+                return _requests;
+            }
+
+            getResponsesForSave() {
                 var _responses = [];
-                for (var i = 0; i < this.tokens().count(); i++){
+                for (var i = 0; i < this.tokens().count(); i++) {
                     var _token = this.tokens().get(i);
                     if (_token.isLive()) {
-                        for (var j = 0; j < _token.nodesProps().count(); j++){
+                        for (var j = 0; j < _token.nodesProps().count(); j++) {
                             var _nodeProp = _token.nodesProps().get(j);
-                            for (var k = 0; k < _nodeProp.responses().count(); k++){
+                            for (var k = 0; k < _nodeProp.responses().count(); k++) {
                                 _responses.push(_nodeProp.responses().get(k))
                             }
                         }
@@ -517,9 +587,7 @@ define([
 
                 return _responses;
             }
-        });
-
-        return Process;
+        };
     }
 );
 

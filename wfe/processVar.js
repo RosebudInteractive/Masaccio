@@ -21,6 +21,8 @@ define(
 
             get metaFields() {
                 return [
+                    {fname: 'TaskId', ftype: 'integer'},
+                    {fname: 'TaskGuid', ftype: 'string'},
                     {fname: 'Name', ftype: 'string'},
                     {fname: 'TaskNumber', ftype: 'string'},
                     {fname: 'Specification', ftype: 'string'},
@@ -34,6 +36,14 @@ define(
                 ]
             }
 
+            taskId(value) {
+                return this._genericSetter("TaskId", value);
+            }
+
+            taskGuid(value) {
+                return this._genericSetter("TaskGuid", value);
+            }
+            
             name(value) {
                 return this._genericSetter("Name", value);
             }
