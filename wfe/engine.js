@@ -628,20 +628,6 @@ define([
 
             justSaveProcess: function(processID){
                 return this.processes.justSaveProcess(this.getProcessInstance(processID));
-                
-                // var that = this;
-                //
-                // return new Promise(function(resolve, reject){
-                //     var _process = that.getProcessInstance(processID);
-                //
-                //     if (_process) {
-                //         that.adapter.serialize(_process).then(
-                //             resolve,
-                //             reject)
-                //     } else {
-                //         reject(new Error('Can not find process [' + processID + ']'))
-                //     }
-                // });
             },
 
             getControlManager : function() {

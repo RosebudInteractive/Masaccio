@@ -70,7 +70,12 @@ define([
             },
 
             currentNode: function(value) {
-                return this._genericSetter("CurrentNode",value);
+                var _oldValue = this._genericSetter("CurrentNode");
+                if ((value) && (value !== _oldValue)) {
+                    this.processInstance().addStepHistory(_oldValue, value);
+                }
+
+                return this._genericSetter("CurrentNode", value);
             },
 
             processInstance: function() {

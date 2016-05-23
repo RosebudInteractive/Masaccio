@@ -76,7 +76,7 @@ define([
             },
 
             dbId : function(value) {
-                return this._genericSetter("Id", value);
+                return this._genericSetter("dbId", value);
             },
 
             name: function(value) {

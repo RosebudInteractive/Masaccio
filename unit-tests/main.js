@@ -47,7 +47,7 @@ var mysql_connection = { //MySql
     }
 };
 
-USE_MSSQL_SERVER = true;
+USE_MSSQL_SERVER = false;
 
 var _config = {
     wfe: {

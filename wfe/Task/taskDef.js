@@ -51,7 +51,7 @@ define([
                 var that = this;
 
                 return super.onSaveProcess(dbObject, params).then(function () {
-                    return new Promise(function(resolve){
+                    return new Promise(function(resolve, reject){
                         dbObject.number(params.processInstance.processVar().taskNumber());
                         dbObject.specification(params.processInstance.processVar().specification());
                         dbObject.objId(params.processInstance.processVar().objId());
@@ -59,9 +59,8 @@ define([
                         // обязательно требует TaskStageLogId, пока поставил nullable
                         dbObject.taskState('InProgress');
 
-                        
-
-                        resolve()
+                        that._saveTaskStages(dbObject, params).then(resolve).
+                        catch(function(err) {reject(err)});
                     })
                 }).catch(function (err) {
                     return Promise.reject(err)
@@ -69,7 +68,7 @@ define([
             }
 
             _saveTaskStages(dbObject, params) {
-                var that = this;
+                // var that = this;
 
                 return new Promise(function(resolve, reject){
                     var _processInstance = params.processInstance;
@@ -78,13 +77,45 @@ define([
                     if (_stages.length == 0) {
                         resolve()
                     } else {
+                        var _count = 0;
                         var _root = dbObject.getDataRoot('TaskStage');
 
                         _stages.forEach(function(stage){
+                            var _stageObj = _getTaskStageObject(_root, stage);
 
-                            stage.taskId(_processInstance.dbId());
+                            if (!_stageObj){
+                                stage.taskId(_processInstance.dbId());
+                                
+                                _root.newObject({
+                                    $sys: {guid: stage.guid()},
+                                    fields: {
+                                        TaskId: stage.taskId(),
+                                        TaskDefStageId: stage.taskDefStageId(),
+                                        StageCode: stage.stageCode(),
+                                        StageState: 'InProgress'//stage.state()
+                                    }
+                                }, {}, function (result) {
+                                    if (result.result !== 'OK') {
+                                        reject(new Error(result.message))
+                                    } else {
+                                        var _created = _root.getDB().getObj(result.newObject);
+                                        stage.dbId(_created.id());
+                                        _count++;
+                                        checkDone();
+                                    }
+                                })
+                            } else {
+                                _stageObj.stageState('InProgress');
+                                _count++;
+                                checkDone();
+                            }
+                        });
 
-                        })
+                        function checkDone() {
+                            if (_count == _stages.length) {
+                                resolve();
+                            }
+                        }
                     }
                 });
             }
@@ -223,11 +254,20 @@ define([
             for (var i = 0; i < processInstance.nodes().count(); i++) {
                 var _node = processInstance.nodes().get(i);
                 if (_node instanceof TaskStage) {
-                    _stages.push()
+                    _stages.push(_node)
                 }
             }
 
             return _stages;
+        }
+
+        function _getTaskStageObject(root, taskStage){
+            var _collection = root.getCol('DataElements');
+            for (var i = 0; i < _collection.count(); i++){
+                if (_collection.get(i).parseGuid(_collection.get(i).pvt.guid).guid == taskStage.guid()){
+                    return _collection.get(i);
+                }
+            }
         }
 
     });

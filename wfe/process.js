@@ -93,7 +93,6 @@ define([
 
             //</editor-fold>
 
-
             constructor(cm, params, definition) {
                 super(cm, params);
 
@@ -586,6 +585,10 @@ define([
                 }
 
                 return _responses;
+            }
+
+            addStepHistory(oldNode, newNode) {
+                
             }
         };
     }
