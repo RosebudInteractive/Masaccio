@@ -284,7 +284,7 @@ define([
             }
 
             isActive() {
-                return !((this.state() == requestState.New) || (this.state() == requestState.Canceled) || (this.state() == requestState.ResponseReceived))
+                return !((this.state() == requestState.Canceled) || (this.state() == requestState.ResponseReceived))
             }
             
             isNew() {
