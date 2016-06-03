@@ -219,7 +219,7 @@ define([
             executeNode : function() {
                 var that = this;
                 this.currentNode().execute(function() {
-                    EngineSingleton.getInstance().findOrUploadProcess(that.processInstance().processID()).then(
+                    EngineSingleton.getInstance().processes.findOrUpload(that.processInstance().processID()).then(
                         function(process){
                             if (process.canContinue()) {
                                 process.activate();
@@ -270,13 +270,23 @@ define([
             },
 
             exposeRequests : function (nodeProps) {
+                var _requests = [];
+                
                 for (var i = 0; i < nodeProps.requests().count(); i++) {
 
                     var _request = nodeProps.requests().get(i);
                     if (_request.isNew()) {
                         _request.state(Request.state.Exposed);
-                        EngineSingleton.getInstance().exposeRequest(_request);
+                        _requests.push(_request);
                     }
+                }
+
+                if (_requests.length != 0) {
+                    EngineSingleton.getInstance().justSaveProcess(this.processInstance().processID()).then(function(){
+                        _requests.forEach(function(req){
+                            EngineSingleton.getInstance().exposeRequest(req);
+                        });
+                    })
                 }
             },
 

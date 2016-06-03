@@ -252,7 +252,7 @@ define(
 
             hasNewRequests() {
                 for (var i = 0; i < this.requests().count(); i++) {
-                    if (this.requests().get(i).isActive()) {
+                    if (this.requests().get(i).isNew()) {
                         return true
                     }
                 }

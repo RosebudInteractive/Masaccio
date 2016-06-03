@@ -217,29 +217,7 @@ define([
                 },
 
                 findOrUploadProcess: function (processID) {
-                    var that = this;
-
-                    return new Promise(function(resolve, reject){
-                        var _process = that.getProcessInstance(processID);
-                        if (_process) {
-                            resolve(_process)
-                        } else {
-                            var _index = that.uploadedProcesses.findIndex(function(element){
-                               return element.processID == processID
-                            });
-
-                            that.adapter.deserialize(processID).then(
-                                function(process){
-                                    that.processIntsances.push(process);
-                                    if (_index != -1) {
-                                        that.uploadedProcesses.splice(_index, 1);
-                                    }
-                                    resolve(process)
-                                },
-                                reject
-                            )
-                        }
-                    });
+                    return this.processes.findOrUpload(processID);
                 },
 
                 defineTokens: function (processInstance) {
@@ -258,9 +236,7 @@ define([
             },
 
             getProcessInstance : function(processID) {
-                return this.processIntsances.find(function(instance){
-                    return instance.processID() == processID
-                });
+                return this.processes._findProcessInstance(processID);
             },
             
             _createRequestOptions : function (requestInfo) {
@@ -317,7 +293,13 @@ define([
                             callback);
 
                         if (_isNeedNotify) {
-                            that.notifier.notify(that.requestStorage.getRequestParamsByName(options.requestName, options.processGuid))
+                            that.requestStorage.getRequestParamsByName(options.requestName, options.processGuid).
+                            then(function(params){
+                                that.notifier.notify(params)
+                            }).
+                            catch(function(err){
+                                Answer.error(err.message).handle(callback)
+                            });
                         }
                     }).
                     catch(function(err){
@@ -423,9 +405,7 @@ define([
             },
 
             getActiveProcess : function(processID) {
-                return this.processIntsances.find(function(instance) {
-                    return (instance.processID() == processID) && instance.isRunning()
-                })
+                return this.processes.getActiveProcess(processID)
             },
 
             exposeRequest : function(request){
@@ -594,6 +574,8 @@ define([
                     }).
                     catch(reject);
                 });
+
+
             },
 
             getProcessDefParameters : function(definitionIdentifier, done){
@@ -626,8 +608,8 @@ define([
                 return Controls.MegaAnswer;
             },
 
-            justSaveProcess: function(processID){
-                return this.processes.justSaveProcess(this.getProcessInstance(processID));
+            justSaveProcess: function(processGuid){
+                return this.processes.justSaveProcess(this.processes._findProcessInstance(processGuid));
             },
 
             getControlManager : function() {

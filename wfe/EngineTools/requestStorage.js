@@ -96,12 +96,20 @@ define(
             }
 
             getRequestParamsByName(requestName, processID) {
-                var _request = this.storage.find(function (request) {
-                    return (request.name() == requestName) && (request.processID() == processID) && request.isActive()
-                });
-                if (_request) {
-                    return _request.createEventParams()
-                }
+                var that = this;
+                return new Promise(function(resolve, reject) {
+                    var _request = that.storage.find(function (request) {
+                        return (request.name() == requestName) && (request.processID() == processID) && request.isActive()
+                    });
+                    if (_request) {
+                        _request.createEventParams().then(function(params){
+                            resolve(params)
+                        }).catch(function(err){reject(err)});
+                    } else {
+                        reject (new Error('Can not find request [' + requestName + ']' ))
+                    }
+                })
+
             }
 
             cancelActiveRequestsForProcess(processID) {

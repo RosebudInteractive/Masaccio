@@ -175,6 +175,12 @@ define([
                     return instance.processID() == processGuid
                 });
             }
+
+            getActiveProcess (processGuid) {
+                return this.instances.find(function(instance) {
+                    return (instance.processID() == processGuid) && instance.isRunning()
+                })
+            }
         };
 
         function checkOptions(options){
