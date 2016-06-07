@@ -111,7 +111,7 @@ define(
                 }
 
                 if (this.state() == FlowNode.state.Executing) {
-                    this._handleRequests();
+                    this._doOnExecute();
                 }
                 else if ((this.state() == FlowNode.state.WaitingRequest) || (this.state() == FlowNode.state.HasNewResponse)) {
                     logResponses.call(this);
@@ -167,6 +167,10 @@ define(
                 }
             }
 
+            _doOnExecute() {
+                this._handleRequests();
+            }
+            
             cancel() {
 
             }

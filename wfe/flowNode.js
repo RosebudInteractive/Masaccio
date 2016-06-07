@@ -182,6 +182,7 @@ define([
             assign : function(source){
                 this.name(source.name());
                 this.state(source.state());
+                this.dbId(source.dbId());
             },
 
             addCollectionInstances : function(nodeDefinition) {
@@ -360,6 +361,10 @@ define([
 
             hasNewRequests : function() {
                 return false
+            },
+
+            isNeedLogging : function(){
+                return false;
             }
         });
 

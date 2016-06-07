@@ -126,6 +126,8 @@ define([
 
                     this.state(processStates.Initialized);
                 }
+
+                this.history = [];
             }
 
             _checkInputParams(params) {
@@ -587,8 +589,13 @@ define([
                 return _responses;
             }
 
-            addStepHistory(oldNode, newNode) {
-                
+            addStepHistory(previousId, newNode) {
+                var _item = {previousId : previousId, current : newNode};
+                this.history.push(_item)
+            }
+
+            hasHistory() {
+                return this.history ? (this.history.length != 0) : false
             }
         };
     }

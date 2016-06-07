@@ -159,5 +159,11 @@ define([
                     EngineSingleton.getInstance().responseStorage.executeResponseCallback(_serviceResponse.ID());
                 }
             }
+
+            isNeedLogging() {
+                return true
+            }
+            
+            
         }
     });

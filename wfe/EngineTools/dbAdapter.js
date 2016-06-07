@@ -29,6 +29,15 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                 };
             }
 
+            _getExpressionForLog(){
+                var _predicate = new Predicate(this.db, {});
+                _predicate.addCondition({field: "Id", op: "=", value: 0});
+                return {
+                    model: {name: 'TaskStageLog'},
+                    predicate: this.db.serialize(_predicate, true)
+                };
+            }
+
             _getSerializedBody(process){
                 var _obj = this.db.serialize(process, true);
                 if (!_obj){
@@ -138,13 +147,71 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                     process.clearFinishedTokens();
                     that.save(process).
                     then(function () {
-                        resolve()
+                        that._saveProcessLog(process).then(resolve, reject)
                     }).
                     catch(function (err) {
                         throw err
                     });
                 });
             }
+
+            _saveProcessLog(process) {
+                this._setDB();
+                var that = this;
+                return new Promise(function (resolve, reject) {
+                    if (!process.hasHistory()) {
+                        resolve();
+                        return
+                    }
+
+                    var _expr = that._getExpressionForLog();
+                    that.db.getRoots([that.queryGuid], {rtype: "data", expr: _expr}, function (guids) {
+                        var _objectGuid = guids.guids[0];
+                        that.queryGuid = _objectGuid;
+
+                        var _root = that.db.getObj(_objectGuid);
+                        var _count = 0;
+
+                        _root.edit(function (result) {
+                            if (result.result === 'OK') {
+                                process.history.forEach(function (item) {
+                                    _root.newObject({
+                                        fields: {
+                                            TaskId: process.dbId(),
+                                            TaskStageId: item.current.dbId(),
+                                            PrevId: item.previousId,
+                                            RequestId: item.current._getServiceRequest().dbId(),
+                                            StageState: 'InProgress'
+                                        }
+                                    }, {}, function (result) {
+                                        if (result.result === 'OK') {
+                                            var _loggedRec = _root.getDB().getObj(result.newObject);
+                                            item.current.token().lastLoggedId(_loggedRec.id());
+                                            _count++;
+                                            check();
+                                        } else {
+                                            reject(new Error(result.message))
+                                        }
+                                    });
+
+                                    function check() {
+                                        if (_count == process.history.length) {
+                                            _root.save({}, function (result) {
+                                                if (result.result === 'OK') {
+                                                    process.history.length = 0;
+                                                    resolve()
+                                                } else {
+                                                    reject(new Error(result.message))
+                                                }
+                                            })
+                                        }
+                                    }
+                                });
+                            }
+                        })
+                    });
+                })
+            };
 
             deserialize(processID, createComponentFunction) {
                 this.db = EngineSingleton.getInstance().db;

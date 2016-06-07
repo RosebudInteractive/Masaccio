@@ -457,7 +457,7 @@ define([
                     dbObject.vars(_processVar);
                 }
             }
-
+            
             applyInputTaskParams (){
                 // Only Task definition can use task parameters
                 // implementation in TaskDef

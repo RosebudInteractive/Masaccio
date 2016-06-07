@@ -97,7 +97,7 @@ define([
                 this.processInstance().enqueueCurrentToken();
                 this.processInstance().waitScriptAnswer();
 
-                console.log('[%s] : => Выполняется узел [%s]', (new Date()).toLocaleTimeString(), this.name())
+                console.log('[%s] : => Выполняется узел [%s]', (new Date()).toLocaleTimeString(), this.name());
                 var _scriptObject = this.createScriptObject(callback);
                 this.state(FlowNode.state.WaitingUserScriptAnswer);
                 Utils.execScript(_scriptObject);

@@ -44,7 +44,8 @@ define([
                         type : 'ref',
                         res_elem_type : Controls.guidOf('FlowNode')
                     }
-                }
+                },
+                {fname: 'LastLoggedId', ftype : 'integer'}
             ],
             metaCols: [
                 {'cname' : 'Parameters', 'ctype' : 'WfeParameter'},
@@ -71,11 +72,15 @@ define([
 
             currentNode: function(value) {
                 var _oldValue = this._genericSetter("CurrentNode");
-                if ((value) && (value !== _oldValue)) {
-                    this.processInstance().addStepHistory(_oldValue, value);
+                if ((value) && (value !== _oldValue) && (value.isNeedLogging())) {
+                    this.processInstance().addStepHistory(this.lastLoggedId(), value);
                 }
 
                 return this._genericSetter("CurrentNode", value);
+            },
+
+            lastLoggedId: function(value) {
+                return this._genericSetter("LastLoggedId",value);
             },
 
             processInstance: function() {
