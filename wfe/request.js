@@ -170,6 +170,7 @@ define([
                         if (!_process) {
                             reject(new Error('Can not find process ' + that.processID()))
                         } else {
+                            that._fillTaskParams(_process);
                             var _params = {
                                 requestId: that.dbId(),
                                 requestGuid: that.ID(),
@@ -187,19 +188,14 @@ define([
                         reject(err)
                     })    
                 });
-                
-                
-
-                // return {
-                //     processID: this.processID(),
-                //     tokenId: this.tokenId(),
-                //     requestID: this.ID(),
-                //     dbRequestId: this.dbId(),
-                //     requestName: this.name(),
-                //     params : this.getParamsForMessage(),
-                //     taskParams : this.getSerializedTaskParams()
-                // };
             }
+
+            _fillTaskParams(processInstance) {
+                this.taskParams().taskId(processInstance.dbId());
+                this.taskParams().taskGuid(processInstance.processID());
+                this.taskParams().tokenId(this.tokenId())
+            }
+
 
             getParamsForMessage() {
                 var _params = {};

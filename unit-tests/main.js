@@ -17,11 +17,11 @@ var _path = {
 };
 
 var mssql_connection = { //MSSQL
-    host: "localhost", // "SQL-SERVER"
+    host: process.env.HOST || "localhost", // "SQL-SERVER"
     port: 1435,       // instanceName: "SQL2008R2"
-    username: "sa",
-    password: "",
-    database: "masaccio_test",
+    username: process.env.USER || "sa",
+    password: process.env.PASSWORD || "",
+    database: process.env.DB || "masaccio_test",
     provider: "mssql",
     connection_options: { instanceName: "SQLEXPRESS", requestTimeout: 0 },
     provider_options: {},
@@ -33,10 +33,10 @@ var mssql_connection = { //MSSQL
 };
 
 var mysql_connection = { //MySql
-    host: "localhost",
-    username: "root",
-    password: "1q2w3e",
-    database: "masaccio_test",
+    host: process.env.HOST || "localhost",
+    username: process.env.USER || "root",
+    password: process.env.PASSWORD || "1q2w3e",
+    database: process.env.DB || "masaccio_test",
     provider: "mysql",
     connection_options: {},
     provider_options: {},
@@ -47,7 +47,7 @@ var mysql_connection = { //MySql
     }
 };
 
-USE_MSSQL_SERVER = false;
+USE_MSSQL_SERVER = (process.env.DB_TYPE == 'ms_sql');
 
 var _config = {
     wfe: {

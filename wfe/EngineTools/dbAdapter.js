@@ -47,7 +47,7 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                 }
             }
 
-            _editProcessObj(processObj, process){
+            _editProcessObj(processObj, process, params){
                 var that = this;
 
                 return new Promise(function(resolve, reject) {
@@ -55,6 +55,11 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                         if (result.result === 'OK') {
                             processObj.state(process.state());
                             processObj.body(that._getSerializedBody(process));
+                            if (params) {
+                                if ((params.taskStageLogId) && (processObj['taskStageLogId'])){
+                                    processObj.taskStageLogId(params.taskStageLogId)
+                                }
+                            }
                         } else {
                             reject(new Error(result.message))
                         }
@@ -115,7 +120,7 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                 });
             }
 
-            save(process){
+            save(process, params){
                 this._setDB();
                 var that = this;
                 return new Promise(function(resolve, reject){
@@ -127,9 +132,9 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                         var _root = that.db.getObj(_objectGuid);
                         var _processObj = _root.getCol("DataElements").get(0);
                         if (_processObj) {
-                            that._editProcessObj(_processObj, process).then(resolve, reject);
+                            that._editProcessObj(_processObj, process, params).then(resolve, reject);
                         } else {
-                            that._addProcessObj(_root, process).then(resolve, reject);
+                            that._addProcessObj(_root, process, params).then(resolve, reject);
                         }
                     });
                 });
@@ -147,7 +152,13 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                     process.clearFinishedTokens();
                     that.save(process).
                     then(function () {
-                        that._saveProcessLog(process).then(resolve, reject)
+                        that._saveProcessLog(process).then(function (lastLoggedId) {
+                            if (lastLoggedId) {
+                                that.save(process, {taskStageLogId : lastLoggedId}).then(resolve, reject)
+                            } else {
+                                resolve()
+                            }
+                        })
                     }).
                     catch(function (err) {
                         throw err
@@ -171,6 +182,7 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
 
                         var _root = that.db.getObj(_objectGuid);
                         var _count = 0;
+                        var _lastId;
 
                         _root.edit(function (result) {
                             if (result.result === 'OK') {
@@ -186,7 +198,8 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                                     }, {}, function (result) {
                                         if (result.result === 'OK') {
                                             var _loggedRec = _root.getDB().getObj(result.newObject);
-                                            item.current.token().lastLoggedId(_loggedRec.id());
+                                            _lastId = _loggedRec.id();
+                                            item.current.token().lastLoggedId(_lastId);
                                             _count++;
                                             check();
                                         } else {
@@ -199,7 +212,7 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                                             _root.save({}, function (result) {
                                                 if (result.result === 'OK') {
                                                     process.history.length = 0;
-                                                    resolve()
+                                                    resolve(_lastId)
                                                 } else {
                                                     reject(new Error(result.message))
                                                 }
@@ -212,6 +225,10 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath + 'predicate/predicat
                     });
                 })
             };
+
+            _setTaskStageLogId(process, taskStageLogId){
+
+            }
 
             deserialize(processID, createComponentFunction) {
                 this.db = EngineSingleton.getInstance().db;

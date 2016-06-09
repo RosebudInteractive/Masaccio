@@ -21,7 +21,10 @@ define(
 
             get metaFields() {
                 return [
-                    {fname: 'SelectedNode', ftype: 'string'}
+                    {fname: 'SelectedNode', ftype: 'string'},
+                    {fname : 'TaskId', ftype : 'integer'},
+                    {fname : 'TaskGuid', ftype : 'string'},
+                    {fname : 'TokenId', ftype : 'integer'}
                 ]
             }
 
@@ -33,6 +36,18 @@ define(
 
             selectedNode(value) {
                 return this._genericSetter("SelectedNode", value);
+            }
+
+            taskId(value) {
+                return this._genericSetter("TaskId", value);
+            }
+
+            taskGuid(value) {
+                return this._genericSetter("TaskGuid", value);
+            }
+
+            tokenId(value) {
+                return this._genericSetter("TokenId", value);
             }
 
             availableNodes() {
