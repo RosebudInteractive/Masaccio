@@ -1,9 +1,9 @@
 /**
  * Created by staloverov on 01.07.2015.
  */
-var ControlMgr = require(UCCELLO_CONFIG.uccelloPath + 'controls/controlMgr');
+'use strict';
 
-//var UObject = require(UCCELLO_CONFIG.uccelloPath+'system/uobject');
+var ControlMgr = require(UCCELLO_CONFIG.uccelloPath + 'controls/controlMgr');
 
 var ProcessDefinition = require('./../processDefinition');
     var ObjectRef = require('./../objectRef');
@@ -38,6 +38,69 @@ var Event = require('./../Events/event');
 var TaskDef = require('./../Task/taskDef');
 var TaskStage = require('./../Task/taskStage');
 var TaskParameter = require('./../Task/taskParameter');
+
+var TypeProvider = require('./typeProvider');
+
+class Initiator {
+    static registerTypeProvider(controlManager, constructHolder) {
+        var _provider = new TypeProvider(controlManager, {});
+        constructHolder.addTypeProvider(_provider);
+
+        _provider.registerType(TaskParameter);
+        _provider.registerType(Request);
+    }
+
+    static registerTypes(controlManager) {
+        new ObjectRef(controlManager);
+
+        new Parameter(controlManager);
+        new UserScript(controlManager);
+
+        new RetrievalExpression(controlManager);
+        new MessageRetrievalExpression(controlManager);
+        new CorrelationProperty(controlManager);
+        new CorrelationKey(controlManager);
+        new CorrelationKeyInstance(controlManager);
+        new MessageDefinition(controlManager);
+        new MessageInstance(controlManager);
+        new MessageFlow(controlManager);
+
+        new SequenceFlow(controlManager);
+
+        new FlowNode(controlManager);
+        new Request(controlManager);
+
+        new ProcessDefinition(controlManager);
+
+        new Activity(controlManager);
+        new UserTask(controlManager);
+        new ScriptTask(controlManager);
+
+        new InclusiveGateway(controlManager);
+        new ExclusiveGateway(controlManager);
+
+        new NodeProps(controlManager);
+        new Token(controlManager);
+        new Process(controlManager);
+
+        new TaskDef(controlManager);
+        new TaskStage(controlManager);
+        new TaskParameter(controlManager);
+    }
+
+    static createControlManager(initParams) {
+        var _dbParams = {
+            name: "Engine",
+            kind: "master",
+            guid: 'fb9653ea-4fc3-aee0-7a31-172a91aa196b',
+            constructHolder: initParams.constructHolder
+        };
+        return new ControlMgr({
+            controller: initParams.dbController,
+            dbparams: _dbParams
+        }, null, null, null, initParams.proxy);
+    }
+}
 
 var Initializer = {
 

@@ -22,6 +22,16 @@ beforeEach(function() {
     Initiator.clearTestClient();
 });
 
+xdescribe('TypeProvider', function() {
+    // var TypeProvider = require(PATH.engine + 'EngineTools/typeProvider');
+    // var _typeProvider = new TypeProvider();
+    
+    it('#register', function (done) {
+        var TaskParam = require(PATH.engine + 'Task/taskParameter')
+        _typeProvider.registerType(TaskParam);
+    })
+});
+
 xdescribe('Engine', function(){
 
     describe('#common', function() {
