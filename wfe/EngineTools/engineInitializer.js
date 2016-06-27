@@ -38,6 +38,10 @@ var Event = require('./../Events/event');
 var TaskDef = require('./../Task/taskDef');
 var TaskStage = require('./../Task/taskStage');
 var TaskParameter = require('./../Task/taskParameter');
+var TaskRequestParameter = require('./../Task/taskRequestParameter');
+var ProcessVar = require('./../processVar');
+var WfeParameter = require('./../parameter');
+
 
 var TypeProvider = require('./typeProvider');
 
@@ -46,8 +50,13 @@ class Initiator {
         var _provider = new TypeProvider(controlManager, {});
         constructHolder.addTypeProvider(_provider);
 
+        var TaskParameter = require('./../Task/taskParameter');
         _provider.registerType(TaskParameter);
         _provider.registerType(Request);
+        _provider.registerType(TaskRequestParameter);
+        _provider.registerType(ProcessVar);
+        _provider.registerType(WfeParameter);
+        _provider.registerType(TaskStage);
     }
 
     static registerTypes(controlManager) {
@@ -85,6 +94,7 @@ class Initiator {
 
         new TaskDef(controlManager);
         new TaskStage(controlManager);
+
         new TaskParameter(controlManager);
     }
 
@@ -162,4 +172,4 @@ var Initializer = {
 };
 
 
-if (module) {module.exports = Initializer}
+if (module) {module.exports = Initiator}
