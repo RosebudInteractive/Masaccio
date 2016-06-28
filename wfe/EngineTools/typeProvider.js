@@ -47,7 +47,7 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath+'system/uobject'],
                 var _item = {};
                 _item.selfGuid = typeConstr.prototype.classGuid;
                 _item.parentGuid = typeConstr.__proto__.prototype.classGuid;
-                _item.constrBody = this._buildConstrBody(typeConstr);//.prototype.constructor.toString();
+                _item.constrBody = this._buildConstrBody(typeConstr);
                 _item.isDataObject = false;
 
                 this.constructors.push(_item);
@@ -118,6 +118,11 @@ define(['./../engineSingleton', UCCELLO_CONFIG.uccelloPath+'system/uobject'],
                     }, 0);
 
                 return callback ? REMOTE_RESULT : constrArr;
+            }
+
+            getInterface() {
+                masaccioTypeProviderInterface.classGuid = this.getGuid();
+                return masaccioTypeProviderInterface;
             }
 
         }

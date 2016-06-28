@@ -23,7 +23,7 @@ var Singleton = {
 
         var _Initializer = require('./EngineTools/engineInitializer');
         _Initializer.registerTypes(_instance.controlManager);
-        _Initializer.registerTypeProvider(_instance.controlManager, _instance.constructHolder)
+        _Initializer.registerTypeProvider(_instance.controlManager, _instance.constructHolder, initParams.rpc)
     },
 
     getInstance : function () {

@@ -36,7 +36,7 @@ var Event = require('./../Events/event');
     var StartMessageEvent = require('./../Events/Start/messageStartEvent');
 
 var TaskDef = require('./../Task/taskDef');
-var TaskStage = require('./../Task/taskStage');
+var TaskStage = require('./../Task/taskStageMOC');
 var TaskParameter = require('./../Task/taskParameter');
 var TaskRequestParameter = require('./../Task/taskRequestParameter');
 var ProcessVar = require('./../processVar');
@@ -46,11 +46,13 @@ var WfeParameter = require('./../parameter');
 var TypeProvider = require('./typeProvider');
 
 class Initiator {
-    static registerTypeProvider(controlManager, constructHolder) {
+    static registerTypeProvider(controlManager, constructHolder, rpc) {
         var _provider = new TypeProvider(controlManager, {});
-        constructHolder.addTypeProvider(_provider);
+        var _remote = rpc._publ(_provider, _provider.getInterface());
+        
+        constructHolder.addTypeProvider(_remote);
+        constructHolder.addTypeProvider(_provider, true)
 
-        var TaskParameter = require('./../Task/taskParameter');
         _provider.registerType(TaskParameter);
         _provider.registerType(Request);
         _provider.registerType(TaskRequestParameter);
@@ -92,10 +94,10 @@ class Initiator {
         new Token(controlManager);
         new Process(controlManager);
 
-        new TaskDef(controlManager);
-        new TaskStage(controlManager);
+        // new TaskDef(controlManager);
+        // new TaskStage(controlManager);
 
-        new TaskParameter(controlManager);
+        // new TaskParameter(controlManager);
     }
 
     static createControlManager(initParams) {
@@ -111,65 +113,5 @@ class Initiator {
         }, null, null, null, initParams.proxy);
     }
 }
-
-var Initializer = {
-
-    registerTypes : function(controlManager){
-        //new UObject(controlManager);
-        new ObjectRef(controlManager);
-
-        new Parameter(controlManager);
-        new UserScript(controlManager);
-
-        new RetrievalExpression(controlManager);
-        new MessageRetrievalExpression(controlManager);
-        new CorrelationProperty(controlManager);
-        new CorrelationKey(controlManager);
-        new CorrelationKeyInstance(controlManager);
-        new MessageDefinition(controlManager);
-        new MessageInstance(controlManager);
-        new MessageFlow(controlManager);
-
-        new SequenceFlow(controlManager);
-
-        new FlowNode(controlManager);
-        new Request(controlManager);
-
-        new ProcessDefinition(controlManager);
-
-        new Activity(controlManager);
-        new UserTask(controlManager);
-        new ScriptTask(controlManager);
-
-        //new Event(controlManager);
-        //new StartMessageEvent(controlManager);
-
-        new InclusiveGateway(controlManager);
-        new ExclusiveGateway(controlManager);
-
-        new NodeProps(controlManager);
-        new Token(controlManager);
-        new Process(controlManager);
-
-        new TaskDef(controlManager);
-        new TaskStage(controlManager);
-        new TaskParameter(controlManager);
-    },
-
-    createInternalDb : function(dbController) {
-        return dbController.newDataBase(this.dbp);
-    },
-
-    createControlManager : function(initParams) {
-        var _dbParams = {
-            name: "Engine",
-            kind: "master",
-            guid: 'fb9653ea-4fc3-aee0-7a31-172a91aa196b',
-            constructHolder: initParams.constructHolder
-        };
-        return new ControlMgr({controller : initParams.dbController, dbparams : _dbParams}, null, null, null, initParams.proxy);
-    }
-};
-
 
 if (module) {module.exports = Initiator}
