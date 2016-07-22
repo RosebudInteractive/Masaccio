@@ -28,7 +28,8 @@ define([
         './controls',
         './parameter',
         './objectRef',
-        './engineSingleton'
+        './engineSingleton',
+        './../public/logger'
     ],
     function(
         UObject,
@@ -39,7 +40,8 @@ define([
         Controls,
         Parameter,
         ObjectRef,
-        EngineSingleton
+        EngineSingleton,
+        Logger
     ){
         var FlowNode = UObject.extend({
 
@@ -227,7 +229,7 @@ define([
             },
 
             close : function() {
-                console.log('[%s] : => [%s] узел закончил выполнение', (new Date()).toLocaleTimeString(), this.name());
+                Logger.info('[%s] узел закончил выполнение', this.name());
                 this.state(flowNodeState.Closed);
             },
 

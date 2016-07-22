@@ -45,7 +45,8 @@ class Initiator {
         var uccelloServ = new UccelloServ({
             authenticate: fakeAuthenticate,
             //commServer: communicationServer,
-            engineSingleton: EngineSingleton
+            engineSingleton: EngineSingleton,
+            traceConfigFile : UCCELLO_CONFIG.traceConfig
         });
 
         this.controlManager = EngineSingleton.getInstance().getControlManager();

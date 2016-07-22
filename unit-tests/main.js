@@ -60,12 +60,14 @@ var _config = {
     dataPath: _path.DbPath,
     uccelloPath: _path.Uccello,
     masaccioPath : _path.Masaccio + 'wfe/',
-    
+
+    traceConfig : _path.Masaccio + 'wfe/traceConfig.cfg',
+
     webSocketServer: {port: 8082},
 
     testClientTimeout : 3,
 
-    needRecreateDB : false,
+    needRecreateDB : true,
 
     dataman: {
         connection: USE_MSSQL_SERVER ? mssql_connection : mysql_connection,

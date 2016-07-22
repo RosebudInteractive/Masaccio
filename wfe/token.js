@@ -17,7 +17,8 @@ define([
         './engineSingleton',
         './controls',
         './parameter',
-        './../public/utils'
+        './../public/utils',
+        './../public/logger'
     ],
     function(
         UObject,
@@ -28,7 +29,8 @@ define([
         EngineSingleton,
         Controls,
         Parameter,
-        Utils
+        Utils,
+        Logger
     ){
         var Token = UObject.extend({
 
@@ -212,7 +214,7 @@ define([
             die : function() {
                 if (this.state() == tokenState.Alive) {
                     this.state(tokenState.Dead);
-                    console.log('[%s] : XX Token [%s] закончил выполнение', (new Date()).toLocaleTimeString(), this.tokenId());
+                    Logger.info('Token [%s] закончил выполнение', this.tokenId());
                     EngineSingleton.getInstance().archiveToken(this);
                 }
             },

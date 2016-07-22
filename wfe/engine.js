@@ -132,7 +132,7 @@ define([
                 var _def = this.findDefinition(definition.definitionId())
                 if (!_def) {
                     this.processDefinitions.push(definition);
-                    console.log('[%s] : => Добавлено описание процесса [%s]', (new Date()).toLocaleTimeString(), definition.name())
+                    Logger.info('Добавлено описание процесса [%s]', definition.name())
                 }
 
                 if (callback) {
@@ -146,7 +146,7 @@ define([
                 if (!options) {
                     Answer.error('Не указаны параметры запуска процесса [%s]', [definitionName]).handle(callback)
                 }
-                console.log('[%s] : => Создание процесса definitionName [%s]', (new Date()).toLocaleTimeString(), definitionName);
+                Logger.info('Создание процесса definitionName [%s]', definitionName);
 
                 var _processOptions = {};
                 if (options.hasOwnProperty('taskParams')){
@@ -163,7 +163,7 @@ define([
                         that.waitForRequest({processId : process.processID(), tokenId : 1, requestName : _requestName}, _timeout, callback);
                         setTimeout(function () {
                             that.runProcess(process);
-                            console.log('[%s] : => процесс processID [%s] запущен', (new Date()).toLocaleTimeString(), process.processID());
+                            Logger.info('Процесс processID [%s] запущен', process.processID());
                         }, 0);
                     },
                     function(reason) {
@@ -175,7 +175,7 @@ define([
             },
 
             startProcessInstance : function(definitionName, options, callback) {
-                console.log('[%s] : => Создание процесса definitionName [%s]', (new Date()).toLocaleTimeString(), definitionName);
+                Logger.info('Создание процесса definitionName [%s]', definitionName);
                 var _processOptions = {};
                 if (options.hasOwnProperty('taskParams')){
                     _processOptions.params = options.taskParams
@@ -197,7 +197,7 @@ define([
             },
 
                 createNewProcess: function (definitionID) {
-                    console.log('[%s] : => Создание инстанса процесса %s', (new Date()).toLocaleTimeString(), definitionID);
+                    Logger.info('Создание инстанса процесса %s', definitionID);
                     var _def = this.findDefinition(definitionID);
                     if (_def) {
                         return new Process(this.controlManager, {}, _def)
@@ -330,7 +330,7 @@ define([
 
             deactivateProcess: function (processInstance) {
                 if (!processInstance.isAllTokensDead()) {
-                    console.log('[%s] : => Процесс [%s] деактивирован', (new Date()).toLocaleTimeString(), processInstance.processID());
+                    Logger.info('Процесс [%s] деактивирован', processInstance.processID());
                     if (!processInstance.isWaitingScriptAnswer())
                         processInstance.wait();
                 } else {
@@ -799,7 +799,7 @@ define([
 
                     that.runProcess(_processInstance);
                 }, 0)
-            }
+            },
         });
 
         return Engine;

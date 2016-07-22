@@ -51,7 +51,7 @@ class Initiator {
         var _remote = rpc._publ(_provider, _provider.getInterface());
         
         constructHolder.addTypeProvider(_remote);
-        constructHolder.addTypeProvider(_provider, true)
+        constructHolder.addTypeProvider(_provider, true);
 
         _provider.registerType(TaskParameter);
         _provider.registerType(Request);

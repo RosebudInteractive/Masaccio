@@ -104,10 +104,10 @@ define(
                 var that = this;
 
                 function logResponses() {
-                    console.log('[%s] : => Узел %s ожидает ответа', (new Date()).toLocaleTimeString(), that.name());
+                    Logger.info('Узел %s ожидает ответа', that.name());
                     var _requestCount = that.token().getPropertiesOfNode(that.name()).requests().count();
                     var _responseCount = that.token().getPropertiesOfNode(that.name()).responses().count();
-                    console.log('[%s] : !! Ответов %d из %d', (new Date()).toLocaleTimeString(), _responseCount, _requestCount);
+                    Logger.info('Ответов %d из %d', _responseCount, _requestCount);
                 }
 
                 if (this.state() == FlowNode.state.Executing) {
@@ -120,10 +120,10 @@ define(
                         this.completeExecution();
                         if (this.processInstance().isWaitingScriptAnswer()) {
                             this.processInstance().enqueueCurrentToken();
-                            console.log('[%s] : => Узел [%s] ждет выполнения скрипта', (new Date()).toLocaleTimeString(), this.name());
+                            Logger.info('Узел [%s] ждет выполнения скрипта', this.name());
                         } else {
                             this._doOnDone();
-                            console.log('[%s] : => Узел отработал %s', (new Date()).toLocaleTimeString(), this.name());
+                            Logger.info('Узел отработал %s', this.name());
                         }
                     } else {
                         this.state(FlowNode.state.WaitingRequest)
@@ -137,7 +137,7 @@ define(
                     }
                 }
                 else {
-                    console.log('[%s] : => Узел отработал %s', (new Date()).toLocaleTimeString(), this.name());
+                    Logger.info('Узел отработал %s', this.name());
                     this.completeExecution();
                 }
 

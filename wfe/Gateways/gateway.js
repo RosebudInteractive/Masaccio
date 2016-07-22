@@ -12,11 +12,11 @@ var gatewayDirection = {
         Converging : 'Converging',
         Diverging : 'Diverging',
         Mixed : 'Mixed'
-    }
+    };
 
 define(
-    ['./../flowNode', './../controls'],
-    function(FlowNode, Controls){
+    ['./../flowNode', './../controls', './../../public/logger'],
+    function(FlowNode, Controls, Logger){
         var Gateway = FlowNode.extend({
 
             className: "Gateway",
@@ -41,7 +41,7 @@ define(
 
             execute : function(callback) {
                 UccelloClass.super.apply(this, [callback]);
-                console.log('[%s] : => Выполняется gateway [%s]', (new Date()).toLocaleTimeString(), this.name());
+                Logger.info('Выполняется gateway [%s]', this.name());
             },
 
             cancel : function() {

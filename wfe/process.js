@@ -391,7 +391,7 @@ define([
             activate() {
                 if (this.state() != processStates.Running) {
                     clearInterval(this.idleTimer);
-                    console.log('[%s] : => Процесс [%s] активирован', (new Date()).toLocaleTimeString(), this.processID());
+                    Logger.info('Процесс [%s] активирован', this.processID());
                     this.state(processStates.Running);
                 }
             }

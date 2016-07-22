@@ -13,7 +13,8 @@ define([
         './../../public/utils',
         './../parameter',
         './../controls',
-        './../engineSingleton'
+        './../engineSingleton',
+        './../../public/logger'
     ],
     function(
         Activity,
@@ -22,7 +23,8 @@ define([
         Utils,
         Parameter,
         Controls,
-        EngineSingleton
+        EngineSingleton,
+        Logger
     ){
         var ScriptTask = Activity.extend({
 
@@ -97,7 +99,7 @@ define([
                 this.processInstance().enqueueCurrentToken();
                 this.processInstance().waitScriptAnswer();
 
-                console.log('[%s] : => Выполняется узел [%s]', (new Date()).toLocaleTimeString(), this.name());
+                Logger.info('Выполняется узел [%s]', this.name());
                 var _scriptObject = this.createScriptObject(callback);
                 this.state(FlowNode.state.WaitingUserScriptAnswer);
                 Utils.execScript(_scriptObject);
